@@ -7,6 +7,7 @@ const BlockType = require('./block-type');
 // These extensions are currently built into the VM repository but should not be loaded at startup.
 // TODO: move these out into a separate repository?
 // TODO: change extension spec so that library info, including extension ID, can be collected through static methods
+const Scratch3DataViewerBlocks = require('../extensions/scratch3_dataviewer');
 const Scratch3PenBlocks = require('../extensions/scratch3_pen');
 const Scratch3WeDo2Blocks = require('../extensions/scratch3_wedo2');
 const Scratch3MusicBlocks = require('../extensions/scratch3_music');
@@ -15,6 +16,7 @@ const Scratch3TranslateBlocks = require('../extensions/scratch3_translate');
 const Scratch3VideoSensingBlocks = require('../extensions/scratch3_video_sensing');
 
 const builtinExtensions = {
+    dataviewer: Scratch3DataViewerBlocks,
     pen: Scratch3PenBlocks,
     wedo2: Scratch3WeDo2Blocks,
     music: Scratch3MusicBlocks,

@@ -27,12 +27,11 @@ class Scratch3DataViewerBlocks {
     constructor (runtime) {
         this.runtime = runtime;
 
-        this.counter = 0;
+        this.counter =0;
 
-        this.dataSampleID = 0;
+        this.dataIndex = 0;
 
-        //apagar no futuro - ou pode já vir com um valor default?
-        this.dataSample = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 9, 9, 10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 17, 17, 18, 18, 19, 20, 20, 21, 22, 22, 23, 24, 25, 26, 27, 28, 28, 29, 30, 32, 33, 34, 35, 36, 37, 39, 40, 41, 43, 44, 46, 47, 49, 51, 52, 54, 56, 58, 60, 62, 64, 66, 68, 71, 73, 76, 78, 81, 84, 87, 90, 93, 96, 99, 102, 106, 109, 113, 117, 121, 125, 129, 134, 138, 143, 148, 153, 158, 164, 169, 175, 181, 187, 193, 200, 207, 214, 221, 228, 236, 244];
+        this.data = [];
 
         this.connect();
     }
@@ -50,8 +49,9 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.HAT
                 },
 
-                //bloco para leitura de dados de fontes distintas 
-                // começando com uma leitura de dados escrita (ou via arduino leonardo)
+                // Cássia: bloco para leitura de dados de fontes distintas
+                //         começando com uma leitura de dados escrita (ou via arduino leonardo)
+                // Adriano: eu acho que dois blocos distintos (dado e url) ia deixar a interface mais amigável.
 				{
                     opcode: 'addData',
                     text: 'add [DATATYPE] [NEWDATA] to data',
@@ -70,7 +70,7 @@ class Scratch3DataViewerBlocks {
                 },
 
                 {
-                    opcode: 'getData', 
+                    opcode: 'getData',
                     text: 'data',
                     blockType: BlockType.REPORTER //talvez  esses reporter blocks possam ser 1 único em menu (com exceção do data [])
                 },
@@ -124,13 +124,13 @@ class Scratch3DataViewerBlocks {
                             defaultValue: 100
                         }
                     }
-                }, 
+                }/*,
 
 				{
                     opcode: 'getDataJson',
                     text: 'teste',
                     blockType: BlockType.REPORTER
-                }
+                }*/
             ],
             menus: {
                 analogPins: ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7'],
@@ -143,39 +143,42 @@ class Scratch3DataViewerBlocks {
         this._device = new DataViewer(this.runtime);
     }
 
-    //aqui não seria "Start receiving data? Pois não tem nenhuma condição para When, né?"
-    // na verdade não entendi muito bem esse bloco - depois podemos conversar!
-    // no futuro podemos juntar com o bloco de receber dados 
-    whenDataReceived () { 
+    // Cassia: aqui não seria "Start receiving data? Pois não tem nenhuma condição para When, né?"
+    //         na verdade não entendi muito bem esse bloco - depois podemos conversar!
+    //         no futuro podemos juntar com o bloco de receber dados
+    // Adriano: Este bloco serve para lermos os dados em forma de streaming.
+    //          A gambi com counter % 2 é que temos que ficar alternando entre verdadeiro e falso
+    //          para o bloco ser chamado.
+    whenDataReceived () {
         this.counter += 1;
-        if (this.counter % 2 == 0) {
-            this.dataSampleID++;
-            return this.dataSampleID < this.dataSample2.length;
+        if ((this.counter % 2 == 0) && (this.dataIndex < this.data.length - 1)) {
+            this.dataIndex++;
+            return true;
         }
     }
 
     getDataIndex (args) {
-        if (args.INDEX < this.dataSample2.length) {
-            return this.dataSample2[args.INDEX];
+        if (args.INDEX < this.data.length) {
+            return this.data[args.INDEX];
         }
     }
 
     getData () {
-        if (this.dataSampleID < this.dataSample2.length) {
-            return this.dataSample2[this.dataSampleID];
+        if (this.dataIndex < this.data.length) {
+            return this.data[this.dataIndex];
         }
     }
 
     getDataLength () {
-        return this.dataSample2.length;
+        return this.data.length;
     }
 
     getID () {
-        return this.dataSampleID;
+        return this.dataIndex;
     }
 
-    restartDataRead() {
-        this.dataSampleID = 0;
+    restartDataRead () {
+        this.dataIndex = 0;
     }
 
 
@@ -184,15 +187,13 @@ class Scratch3DataViewerBlocks {
 
     setReadPin () {
     }
-	
+
 	// teste para leitura dos dados separados por vírgulas
     addData (args) {
     	if (args.DATATYPE == 'text') {
-    		this.dataSample2 = args.NEWDATA.split (","); //salva  o texto que foi inserido separado por vírgulas no campo em branco do bloco. verificar necessidade de converter em número
-    		return this.dataSample2[1]; //retorna elemento na posição 1 do array - apenas para teste
-    	}
-    	else {
-    		return 0;
+            // salva o texto que foi inserido separado por vírgulas no campo em branco do bloco.
+            // verificar necessidade de converter em número
+    		this.data = args.NEWDATA.split (",");
     	}
     }
 

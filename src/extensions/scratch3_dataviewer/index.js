@@ -43,12 +43,6 @@ class Scratch3DataViewerBlocks {
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [
-                {
-                    opcode: 'whenDataReceived',
-                    text: 'when data received',
-                    blockType: BlockType.HAT
-                },
-
                 // Cássia: bloco para leitura de dados de fontes distintas
                 //         começando com uma leitura de dados escrita (ou via arduino leonardo)
                 // Adriano: eu acho que dois blocos distintos (dado e url) ia deixar a interface mais amigável.
@@ -71,6 +65,12 @@ class Scratch3DataViewerBlocks {
 
                 '---',
                 {
+                    opcode: 'whenDataReceived',
+                    text: 'when data received',
+                    blockType: BlockType.HAT
+                },
+
+                {
                     opcode: 'dataReadFinished',
                     text: 'data read finished',
                     blockType: BlockType.BOOLEAN,
@@ -81,8 +81,14 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.REPORTER //talvez  esses reporter blocks possam ser 1 único em menu (com exceção do data [])
                 },
                 {
-                    opcode: 'getID',
-                    text: 'ID',
+                    opcode: 'getIndex',
+                    text: 'Index',
+                    blockType: BlockType.REPORTER
+                },
+                '---',
+                {
+                    opcode: 'getDataLength',
+                    text: 'data length',
                     blockType: BlockType.REPORTER
                 },
                 {
@@ -96,50 +102,14 @@ class Scratch3DataViewerBlocks {
                         }
                     }
                 },
-                {
-                    opcode: 'getDataLength',
-                    text: 'data length',
-                    blockType: BlockType.REPORTER
-                },
+                '---',
                 {
                     opcode: 'restartDataRead',
                     text: 'Restart data read',
                     blockType: BlockType.COMMAND
-                },
-                {
-                    opcode: 'clickToProgram',
-                    text: 'Click to program',
-                    blockType: BlockType.HAT
-                },
-                {
-                    opcode: 'setReadPin',
-                    text: 'Read analog pin [PIN] every [SEC] seconds [TIMES] times',
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                        PIN: {
-                            type: ArgumentType.STRING,
-                            menu: 'analogPins',
-                            defaultValue: 'A0'
-                        },
-                        SEC: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 5
-                        },
-                        TIMES: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 100
-                        }
-                    }
-                }/*,
-
-                {
-                    opcode: 'getDataJson',
-                    text: 'teste',
-                    blockType: BlockType.REPORTER
-                }*/
+                }
             ],
             menus: {
-                analogPins: ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7'],
                 dataSource: ['text', 'url']
             }
         };
@@ -189,19 +159,12 @@ class Scratch3DataViewerBlocks {
         return this.data.length;
     }
 
-    getID () {
+    getIndex () {
         return this.dataIndex;
     }
 
     restartDataRead () {
         this.dataIndex = -1;
-    }
-
-
-    clickToProgram () {
-    }
-
-    setReadPin () {
     }
 
     // teste para leitura dos dados separados por vírgulas

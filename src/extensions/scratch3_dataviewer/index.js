@@ -46,9 +46,8 @@ class Scratch3DataViewerBlocks {
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [
-                // Cássia: bloco para leitura de dados de fontes distintas
-                //         começando com uma leitura de dados escrita (ou via arduino leonardo)
-                // Adriano: eu acho que dois blocos distintos (dado e url) ia deixar a interface mais amigável.
+                // Bloco para leitura de dados de fontes distintas,
+                // começando com uma leitura de dados escrita (ou via arduino leonardo)
                 {
                     opcode: 'addData',
                     text: 'add data [DATA]',

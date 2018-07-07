@@ -1,12 +1,15 @@
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const log = require('../../util/log');
+const nets = require('nets');
 
 // eslint-disable-next-line max-len
 const blockIconURI = '';
 
 // eslint-disable-next-line max-len
 const menuIconURI = '';
+
+const serverTimeoutMs = 10000; // 10 seconds (chosen arbitrarily).
 
 class DataViewer {
     constructor (runtime) {
@@ -48,17 +51,23 @@ class Scratch3DataViewerBlocks {
                 // Adriano: eu acho que dois blocos distintos (dado e url) ia deixar a interface mais amigável.
                 {
                     opcode: 'addData',
-                    text: 'add [DATATYPE] [NEWDATA] to data',
+                    text: 'add data [DATA]',
                     blockType: BlockType.COMMAND,
                     arguments: {
-                        DATATYPE: {
+                        DATA: {
                             type: ArgumentType.STRING,
-                            menu: 'dataSource',
-                            defaultValue: 'text'
-                        },
-                        NEWDATA: {
+                            defaultValue: ''
+                        }
+                    }
+                },
+                {
+                    opcode: 'readCSVDataFromURL',
+                    text: 'read CSV data from [URL]',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        URL: {
                             type: ArgumentType.STRING,
-                            defaultValue: 0
+                            defaultValue: ''
                         }
                     }
                 },
@@ -167,17 +176,20 @@ class Scratch3DataViewerBlocks {
         this.dataIndex = -1;
     }
 
-    // teste para leitura dos dados separados por vírgulas
     addData (args) {
-        if (args.DATATYPE == 'text') {
-            // salva o texto que foi inserido separado por vírgulas no campo em branco do bloco.
-            // verificar necessidade de converter em número
-            this.data = args.NEWDATA.split(',');
-            this.dataIndex = -1;
-        }
+        // TODO: verificar necessidade de converter em número
+        this.data = args.DATA.split(',');
+        this.dataIndex = -1;
     }
-
-
+    readCSVDataFromURL (args) {
+        nets({url: args.URL, timeout: serverTimeoutMs}, (err, res, body) => {
+            if (err) {
+                log.warn('error fetching result! ${res}');
+            }
+            this.data = body.toString().split(',');
+            this.dataIndex = -1;
+        });
+    }
 }
 
 module.exports = Scratch3DataViewerBlocks;

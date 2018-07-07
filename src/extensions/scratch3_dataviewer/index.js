@@ -71,7 +71,19 @@ class Scratch3DataViewerBlocks {
                         }
                     }
                 },
-
+                {
+                    opcode: 'readThingSpeakData',
+                    text: 'read ThingSpeak field [FIELD] from channel [CHANNEL]',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        FIELD: {
+                            type: ArgumentType.NUMBER
+                        },
+                        CHANNEL: {
+                            type: ArgumentType.NUMBER
+                        }
+                    }
+                },
                 '---',
                 {
                     opcode: 'whenDataReceived',
@@ -117,10 +129,7 @@ class Scratch3DataViewerBlocks {
                     text: 'Restart data read',
                     blockType: BlockType.COMMAND
                 }
-            ],
-            menus: {
-                dataSource: ['text', 'url']
-            }
+            ]
         };
     }
 
@@ -186,7 +195,25 @@ class Scratch3DataViewerBlocks {
             if (err) {
                 log.warn('error fetching result! ${res}');
             }
+            // Estamos assumindo que o dado está em apenas uma linha e tem apenas um campo.
             this.data = body.toString().split(',');
+            this.dataIndex = -1;
+        });
+    }
+    readThingSpeakData (args) {
+        const urlBase = 'https://thingspeak.com/channels/' + args.CHANNEL + '/field/' + args.FIELD + '.json'
+        nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
+            if (err) {
+                log.warn('error fetching result! ${res}');
+            }
+            let feeds = JSON.parse(body).feeds;
+            let data = [];
+            for (const idx in feeds) {
+                if (feeds[idx].hasOwnProperty('field' + args.FIELD)) {
+                    data[idx] = feeds[idx]['field' + args.FIELD].trim();
+                }
+            }
+            this.data = data;
             this.dataIndex = -1;
         });
     }

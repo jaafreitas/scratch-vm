@@ -29,7 +29,7 @@ class Scratch3DataViewerBlocks {
 
         this.counter =0;
 
-        this.dataIndex = 0;
+        this.dataIndex = -1;
 
         this.data = [];
 
@@ -52,15 +52,15 @@ class Scratch3DataViewerBlocks {
                 // Cássia: bloco para leitura de dados de fontes distintas
                 //         começando com uma leitura de dados escrita (ou via arduino leonardo)
                 // Adriano: eu acho que dois blocos distintos (dado e url) ia deixar a interface mais amigável.
-				{
+                {
                     opcode: 'addData',
                     text: 'add [DATATYPE] [NEWDATA] to data',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         DATATYPE: {
-                        	type: ArgumentType.STRING,
-                        	menu: 'dataSource',
-                        	defaultValue: 'text'
+                            type: ArgumentType.STRING,
+                            menu: 'dataSource',
+                            defaultValue: 'text'
                         },
                         NEWDATA: {
                             type: ArgumentType.STRING,
@@ -69,6 +69,12 @@ class Scratch3DataViewerBlocks {
                     }
                 },
 
+                '---',
+                {
+                    opcode: 'dataReadFinished',
+                    text: 'data read finished',
+                    blockType: BlockType.BOOLEAN,
+                },
                 {
                     opcode: 'getData',
                     text: 'data',
@@ -126,7 +132,7 @@ class Scratch3DataViewerBlocks {
                     }
                 }/*,
 
-				{
+                {
                     opcode: 'getDataJson',
                     text: 'teste',
                     blockType: BlockType.REPORTER
@@ -143,6 +149,13 @@ class Scratch3DataViewerBlocks {
         this._device = new DataViewer(this.runtime);
     }
 
+    dataReadFinished() {
+        if (this.dataIndex < this.data.length) {
+            this.dataIndex++;
+        }
+        return this.dataIndex >= this.data.length;
+    }
+
     // Cassia: aqui não seria "Start receiving data? Pois não tem nenhuma condição para When, né?"
     //         na verdade não entendi muito bem esse bloco - depois podemos conversar!
     //         no futuro podemos juntar com o bloco de receber dados
@@ -154,6 +167,9 @@ class Scratch3DataViewerBlocks {
         if ((this.counter % 2 == 0) && (this.dataIndex < this.data.length - 1)) {
             this.dataIndex++;
             return true;
+        }
+        else {
+            return false;
         }
     }
 
@@ -178,7 +194,7 @@ class Scratch3DataViewerBlocks {
     }
 
     restartDataRead () {
-        this.dataIndex = 0;
+        this.dataIndex = -1;
     }
 
 
@@ -188,13 +204,14 @@ class Scratch3DataViewerBlocks {
     setReadPin () {
     }
 
-	// teste para leitura dos dados separados por vírgulas
+    // teste para leitura dos dados separados por vírgulas
     addData (args) {
-    	if (args.DATATYPE == 'text') {
+        if (args.DATATYPE == 'text') {
             // salva o texto que foi inserido separado por vírgulas no campo em branco do bloco.
             // verificar necessidade de converter em número
-    		this.data = args.NEWDATA.split (",");
-    	}
+            this.data = args.NEWDATA.split(',');
+            this.dataIndex = -1;
+        }
     }
 
 

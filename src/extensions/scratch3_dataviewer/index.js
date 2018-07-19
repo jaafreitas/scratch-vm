@@ -102,9 +102,40 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'getIndex',
-                    text: 'Index',
+                    text: 'index',
                     blockType: BlockType.REPORTER
                 },
+                {
+                    opcode: 'getMean',
+                    text: 'mean',
+                    blockType: BlockType.REPORTER
+                },
+                {
+                    opcode: 'getMax',
+                    text: 'max',
+                    blockType: BlockType.REPORTER
+                },
+                {
+                    opcode: 'getMin',
+                    text: 'min',
+                    blockType: BlockType.REPORTER
+                },
+                {
+                    opcode: 'mapValues',
+                    text: 'change scale to [NEW_MIN] [NEW_MAX] ',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        NEW_MIN: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        NEW_MAX: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 100
+                        }
+                    }
+                },
+
                 '---',
                 {
                     opcode: 'getDataLength',
@@ -180,14 +211,44 @@ class Scratch3DataViewerBlocks {
         return this.dataIndex;
     }
 
+    getMean () {   
+        var total = 0, i;
+        for (i = 0; i < this.data.length; i += 1) {
+            total = total + parseInt(this.data[i], 10);
+        }
+        return total / this.data.length;
+    }
+
+   getMax () {   
+        var max = this.data.reduce(function(a, b) {
+            return Math.max(a, b);
+        });
+        return max;
+    }
+
+   getMin () {   
+        var min = this.data.reduce(function(a, b) {
+            return Math.min(a, b);
+        });
+        return min;
+    }
+
     restartDataRead () {
         this.dataIndex = -1;
     }
 
     addData (args) {
-        // TODO: verificar necessidade de converter em número
         this.data = args.DATA.split(',');
         this.dataIndex = -1;
+    }
+
+    mapValues (args) {
+        //adicionar aviso se o conjunto de dados estiver vazio
+        var new_min = Number(args.NEW_MIN);
+        var new_max = Number(args.NEW_MAX);
+        for (var i = 0; i < this.data.length; i += 1) {
+            this.data[i] = (this.data[i]-this.getMin())*(new_max - new_min)/(this.getMax() - this.getMin())+new_min;
+        }
     }
     readCSVDataFromURL (args) {
         nets({url: args.URL, timeout: serverTimeoutMs}, (err, res, body) => {

@@ -121,8 +121,8 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.REPORTER
                 },
                 {
-                    opcode: 'mapValues',
-                    text: 'change scale to [NEW_MIN] [NEW_MAX] ',
+                    opcode: 'mapDataValues',
+                    text: 'change data scale to [NEW_MIN] [NEW_MAX] ',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         NEW_MIN: {
@@ -242,12 +242,13 @@ class Scratch3DataViewerBlocks {
         this.dataIndex = -1;
     }
 
-    mapValues (args) {
-        //adicionar aviso se o conjunto de dados estiver vazio
-        var new_min = Number(args.NEW_MIN);
-        var new_max = Number(args.NEW_MAX);
+    mapDataValues (args) {
+        const old_min = this.getMin();
+        const old_max = this.getMax();
+        const new_min = Number(args.NEW_MIN);
+        const new_max = Number(args.NEW_MAX);
         for (var i = 0; i < this.data.length; i += 1) {
-            this.data[i] = (this.data[i]-this.getMin())*(new_max - new_min)/(this.getMax() - this.getMin())+new_min;
+            this.data[i] = new_min + (this.data[i] - old_min) * (new_max - new_min) / (old_max - old_min);
         }
     }
     readCSVDataFromURL (args) {

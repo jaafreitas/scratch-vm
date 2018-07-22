@@ -204,10 +204,10 @@ class Scratch3DataViewerBlocks {
     }
 
     dataReadFinished() {
-        if (this.dataIndex < this.data.length) {
+        if (this.dataIndex < this.getDataLength()) {
             this.dataIndex++;
         }
-        return this.dataIndex >= this.data.length;
+        return this.dataIndex >= this.getDataLength();
     }
 
     // Cassia: aqui não seria "Start receiving data? Pois não tem nenhuma condição para When, né?"
@@ -218,7 +218,7 @@ class Scratch3DataViewerBlocks {
     //          para o bloco ser chamado.
     whenDataReceived () {
         this.counter += 1;
-        if ((this.counter % 2 == 0) && (this.dataIndex < this.data.length - 1)) {
+        if ((this.counter % 2 == 0) && (this.dataIndex < this.getDataLength() - 1)) {
             this.dataIndex++;
             return true;
         }
@@ -228,13 +228,13 @@ class Scratch3DataViewerBlocks {
     }
 
     getDataIndex (args) {
-        if (args.INDEX < this.data.length) {
+        if (args.INDEX < this.getDataLength()) {
             return this.data[args.INDEX];
         }
     }
 
     getData () {
-        if (this.dataIndex < this.data.length) {
+        if (this.dataIndex < this.getDataLength()) {
             return this.data[this.dataIndex];
         }
     }
@@ -248,25 +248,23 @@ class Scratch3DataViewerBlocks {
     }
 
     getMean () {
-        var total = 0, i;
-        for (i = 0; i < this.data.length; i += 1) {
+        var total = 0;
+        for (var i = 0; i < this.getDataLength(); i += 1) {
             total = total + parseInt(this.data[i], 10);
         }
-        return total / this.data.length;
+        return total / this.getDataLength();
     }
 
    getMax () {
-        var max = this.data.reduce(function(a, b) {
+        return this.data.reduce(function(a, b) {
             return Math.max(a, b);
         });
-        return max;
     }
 
    getMin () {
-        var min = this.data.reduce(function(a, b) {
+        return this.data.reduce(function(a, b) {
             return Math.min(a, b);
         });
-        return min;
     }
 
     restartDataRead () {
@@ -278,33 +276,26 @@ class Scratch3DataViewerBlocks {
         this.dataIndex = -1;
     }
 
-    mapIndexValue (args) {
-        const value = Number(args.VALUE);
-        const old_min = 0;
-        const old_max = this.getDataLength() - 1;
-        const new_min = Number(args.NEW_MIN);
-        const new_max = Number(args.NEW_MAX);
+    mapValue (value, old_min, old_max, new_min, new_max) {
         return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min);
     }
 
+    mapIndexValue (args) {
+        return this.mapValue(Number(args.VALUE), 0, this.getDataLength() - 1, Number(args.NEW_MIN), Number(args.NEW_MAX));
+    }
+
     mapDataValue (args) {
-        const value = Number(args.VALUE);
-        const old_min = this.getMin();
-        const old_max = this.getMax();
-        const new_min = Number(args.NEW_MIN);
-        const new_max = Number(args.NEW_MAX);
-        return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min);
+        return this.mapValue(Number(args.VALUE), this.getMin(), this.getMax(), Number(args.NEW_MIN), Number(args.NEW_MAX));
     }
 
     mapDataValues (args) {
         const old_min = this.getMin();
         const old_max = this.getMax();
-        const new_min = Number(args.NEW_MIN);
-        const new_max = Number(args.NEW_MAX);
-        for (var i = 0; i < this.data.length; i += 1) {
-            this.data[i] = new_min + (this.data[i] - old_min) * (new_max - new_min) / (old_max - old_min);
+        for (var i = 0; i < this.getDataLength(); i += 1) {
+            this.data[i] = this.mapValue(this.data[i], old_min, old_max, Number(args.NEW_MIN), Number(args.NEW_MAX));
         }
     }
+
     readCSVDataFromURL (args) {
         nets({url: args.URL, timeout: serverTimeoutMs}, (err, res, body) => {
             if (err) {
@@ -315,6 +306,7 @@ class Scratch3DataViewerBlocks {
             this.dataIndex = -1;
         });
     }
+
     readThingSpeakData (args) {
         const urlBase = 'https://thingspeak.com/channels/' + args.CHANNEL + '/field/' + args.FIELD + '.json'
         nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {

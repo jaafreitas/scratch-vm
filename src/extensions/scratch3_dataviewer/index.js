@@ -135,7 +135,43 @@ class Scratch3DataViewerBlocks {
                         }
                     }
                 },
-
+                '---',
+                {
+                    opcode: 'mapDataValue',
+                    text: 'map data value [VALUE] to [NEW_MIN] [NEW_MAX] ',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        VALUE: {
+                            type: ArgumentType.NUMBER
+                        },
+                        NEW_MIN: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        NEW_MAX: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 100
+                        }
+                    }
+                },
+                {
+                    opcode: 'mapIndexValue',
+                    text: 'map index value [VALUE] to [NEW_MIN] [NEW_MAX] ',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        VALUE: {
+                            type: ArgumentType.NUMBER
+                        },
+                        NEW_MIN: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        NEW_MAX: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 100
+                        }
+                    }
+                },
                 '---',
                 {
                     opcode: 'getDataLength',
@@ -211,7 +247,7 @@ class Scratch3DataViewerBlocks {
         return this.dataIndex;
     }
 
-    getMean () {   
+    getMean () {
         var total = 0, i;
         for (i = 0; i < this.data.length; i += 1) {
             total = total + parseInt(this.data[i], 10);
@@ -219,14 +255,14 @@ class Scratch3DataViewerBlocks {
         return total / this.data.length;
     }
 
-   getMax () {   
+   getMax () {
         var max = this.data.reduce(function(a, b) {
             return Math.max(a, b);
         });
         return max;
     }
 
-   getMin () {   
+   getMin () {
         var min = this.data.reduce(function(a, b) {
             return Math.min(a, b);
         });
@@ -240,6 +276,24 @@ class Scratch3DataViewerBlocks {
     addData (args) {
         this.data = args.DATA.split(',');
         this.dataIndex = -1;
+    }
+
+    mapIndexValue (args) {
+        const value = Number(args.VALUE);
+        const old_min = 0;
+        const old_max = this.getDataLength() - 1;
+        const new_min = Number(args.NEW_MIN);
+        const new_max = Number(args.NEW_MAX);
+        return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min);
+    }
+
+    mapDataValue (args) {
+        const value = Number(args.VALUE);
+        const old_min = this.getMin();
+        const old_max = this.getMax();
+        const new_min = Number(args.NEW_MIN);
+        const new_max = Number(args.NEW_MAX);
+        return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min);
     }
 
     mapDataValues (args) {

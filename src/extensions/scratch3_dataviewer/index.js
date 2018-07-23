@@ -62,12 +62,19 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'readCSVDataFromURL',
-                    text: 'read CSV data from [URL]',
+                    text: 'read CSV field [FIELD] from [URL] starting from line [LINE]',
                     blockType: BlockType.REPORTER,
                     arguments: {
+                        FIELD: {
+                            type: ArgumentType.NUMBER
+                        },
                         URL: {
                             type: ArgumentType.STRING,
                             defaultValue: ''
+                        },
+                        LINE: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 2
                         }
                     }
                 },
@@ -327,17 +334,30 @@ class Scratch3DataViewerBlocks {
     }
 
     readCSVDataFromURL (args) {
+        const urlBase = Cast.toString(args.URL);
+        const field = Cast.toNumber(args.FIELD);
+        const line = Cast.toNumber(args.LINE);
+
         const dataPromise = new Promise(resolve => {
-            nets({url: Cast.toString(args.URL), timeout: serverTimeoutMs}, (err, res, body) => {
+            nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
                 if (err) {
                     log.warn(`error fetching translate result! ${res}`);
                     resolve('');
                     return '';
                 }
-                // Estamos assumindo que o dado está em apenas uma linha e tem apenas um campo.
-                const data = body.toString().split(',');
-                resolve(data);
-                return data;
+                const lines = body.toString().split('\n');
+                const data = [];
+                var dataIndex = 0;
+                for (var i = (line - 1); i < lines.length; i += 1) {
+                    const fields = lines[i].trim().split(',');
+                    if (fields[field]) {
+                        data[dataIndex] = fields[field];
+                        dataIndex++;
+                    }
+                }
+
+                resolve(data.join(','));
+                return data.join(',');
             });
         });
         dataPromise.then(data => data);

@@ -1,6 +1,7 @@
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const log = require('../../util/log');
+const Cast = require('../../util/cast');
 const nets = require('nets');
 
 // eslint-disable-next-line max-len
@@ -208,7 +209,7 @@ class Scratch3DataViewerBlocks {
         this._device = new DataViewer(this.runtime);
     }
 
-    dataReadFinished() {
+    dataReadFinished(args) {
         if (this.dataIndex < this.getDataLength()) {
             this.dataIndex++;
         }
@@ -216,8 +217,6 @@ class Scratch3DataViewerBlocks {
     }
 
     dataLoop (args, util) {
-        console.log('dataLoop: index ' + this.dataIndex);
-        console.log('dataLoop: length ' + this.getDataLength());
         if (this.dataIndex < this.getDataLength()) {
             this.dataIndex++;
         }
@@ -235,7 +234,7 @@ class Scratch3DataViewerBlocks {
     // Adriano: Este bloco serve para lermos os dados em forma de streaming.
     //          A gambi com counter % 2 é que temos que ficar alternando entre verdadeiro e falso
     //          para o bloco ser chamado.
-    whenDataReceived () {
+    whenDataReceived (args) {
         this.counter += 1;
         if ((this.counter % 2 == 0) && (this.dataIndex < this.getDataLength() - 1)) {
             this.dataIndex++;
@@ -247,51 +246,59 @@ class Scratch3DataViewerBlocks {
     }
 
     getDataIndex (args) {
-        if (args.INDEX < this.getDataLength()) {
-            return this.data[args.INDEX];
+        if (Cast.toNumber(args.INDEX) < this.getDataLength()) {
+            return this.data[Cast.toNumber(args.INDEX)];
         }
     }
 
-    getData () {
+    getData (args) {
         if (this.dataIndex < this.getDataLength()) {
             return this.data[this.dataIndex];
         }
     }
 
-    getDataLength () {
+    getDataLength (args) {
         return this.data.length;
     }
 
-    getIndex () {
-        return this.dataIndex;
-    }
-
-    getMean () {
-        var total = 0;
-        for (var i = 0; i < this.getDataLength(); i += 1) {
-            total = total + parseInt(this.data[i], 10);
+    getIndex (args) {
+        if (this.dataIndex >= 0) {
+            return this.dataIndex;
         }
-        return total / this.getDataLength();
     }
 
-   getMax () {
-        return this.data.reduce(function(a, b) {
-            return Math.max(a, b);
-        });
+    getMean (args) {
+        if (this.getDataLength() > 0) {
+            var total = 0;
+            for (var i = 0; i < this.getDataLength(); i += 1) {
+                total = total + parseInt(this.data[i], 10);
+            }
+            return total / this.getDataLength();
+        }
     }
 
-   getMin () {
-        return this.data.reduce(function(a, b) {
-            return Math.min(a, b);
-        });
+   getMax (args) {
+        if (this.getDataLength() > 0) {
+            return this.data.reduce(function(a, b) {
+                return Math.max(a, b);
+            });
+        }
     }
 
-    restartDataRead () {
+   getMin (args) {
+        if (this.getDataLength() > 0) {
+            return this.data.reduce(function(a, b) {
+                return Math.min(a, b);
+            });
+        }
+    }
+
+    restartDataRead (args) {
         this.dataIndex = -1;
     }
 
     addData (args) {
-        this.data = args.DATA.split(',');
+        this.data = Cast.toString(args.DATA).split(',');
         this.dataIndex = -1;
     }
 
@@ -300,23 +307,27 @@ class Scratch3DataViewerBlocks {
     }
 
     mapIndexValue (args) {
-        return this.mapValue(Number(args.VALUE), 0, this.getDataLength() - 1, Number(args.NEW_MIN), Number(args.NEW_MAX));
+        if (this.getDataLength() > 0) {
+            return this.mapValue(Cast.toNumber(args.VALUE), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX));
+        }
     }
 
     mapDataValue (args) {
-        return this.mapValue(Number(args.VALUE), this.getMin(), this.getMax(), Number(args.NEW_MIN), Number(args.NEW_MAX));
+        if (this.getDataLength() > 0) {
+            return this.mapValue(Cast.toNumber(args.VALUE), this.getMin(), this.getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX));
+        }
     }
 
     mapDataValues (args) {
         const old_min = this.getMin();
         const old_max = this.getMax();
         for (var i = 0; i < this.getDataLength(); i += 1) {
-            this.data[i] = this.mapValue(this.data[i], old_min, old_max, Number(args.NEW_MIN), Number(args.NEW_MAX));
+            this.data[i] = this.mapValue(this.data[i], old_min, old_max, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX));
         }
     }
 
     readCSVDataFromURL (args) {
-        nets({url: args.URL, timeout: serverTimeoutMs}, (err, res, body) => {
+        nets({url: Cast.toString(args.URL), timeout: serverTimeoutMs}, (err, res, body) => {
             if (err) {
                 log.warn('error fetching result! ${res}');
             }
@@ -328,17 +339,17 @@ class Scratch3DataViewerBlocks {
 
     readThingSpeakData (args) {
         const urlBase = 'https://thingspeak.com/channels/' + args.CHANNEL + '/field/' + args.FIELD + '.json'
-        nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
-            if (err) {
+            nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
+                if (err) {
                 log.warn('error fetching result! ${res}');
-            }
+                }
             let feeds = JSON.parse(body).feeds;
             let data = [];
-            for (const idx in feeds) {
+                for (const idx in feeds) {
                 if (feeds[idx].hasOwnProperty('field' + args.FIELD)) {
                     data[idx] = feeds[idx]['field' + args.FIELD].trim();
+                    }
                 }
-            }
             this.data = data;
             this.dataIndex = -1;
         });

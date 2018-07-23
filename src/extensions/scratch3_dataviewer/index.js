@@ -63,7 +63,7 @@ class Scratch3DataViewerBlocks {
                 {
                     opcode: 'readCSVDataFromURL',
                     text: 'read CSV data from [URL]',
-                    blockType: BlockType.COMMAND,
+                    blockType: BlockType.REPORTER,
                     arguments: {
                         URL: {
                             type: ArgumentType.STRING,
@@ -74,7 +74,7 @@ class Scratch3DataViewerBlocks {
                 {
                     opcode: 'readThingSpeakData',
                     text: 'read ThingSpeak field [FIELD] from channel [CHANNEL]',
-                    blockType: BlockType.COMMAND,
+                    blockType: BlockType.REPORTER,
                     arguments: {
                         FIELD: {
                             type: ArgumentType.NUMBER
@@ -327,32 +327,50 @@ class Scratch3DataViewerBlocks {
     }
 
     readCSVDataFromURL (args) {
-        nets({url: Cast.toString(args.URL), timeout: serverTimeoutMs}, (err, res, body) => {
-            if (err) {
-                log.warn('error fetching result! ${res}');
-            }
-            // Estamos assumindo que o dado está em apenas uma linha e tem apenas um campo.
-            this.data = body.toString().split(',');
-            this.dataIndex = -1;
+        const dataPromise = new Promise(resolve => {
+            nets({url: Cast.toString(args.URL), timeout: serverTimeoutMs}, (err, res, body) => {
+                if (err) {
+                    log.warn(`error fetching translate result! ${res}`);
+                    resolve('');
+                    return '';
+                }
+                // Estamos assumindo que o dado está em apenas uma linha e tem apenas um campo.
+                const data = body.toString().split(',');
+                resolve(data);
+                return data;
+            });
         });
+        dataPromise.then(data => data);
+        return dataPromise;
     }
 
     readThingSpeakData (args) {
-        const urlBase = 'https://thingspeak.com/channels/' + args.CHANNEL + '/field/' + args.FIELD + '.json'
+        const channel = Cast.toNumber(args.CHANNEL);
+        const field = Cast.toNumber(args.FIELD);
+        const urlBase = 'https://thingspeak.com/channels/' + channel + '/field/' + field + '.json';
+
+        const dataPromise = new Promise(resolve => {
             nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
                 if (err) {
-                log.warn('error fetching result! ${res}');
+                    log.warn(`error fetching translate result! ${res}`);
+                    resolve('');
+                    return '';
                 }
-            let feeds = JSON.parse(body).feeds;
-            let data = [];
+
+                const feeds = JSON.parse(body).feeds;
+                const data = [];
                 for (const idx in feeds) {
-                if (feeds[idx].hasOwnProperty('field' + args.FIELD)) {
-                    data[idx] = feeds[idx]['field' + args.FIELD].trim();
+                    if (feeds[idx].hasOwnProperty('field' + field)) {
+                        data[idx] = feeds[idx]['field' + field].trim();
                     }
                 }
-            this.data = data;
-            this.dataIndex = -1;
+
+                resolve(data.join(','));
+                return data.join(',');
+            });
         });
+        dataPromise.then(data => data);
+        return dataPromise;
     }
 }
 

@@ -85,6 +85,11 @@ class Scratch3DataViewerBlocks {
                 },
                 '---',
                 {
+                    opcode: 'dataLoop',
+                    text: 'Read data until finished',
+                    blockType: BlockType.LOOP,
+                },
+                {
                     opcode: 'whenDataReceived',
                     text: 'when data received',
                     blockType: BlockType.HAT
@@ -208,6 +213,20 @@ class Scratch3DataViewerBlocks {
             this.dataIndex++;
         }
         return this.dataIndex >= this.getDataLength();
+    }
+
+    dataLoop (args, util) {
+        console.log('dataLoop: index ' + this.dataIndex);
+        console.log('dataLoop: length ' + this.getDataLength());
+        if (this.dataIndex < this.getDataLength()) {
+            this.dataIndex++;
+        }
+        if (this.dataIndex < this.getDataLength()) {
+            util.startBranch(1, true);
+        }
+        else {
+            this.dataIndex = -1;
+        }
     }
 
     // Cassia: aqui não seria "Start receiving data? Pois não tem nenhuma condição para When, né?"

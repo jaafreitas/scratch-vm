@@ -2,6 +2,7 @@ const Cast = require('../util/cast');
 const Clone = require('../util/clone');
 const RenderedTarget = require('../sprites/rendered-target');
 const uid = require('../util/uid');
+const StageLayering = require('../engine/stage-layering');
 
 /**
  * @typedef {object} BubbleState - the bubble state associated with a particular target.
@@ -91,7 +92,7 @@ class Scratch3LooksBlocks {
     _onTargetWillExit (target) {
         const bubbleState = this._getBubbleState(target);
         if (bubbleState.drawableId && bubbleState.skinId) {
-            this.runtime.renderer.destroyDrawable(bubbleState.drawableId);
+            this.runtime.renderer.destroyDrawable(bubbleState.drawableId, StageLayering.SPRITE_LAYER);
             this.runtime.renderer.destroySkin(bubbleState.skinId);
             bubbleState.drawableId = null;
             bubbleState.skinId = null;
@@ -106,6 +107,8 @@ class Scratch3LooksBlocks {
      */
     _onResetBubbles () {
         for (let n = 0; n < this.runtime.targets.length; n++) {
+            const bubbleState = this._getBubbleState(this.runtime.targets[n]);
+            bubbleState.text = '';
             this._onTargetWillExit(this.runtime.targets[n]);
         }
         clearTimeout(this._bubbleTimeout);
@@ -152,10 +155,17 @@ class Scratch3LooksBlocks {
             this.runtime.renderer.updateDrawableProperties(bubbleState.drawableId, {
                 position: [
                     bubbleState.onSpriteRight ? (
-                        Math.min(stageBounds.right - bubbleWidth, targetBounds.right)
+                        Math.max(
+                            stageBounds.left, // Bubble should not extend past left edge of stage
+                            Math.min(stageBounds.right - bubbleWidth, targetBounds.right)
+                        )
                     ) : (
-                        Math.max(stageBounds.left, targetBounds.left - bubbleWidth)
+                        Math.min(
+                            stageBounds.right - bubbleWidth, // Bubble should not extend past right edge of stage
+                            Math.max(stageBounds.left, targetBounds.left - bubbleWidth)
+                        )
                     ),
+                    // Bubble should not extend past the top of the stage
                     Math.min(stageBounds.top, targetBounds.bottom + bubbleHeight)
                 ]
             });
@@ -190,15 +200,20 @@ class Scratch3LooksBlocks {
 
             // TODO is there a way to figure out before rendering whether to default left or right?
             const targetBounds = target.getBounds();
-            const stageBounds = this.runtime.getTargetForStage().getBounds();
+            const stageSize = this.runtime.renderer.getNativeSize();
+            const stageBounds = {
+                left: -stageSize[0] / 2,
+                right: stageSize[0] / 2,
+                top: stageSize[1] / 2,
+                bottom: -stageSize[1] / 2
+            };
             if (targetBounds.right + 170 > stageBounds.right) {
                 bubbleState.onSpriteRight = false;
             }
 
-            bubbleState.drawableId = this.runtime.renderer.createDrawable();
+            bubbleState.drawableId = this.runtime.renderer.createDrawable(StageLayering.SPRITE_LAYER);
             bubbleState.skinId = this.runtime.renderer.createTextSkin(type, text, bubbleState.onSpriteRight, [0, 0]);
 
-            this.runtime.renderer.setDrawableOrder(bubbleState.drawableId, Infinity);
             this.runtime.renderer.updateDrawableProperties(bubbleState.drawableId, {
                 skinId: bubbleState.skinId
             });
@@ -291,7 +306,7 @@ class Scratch3LooksBlocks {
                 this._bubbleTimeout = null;
                 // Clear say bubble if it hasn't been changed and proceed.
                 if (this._getBubbleState(target).usageId === usageId) {
-                    this._onTargetWillExit(target);
+                    this._updateBubble(target, 'say', '');
                 }
                 resolve();
             }, 1000 * args.SECS);
@@ -311,7 +326,7 @@ class Scratch3LooksBlocks {
                 this._bubbleTimeout = null;
                 // Clear think bubble if it hasn't been changed and proceed.
                 if (this._getBubbleState(target).usageId === usageId) {
-                    this._onTargetWillExit(target);
+                    this._updateBubble(target, 'think', '');
                 }
                 resolve();
             }, 1000 * args.SECS);
@@ -409,7 +424,17 @@ class Scratch3LooksBlocks {
         const instance = this;
         const waiting = util.stackFrame.startedThreads.some(thread => instance.runtime.isActiveThread(thread));
         if (waiting) {
-            util.yield();
+            // If all threads are waiting for the next tick or later yield
+            // for a tick as well. Otherwise yield until the next loop of
+            // the threads.
+            if (
+                util.stackFrame.startedThreads
+                    .every(thread => instance.runtime.isWaitingThread(thread))
+            ) {
+                util.yieldTick();
+            } else {
+                util.yield();
+            }
         }
     }
 

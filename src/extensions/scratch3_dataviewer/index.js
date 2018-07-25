@@ -33,9 +33,7 @@ class Scratch3DataViewerBlocks {
 
         this.counter =0;
 
-        this.dataIndex = -1;
-
-        this.data = [];
+        this.clearData();
 
         this.connect();
     }
@@ -200,6 +198,11 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.REPORTER
                 },
                 {
+                    opcode: 'clearData',
+                    text: 'clear data',
+                    blockType: BlockType.COMMAND
+                },
+                {
                     opcode: 'getDataIndex',
                     text: 'data [INDEX]',
                     blockType: BlockType.REPORTER,
@@ -313,6 +316,7 @@ class Scratch3DataViewerBlocks {
     }
 
     setData (args) {
+        if (args.DATA.trim()) {
         const splitedData = args.DATA.split(',');
         const data = [];
         var dataIndex = 0;
@@ -325,11 +329,17 @@ class Scratch3DataViewerBlocks {
         this.data = data;
         this.dataIndex = -1;
     }
+    }
 
     addData (args) {
         if (args.DATA) {
            this.data.push(Cast.toNumber(args.DATA));
         }
+    }
+
+    clearData (args) {
+        this.data = [];
+        this.dataIndex = -1;
     }
 
     mapValue (value, old_min, old_max, new_min, new_max) {

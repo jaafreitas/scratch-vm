@@ -47,16 +47,24 @@ class Scratch3DataViewerBlocks {
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [
-                // Bloco para leitura de dados de fontes distintas,
-                // começando com uma leitura de dados escrita (ou via arduino leonardo)
                 {
-                    opcode: 'addData',
-                    text: 'add data [DATA]',
+                    opcode: 'setData',
+                    text: 'set data to [DATA]',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         DATA: {
                             type: ArgumentType.STRING,
                             defaultValue: ''
+                        }
+                    }
+                },
+                {
+                    opcode: 'addData',
+                    text: 'add [DATA] to data',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        DATA: {
+                            type: ArgumentType.NUMBER
                         }
                     }
                 },
@@ -134,7 +142,7 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.REPORTER
                 },
                 {
-                    opcode: 'mapDataValues',
+                    opcode: 'changeDataScale',
                     text: 'change data scale to [NEW_MIN] [NEW_MAX] ',
                     blockType: BlockType.COMMAND,
                     arguments: {
@@ -253,8 +261,8 @@ class Scratch3DataViewerBlocks {
     }
 
     getDataIndex (args) {
-        if (Cast.toNumber(args.INDEX) < this.getDataLength()) {
-            return this.data[Cast.toNumber(args.INDEX)];
+        if (args.INDEX < this.getDataLength()) {
+            return this.data[args.INDEX];
         }
     }
 
@@ -269,7 +277,7 @@ class Scratch3DataViewerBlocks {
     }
 
     getIndex (args) {
-        if (this.dataIndex >= 0) {
+        if (this.getDataLength() > 0 && this.dataIndex >= 0) {
             return this.dataIndex;
         }
     }
@@ -304,9 +312,24 @@ class Scratch3DataViewerBlocks {
         this.dataIndex = -1;
     }
 
-    addData (args) {
-        this.data = Cast.toString(args.DATA).split(',');
+    setData (args) {
+        const splitedData = args.DATA.split(',');
+        const data = [];
+        var dataIndex = 0;
+        for (var i = 0; i < splitedData.length; i += 1) {
+            if (splitedData[i].trim() && !isNaN(splitedData[i])) {
+                data[dataIndex] = Cast.toNumber(splitedData[i]);
+                dataIndex++;
+            }
+        }
+        this.data = data;
         this.dataIndex = -1;
+    }
+
+    addData (args) {
+        if (args.DATA) {
+           this.data.push(Cast.toNumber(args.DATA));
+        }
     }
 
     mapValue (value, old_min, old_max, new_min, new_max) {
@@ -314,83 +337,94 @@ class Scratch3DataViewerBlocks {
     }
 
     mapIndexValue (args) {
-        if (this.getDataLength() > 0) {
-            return this.mapValue(Cast.toNumber(args.VALUE), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX));
+        if (this.getDataLength() > 0 && args.VALUE && args.NEW_MIN && args.NEW_MIN) {
+            return Cast.toNumber(this.mapValue(args.VALUE, 0, this.getDataLength() - 1, args.NEW_MIN, args.NEW_MAX));
         }
     }
 
     mapDataValue (args) {
-        if (this.getDataLength() > 0) {
-            return this.mapValue(Cast.toNumber(args.VALUE), this.getMin(), this.getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX));
+        if (this.getDataLength() > 0 && args.VALUE && args.NEW_MIN && args.NEW_MIN) {
+            return Cast.toNumber(this.mapValue(args.VALUE, this.getMin(), this.getMax(), args.NEW_MIN, args.NEW_MAX));
         }
     }
 
-    mapDataValues (args) {
+    changeDataScale (args) {
         const old_min = this.getMin();
         const old_max = this.getMax();
         for (var i = 0; i < this.getDataLength(); i += 1) {
-            this.data[i] = this.mapValue(this.data[i], old_min, old_max, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX));
+            this.data[i] = this.mapValue(this.data[i], old_min, old_max, args.NEW_MIN, args.NEW_MAX);
         }
     }
 
     readCSVDataFromURL (args) {
-        const urlBase = Cast.toString(args.URL);
-        const field = Cast.toNumber(args.FIELD);
-        const line = Cast.toNumber(args.LINE);
+        if (args.URL.trim() && args.FIELD && args.LINE) {
+            const urlBase = args.URL;
+            const field = args.FIELD;
+            const line = args.LINE;
 
-        const dataPromise = new Promise(resolve => {
-            nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
-                if (err) {
-                    log.warn(`error fetching translate result! ${res}`);
-                    resolve('');
-                    return '';
-                }
-                const lines = body.toString().split('\n');
-                const data = [];
-                var dataIndex = 0;
-                for (var i = (line - 1); i < lines.length; i += 1) {
-                    const fields = lines[i].trim().split(',');
-                    if (fields[field]) {
-                        data[dataIndex] = fields[field];
-                        dataIndex++;
+            return new Promise((resolve, reject) => {
+                nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
+                    if (err) {
+                        return reject(err);
                     }
-                }
+                    if (res.statusCode !== 200) {
+                        return reject('statusCode != 200');
+                    }
 
-                resolve(data.join(','));
-                return data.join(',');
+                    const lines = body.toString().split('\n');
+                    const data = [];
+                    var dataIndex = 0;
+                    for (var i = (line - 1); i < lines.length; i += 1) {
+                        const fields = lines[i].trim().split(',');
+                        if (fields[field]) {
+                            // Just to make sure we are getting only numbers.
+                            /// ToDo: cover more cases...
+                            fields[field] = fields[field].replace(/\D*(\d+)/, '$1');
+                            if (!isNaN(fields[field])) {
+                                data[dataIndex] = Cast.toNumber(fields[field]);
+                                dataIndex++;
+                            }
+                        }
+                    }
+
+                    return resolve(data.join(','));
+                });
             });
-        });
-        dataPromise.then(data => data);
-        return dataPromise;
+        }
     }
 
     readThingSpeakData (args) {
-        const channel = Cast.toNumber(args.CHANNEL);
-        const field = Cast.toNumber(args.FIELD);
-        const urlBase = 'https://thingspeak.com/channels/' + channel + '/field/' + field + '.json';
+        if (args.CHANNEL && args.FIELD) {
+            const channel = args.CHANNEL;
+            const field = args.FIELD;
+            const urlBase = 'https://thingspeak.com/channels/' + channel + '/field/' + field + '.json';
 
-        const dataPromise = new Promise(resolve => {
-            nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
-                if (err) {
-                    log.warn(`error fetching translate result! ${res}`);
-                    resolve('');
-                    return '';
-                }
-
-                const feeds = JSON.parse(body).feeds;
-                const data = [];
-                for (const idx in feeds) {
-                    if (feeds[idx].hasOwnProperty('field' + field)) {
-                        data[idx] = feeds[idx]['field' + field].trim();
+            return new Promise((resolve, reject) => {
+                nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
+                    if (err) {
+                        return reject(err);
                     }
-                }
+                    if (res.statusCode !== 200) {
+                        return reject('statusCode != 200');
+                    }
 
-                resolve(data.join(','));
-                return data.join(',');
+                    const feeds = JSON.parse(body).feeds;
+                    const data = [];
+                    var dataIndex = 0;
+                    for (const idx in feeds) {
+                        if (feeds[idx].hasOwnProperty('field' + field)) {
+                            const value = feeds[idx]['field' + field].trim();
+                            if (value && !isNaN(value)) {
+                                data[dataIndex] = Cast.toNumber(value);
+                                dataIndex++;
+                            }
+                        }
+                    }
+
+                    return resolve(data.join(','));
+                });
             });
-        });
-        dataPromise.then(data => data);
-        return dataPromise;
+        }
     }
 }
 

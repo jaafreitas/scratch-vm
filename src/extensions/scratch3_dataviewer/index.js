@@ -317,18 +317,18 @@ class Scratch3DataViewerBlocks {
 
     setData (args) {
         if (args.DATA.trim()) {
-        const splitedData = args.DATA.split(',');
-        const data = [];
-        var dataIndex = 0;
-        for (var i = 0; i < splitedData.length; i += 1) {
-            if (splitedData[i].trim() && !isNaN(splitedData[i])) {
-                data[dataIndex] = Cast.toNumber(splitedData[i]);
-                dataIndex++;
+            const splitedData = args.DATA.split(',');
+            const data = [];
+            var dataIndex = 0;
+            for (var i = 0; i < splitedData.length; i += 1) {
+                if (splitedData[i].trim() && !isNaN(splitedData[i])) {
+                    data[dataIndex] = Cast.toNumber(splitedData[i]);
+                    dataIndex++;
+                }
             }
+            this.data = data;
+            this.dataIndex = -1;
         }
-        this.data = data;
-        this.dataIndex = -1;
-    }
     }
 
     addData (args) {
@@ -347,14 +347,14 @@ class Scratch3DataViewerBlocks {
     }
 
     mapIndexValue (args) {
-        if (this.getDataLength() > 0 && args.VALUE && args.NEW_MIN && args.NEW_MIN) {
+        if (this.getDataLength() > 0) {
             return Cast.toNumber(this.mapValue(
                 Cast.toNumber(args.VALUE), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
         }
     }
 
     mapDataValue (args) {
-        if (this.getDataLength() > 0 && args.VALUE && args.NEW_MIN && args.NEW_MIN) {
+        if (this.getDataLength() > 0) {
             return Cast.toNumber(this.mapValue(
                  Cast.toNumber(args.VALUE), this.getMin(), this.getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
         }

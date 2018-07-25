@@ -284,9 +284,9 @@ class Scratch3DataViewerBlocks {
 
     getMean (args) {
         if (this.getDataLength() > 0) {
-            var total = 0;
+            var total = 0.0;
             for (var i = 0; i < this.getDataLength(); i += 1) {
-                total = total + parseInt(this.data[i], 10);
+                total = total + this.data[i];
             }
             return total / this.getDataLength();
         }
@@ -338,13 +338,15 @@ class Scratch3DataViewerBlocks {
 
     mapIndexValue (args) {
         if (this.getDataLength() > 0 && args.VALUE && args.NEW_MIN && args.NEW_MIN) {
-            return Cast.toNumber(this.mapValue(args.VALUE, 0, this.getDataLength() - 1, args.NEW_MIN, args.NEW_MAX));
+            return Cast.toNumber(this.mapValue(
+                Cast.toNumber(args.VALUE), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
         }
     }
 
     mapDataValue (args) {
         if (this.getDataLength() > 0 && args.VALUE && args.NEW_MIN && args.NEW_MIN) {
-            return Cast.toNumber(this.mapValue(args.VALUE, this.getMin(), this.getMax(), args.NEW_MIN, args.NEW_MAX));
+            return Cast.toNumber(this.mapValue(
+                 Cast.toNumber(args.VALUE), this.getMin(), this.getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
         }
     }
 
@@ -352,7 +354,8 @@ class Scratch3DataViewerBlocks {
         const old_min = this.getMin();
         const old_max = this.getMax();
         for (var i = 0; i < this.getDataLength(); i += 1) {
-            this.data[i] = this.mapValue(this.data[i], old_min, old_max, args.NEW_MIN, args.NEW_MAX);
+            this.data[i] = Cast.toNumber(this.mapValue(
+                this.data[i], old_min, old_max, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
         }
     }
 

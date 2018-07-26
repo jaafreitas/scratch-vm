@@ -317,15 +317,25 @@ class Scratch3DataViewerBlocks {
 
     setData (args) {
         if (args.DATA.trim()) {
-            const splitedData = args.DATA.split(',');
+
             const data = [];
             var dataIndex = 0;
-            for (var i = 0; i < splitedData.length; i += 1) {
-                if (splitedData[i].trim() && !isNaN(splitedData[i])) {
-                    data[dataIndex] = Cast.toNumber(splitedData[i]);
+            const splitedComma = args.DATA.split(',');
+            for (var i = 0; i < splitedComma.length; i += 1) {
+                if (splitedComma[i].trim() && !isNaN(splitedComma[i])) {
+                    data[dataIndex] = Cast.toNumber(splitedComma[i]);
                     dataIndex++;
+                } else {
+                    const splitedSpace = splitedComma[i].trim().split(' ');
+                    for (var j = 0; j < splitedSpace.length; j += 1) {
+                        if (splitedSpace[j].trim() && !isNaN(splitedSpace[j])) {
+                            data[dataIndex] = Cast.toNumber(splitedSpace[j]);
+                            dataIndex++;
+                        }
+                    }
                 }
             }
+
             this.data = data;
             this.dataIndex = -1;
         }

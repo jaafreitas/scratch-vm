@@ -125,19 +125,16 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.REPORTER
                 },
                 {
-                    opcode: 'getMean',
-                    text: 'mean',
-                    blockType: BlockType.REPORTER
-                },
-                {
-                    opcode: 'getMax',
-                    text: 'max',
-                    blockType: BlockType.REPORTER
-                },
-                {
-                    opcode: 'getMin',
-                    text: 'min',
-                    blockType: BlockType.REPORTER
+                    opcode: 'getStatistic',
+                    text: '[FNC]',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        FNC: {
+                            type: ArgumentType.STRING,
+                            menu: 'statisticFunctions',
+                            defaultValue: 'mean'
+                        }
+                    }
                 },
                 {
                     opcode: 'changeDataScale',
@@ -219,7 +216,10 @@ class Scratch3DataViewerBlocks {
                     text: 'Restart data read',
                     blockType: BlockType.COMMAND
                 }
-            ]
+            ],
+            menus: {
+                statisticFunctions: ['mean', 'min', 'max']
+            }
         };
     }
 
@@ -285,29 +285,33 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    getMean (args) {
-        if (this.getDataLength() > 0) {
-            var total = 0.0;
-            for (var i = 0; i < this.getDataLength(); i += 1) {
-                total = total + this.data[i];
-            }
-            return total / this.getDataLength();
-        }
-    }
-
-   getMax (args) {
-        if (this.getDataLength() > 0) {
-            return this.data.reduce(function(a, b) {
-                return Math.max(a, b);
-            });
-        }
-    }
-
-   getMin (args) {
-        if (this.getDataLength() > 0) {
-            return this.data.reduce(function(a, b) {
-                return Math.min(a, b);
-            });
+    getStatistic (args) {
+        switch(args.FNC) {
+            case "mean":
+                if (this.getDataLength() > 0) {
+                    var total = 0.0;
+                    for (var i = 0; i < this.getDataLength(); i += 1) {
+                        total = total + this.data[i];
+                    }
+                    return total / this.getDataLength();
+                }
+                break;
+            case "min":
+                if (this.getDataLength() > 0) {
+                    return this.data.reduce(function(a, b) {
+                        return Math.min(a, b);
+                    });
+                }
+                break;
+            case "max":
+                if (this.getDataLength() > 0) {
+                    return this.data.reduce(function(a, b) {
+                        return Math.max(a, b);
+                    });
+                }
+                break;
+            default:
+                return "error";
         }
     }
 

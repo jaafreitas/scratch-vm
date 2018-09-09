@@ -68,10 +68,10 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'readCSVDataFromURL',
-                    text: 'read CSV field [FIELD] from [URL] starting from line [LINE]',
+                    text: 'read CSV column [COLUMN] from [URL] starting from line [LINE]',
                     blockType: BlockType.REPORTER,
                     arguments: {
-                        FIELD: {
+                        COLUMN: {
                             type: ArgumentType.NUMBER
                         },
                         URL: {
@@ -384,9 +384,9 @@ class Scratch3DataViewerBlocks {
     }
 
     readCSVDataFromURL (args) {
-        if (args.URL.trim() && args.FIELD && args.LINE) {
+        if (args.URL.trim() && args.COLUMN && args.LINE) {
             const urlBase = args.URL;
-            const field = args.FIELD;
+            const column = args.COLUMN - 1;
             const line = args.LINE;
 
             return new Promise((resolve, reject) => {
@@ -402,13 +402,13 @@ class Scratch3DataViewerBlocks {
                     const data = [];
                     var dataIndex = 0;
                     for (var i = (line - 1); i < lines.length; i += 1) {
-                        const fields = lines[i].trim().split(',');
-                        if (fields[field]) {
+                        const columns = lines[i].trim().split(',');
+                        if (columns[column]) {
                             // Just to make sure we are getting only numbers.
                             /// ToDo: cover more cases...
-                            fields[field] = fields[field].replace(/\D*(\d+)/, '$1');
-                            if (!isNaN(fields[field])) {
-                                data[dataIndex] = Cast.toNumber(fields[field]);
+                            columns[column] = columns[column].replace(/\D*(\d+)/, '$1');
+                            if (!isNaN(columns[column])) {
+                                data[dataIndex] = Cast.toNumber(columns[column]);
                                 dataIndex++;
                             }
                         }

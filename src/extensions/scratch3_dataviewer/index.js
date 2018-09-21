@@ -64,7 +64,7 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'readCSVDataFromURL',
-                    text: 'read CSV column [COLUMN] from [URL] starting from line [LINE]',
+                    text: 'read .csv file [URL]: column [COLUMN] starting from line [LINE]',
                     blockType: BlockType.REPORTER,
                     arguments: {
                         COLUMN: {
@@ -72,7 +72,7 @@ class Scratch3DataViewerBlocks {
                         },
                         URL: {
                             type: ArgumentType.STRING,
-                            defaultValue: ''
+                            defaultValue: 'spreadsheet link'
                         },
                         LINE: {
                             type: ArgumentType.NUMBER,
@@ -82,7 +82,7 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'readThingSpeakData',
-                    text: 'read ThingSpeak field [FIELD] from channel [CHANNEL]',
+                    text: 'read ThingSpeak: channel [CHANNEL], field [FIELD]',
                     blockType: BlockType.REPORTER,
                     arguments: {
                         FIELD: {
@@ -96,17 +96,22 @@ class Scratch3DataViewerBlocks {
                 '---',
                 {
                     opcode: 'dataLoop',
-                    text: 'Read data until finished',
+                    text: 'read all values from data',
                     blockType: BlockType.LOOP,
                 },
                 {
-                    opcode: 'getData',
-                    text: 'data',
+                    opcode: 'getValue',
+                    text: 'value',
                     blockType: BlockType.REPORTER //talvez  esses reporter blocks possam ser 1 único em menu (com exceção do data [])
                 },
                 {
                     opcode: 'getIndex',
                     text: 'index',
+                    blockType: BlockType.REPORTER
+                },
+                {
+                    opcode: 'getDataLength',
+                    text: 'data length',
                     blockType: BlockType.REPORTER
                 },
                 {
@@ -121,6 +126,7 @@ class Scratch3DataViewerBlocks {
                         }
                     }
                 },
+                '---',
                 {
                     opcode: 'changeDataScale',
                     text: 'change data scale to [NEW_MIN] [NEW_MAX] ',
@@ -136,7 +142,6 @@ class Scratch3DataViewerBlocks {
                         }
                     }
                 },
-                '---',
                 {
                     opcode: 'mapDataValue',
                     text: 'map data value [VALUE] to [NEW_MIN] [NEW_MAX] ',
@@ -173,15 +178,9 @@ class Scratch3DataViewerBlocks {
                         }
                     }
                 },
-                '---',
-                {
-                    opcode: 'getDataLength',
-                    text: 'data length',
-                    blockType: BlockType.REPORTER
-                },
                 {
                     opcode: 'getDataIndex',
-                    text: 'data [INDEX]',
+                    text: 'value in data index [INDEX]',
                     blockType: BlockType.REPORTER,
                     arguments: {
                         INDEX: {
@@ -219,7 +218,7 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    getData (args) {
+    getValue (args) {
         if (this.dataIndex < this.getDataLength()) {
             return this.data[this.dataIndex];
         }

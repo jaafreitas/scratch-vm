@@ -53,11 +53,11 @@ class Scratch3DataViewerBlocks {
                     }
                 },
                 {
-                    opcode: 'addData',
-                    text: 'add [DATA] to data',
+                    opcode: 'addValueToData',
+                    text: 'add value [VALUE] to data',
                     blockType: BlockType.COMMAND,
                     arguments: {
-                        DATA: {
+                        VALUE: {
                             type: ArgumentType.NUMBER
                         }
                     }
@@ -161,11 +161,11 @@ class Scratch3DataViewerBlocks {
                     }
                 },
                 {
-                    opcode: 'mapIndexValue',
-                    text: 'map index value [VALUE] to [NEW_MIN] [NEW_MAX] ',
+                    opcode: 'mapDataIndex',
+                    text: 'map data index [INDEX] to [NEW_MIN] [NEW_MAX] ',
                     blockType: BlockType.REPORTER,
                     arguments: {
-                        VALUE: {
+                        INDEX: {
                             type: ArgumentType.NUMBER
                         },
                         NEW_MIN: {
@@ -303,9 +303,9 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    addData (args) {
-        if (args.DATA) {
-           this.data.push(Cast.toNumber(args.DATA));
+    addValueToData (args) {
+        if (args.VALUE) {
+           this.data.push(Cast.toNumber(args.VALUE));
         }
     }
 
@@ -313,10 +313,10 @@ class Scratch3DataViewerBlocks {
         return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min);
     }
 
-    mapIndexValue (args) {
+    mapDataIndex (args) {
         if (this.getDataLength() > 0) {
             return Cast.toNumber(this.mapValue(
-                Cast.toNumber(args.VALUE), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                Cast.toNumber(args.INDEX), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
         }
     }
 

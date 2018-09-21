@@ -31,10 +31,6 @@ class Scratch3DataViewerBlocks {
     constructor (runtime) {
         this.runtime = runtime;
 
-        this.counter =0;
-
-        this.clearData();
-
         this.connect();
     }
 
@@ -102,17 +98,6 @@ class Scratch3DataViewerBlocks {
                     opcode: 'dataLoop',
                     text: 'Read data until finished',
                     blockType: BlockType.LOOP,
-                },
-                {
-                    opcode: 'whenDataReceived',
-                    text: 'when data received',
-                    blockType: BlockType.HAT
-                },
-
-                {
-                    opcode: 'dataReadFinished',
-                    text: 'data read finished',
-                    blockType: BlockType.BOOLEAN,
                 },
                 {
                     opcode: 'getData',
@@ -195,11 +180,6 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.REPORTER
                 },
                 {
-                    opcode: 'clearData',
-                    text: 'clear data',
-                    blockType: BlockType.COMMAND
-                },
-                {
                     opcode: 'getDataIndex',
                     text: 'data [INDEX]',
                     blockType: BlockType.REPORTER,
@@ -210,12 +190,6 @@ class Scratch3DataViewerBlocks {
                         }
                     }
                 },
-                '---',
-                {
-                    opcode: 'restartDataRead',
-                    text: 'Restart data read',
-                    blockType: BlockType.COMMAND
-                }
             ],
             menus: {
                 statisticFunctions: ['mean', 'min', 'max']
@@ -227,13 +201,6 @@ class Scratch3DataViewerBlocks {
         this._device = new DataViewer(this.runtime);
     }
 
-    dataReadFinished(args) {
-        if (this.dataIndex < this.getDataLength()) {
-            this.dataIndex++;
-        }
-        return this.dataIndex >= this.getDataLength();
-    }
-
     dataLoop (args, util) {
         if (this.dataIndex < this.getDataLength()) {
             this.dataIndex++;
@@ -243,23 +210,6 @@ class Scratch3DataViewerBlocks {
         }
         else {
             this.dataIndex = -1;
-        }
-    }
-
-    // Cassia: aqui não seria "Start receiving data? Pois não tem nenhuma condição para When, né?"
-    //         na verdade não entendi muito bem esse bloco - depois podemos conversar!
-    //         no futuro podemos juntar com o bloco de receber dados
-    // Adriano: Este bloco serve para lermos os dados em forma de streaming.
-    //          A gambi com counter % 2 é que temos que ficar alternando entre verdadeiro e falso
-    //          para o bloco ser chamado.
-    whenDataReceived (args) {
-        this.counter += 1;
-        if ((this.counter % 2 == 0) && (this.dataIndex < this.getDataLength() - 1)) {
-            this.dataIndex++;
-            return true;
-        }
-        else {
-            return false;
         }
     }
 
@@ -315,10 +265,6 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    restartDataRead (args) {
-        this.dataIndex = -1;
-    }
-
     setData (args) {
         if (args.DATA.trim()) {
 
@@ -349,11 +295,6 @@ class Scratch3DataViewerBlocks {
         if (args.DATA) {
            this.data.push(Cast.toNumber(args.DATA));
         }
-    }
-
-    clearData (args) {
-        this.data = [];
-        this.dataIndex = -1;
     }
 
     mapValue (value, old_min, old_max, new_min, new_max) {

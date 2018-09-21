@@ -234,30 +234,43 @@ class Scratch3DataViewerBlocks {
         }
     }
 
+
+    _getMean () {
+        if (this.getDataLength() > 0) {
+            var total = 0.0;
+            for (var i = 0; i < this.getDataLength(); i += 1) {
+                total = total + this.data[i];
+            }
+            return total / this.getDataLength();
+        }
+    }
+
+    _getMin () {
+        if (this.getDataLength() > 0) {
+            return this.data.reduce(function(a, b) {
+                return Math.min(a, b);
+            });
+        }
+    }
+
+    _getMax () {
+        if (this.getDataLength() > 0) {
+            return this.data.reduce(function(a, b) {
+                return Math.max(a, b);
+            });
+        }
+    }
+
     getStatistic (args) {
         switch(args.FNC) {
             case "mean":
-                if (this.getDataLength() > 0) {
-                    var total = 0.0;
-                    for (var i = 0; i < this.getDataLength(); i += 1) {
-                        total = total + this.data[i];
-                    }
-                    return total / this.getDataLength();
-                }
+                return this._getMean();
                 break;
             case "min":
-                if (this.getDataLength() > 0) {
-                    return this.data.reduce(function(a, b) {
-                        return Math.min(a, b);
-                    });
-                }
+                return this._getMin();
                 break;
             case "max":
-                if (this.getDataLength() > 0) {
-                    return this.data.reduce(function(a, b) {
-                        return Math.max(a, b);
-                    });
-                }
+                return this._getMax();
                 break;
             default:
                 return "error";
@@ -315,8 +328,8 @@ class Scratch3DataViewerBlocks {
     }
 
     changeDataScale (args) {
-        const old_min = this.getMin();
-        const old_max = this.getMax();
+        const old_min = this._getMin();
+        const old_max = this._getMax();
         for (var i = 0; i < this.getDataLength(); i += 1) {
             this.data[i] = Cast.toNumber(this.mapValue(
                 this.data[i], old_min, old_max, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));

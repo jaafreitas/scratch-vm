@@ -3,6 +3,7 @@ const BlockType = require('../../extension-support/block-type');
 const log = require('../../util/log');
 const Cast = require('../../util/cast');
 const nets = require('nets');
+const formatMessage = require('format-message');
 
 // eslint-disable-next-line max-len
 const blockIconURI = '';
@@ -20,14 +21,6 @@ class DataViewer {
 
 class Scratch3DataViewerBlocks {
 
-    static get EXTENSION_NAME () {
-        return 'DataViewer';
-    }
-
-    static get EXTENSION_ID () {
-        return 'dataviewer';
-    }
-
     constructor (runtime) {
         this.runtime = runtime;
 
@@ -36,14 +29,22 @@ class Scratch3DataViewerBlocks {
 
     getInfo () {
         return {
-            id: Scratch3DataViewerBlocks.EXTENSION_ID,
-            name: Scratch3DataViewerBlocks.EXTENSION_NAME,
+            id: 'dataviewer',
+
+            name: formatMessage({
+                id: 'dataviewer.categoryName',
+                default: 'DataViewer'
+            }),
+
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [
                 {
                     opcode: 'setData',
-                    text: 'set data to [DATA]',
+                    text: formatMessage({
+                        id: 'dataviewer.setData',
+                        default: 'set data to [DATA]'
+                    }),
                     blockType: BlockType.COMMAND,
                     arguments: {
                         DATA: {
@@ -54,7 +55,10 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'addValueToData',
-                    text: 'add value [VALUE] to data',
+                    text: formatMessage({
+                        id: 'dataviewer.addValueToData',
+                        default: 'add value [VALUE] to data'
+                    }),
                     blockType: BlockType.COMMAND,
                     arguments: {
                         VALUE: {
@@ -64,7 +68,10 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'readCSVDataFromURL',
-                    text: 'read .csv file [URL]: column [COLUMN] starting from line [LINE]',
+                    text: formatMessage({
+                        id: 'dataviewer.readCSVDataFromURL',
+                        default: 'read .csv file [URL]: column [COLUMN] starting from line [LINE]'
+                    }),
                     blockType: BlockType.REPORTER,
                     arguments: {
                         COLUMN: {
@@ -82,7 +89,10 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'readThingSpeakData',
-                    text: 'read ThingSpeak: channel [CHANNEL], field [FIELD]',
+                    text: formatMessage({
+                        id: 'dataviewer.readThingSpeakData',
+                        default: 'read ThingSpeak: channel [CHANNEL], field [FIELD]'
+                    }),
                     blockType: BlockType.REPORTER,
                     arguments: {
                         FIELD: {
@@ -96,27 +106,42 @@ class Scratch3DataViewerBlocks {
                 '---',
                 {
                     opcode: 'dataLoop',
-                    text: 'read all values from data',
+                    text: formatMessage({
+                        id: 'dataviewer.dataLoop',
+                        default: 'read all values from data'
+                    }),
                     blockType: BlockType.LOOP,
                 },
                 {
                     opcode: 'getValue',
-                    text: 'value',
+                    text: formatMessage({
+                        id: 'dataviewer.getValue',
+                        default: 'value'
+                    }),
                     blockType: BlockType.REPORTER //talvez  esses reporter blocks possam ser 1 único em menu (com exceção do data [])
                 },
                 {
                     opcode: 'getIndex',
-                    text: 'index',
+                    text: formatMessage({
+                        id: 'dataviewer.getIndex',
+                        default: 'index'
+                    }),
                     blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'getDataLength',
-                    text: 'data length',
+                    text: formatMessage({
+                        id: 'dataviewer.getDataLength',
+                        default: 'data length'
+                    }),
                     blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'getStatistic',
-                    text: '[FNC]',
+                    text: formatMessage({
+                        id: 'dataviewer.getStatistic',
+                        default: '[FNC]'
+                    }),
                     blockType: BlockType.REPORTER,
                     arguments: {
                         FNC: {
@@ -129,7 +154,10 @@ class Scratch3DataViewerBlocks {
                 '---',
                 {
                     opcode: 'changeDataScale',
-                    text: 'change data scale to [NEW_MIN] [NEW_MAX] ',
+                    text: formatMessage({
+                        id: 'dataviewer.changeDataScale',
+                        default: 'change data scale to [NEW_MIN] [NEW_MAX]'
+                    }),
                     blockType: BlockType.COMMAND,
                     arguments: {
                         NEW_MIN: {
@@ -144,7 +172,10 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'mapDataValue',
-                    text: 'map data value [VALUE] to [NEW_MIN] [NEW_MAX] ',
+                    text: formatMessage({
+                        id: 'dataviewer.mapDataValue',
+                        default: 'map data value [VALUE] to [NEW_MIN] [NEW_MAX]'
+                    }),
                     blockType: BlockType.REPORTER,
                     arguments: {
                         VALUE: {
@@ -162,7 +193,10 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'mapDataIndex',
-                    text: 'map data index [INDEX] to [NEW_MIN] [NEW_MAX] ',
+                    text: formatMessage({
+                        id: 'dataviewer.mapDataIndex',
+                        default: 'map data index [INDEX] to [NEW_MIN] [NEW_MAX]'
+                    }),
                     blockType: BlockType.REPORTER,
                     arguments: {
                         INDEX: {
@@ -180,7 +214,10 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     opcode: 'getDataIndex',
-                    text: 'value in data index [INDEX]',
+                    text: formatMessage({
+                        id: 'dataviewer.getDataIndex',
+                        default: 'value in data index [INDEX]'
+                    }),
                     blockType: BlockType.REPORTER,
                     arguments: {
                         INDEX: {
@@ -188,10 +225,32 @@ class Scratch3DataViewerBlocks {
                             defaultValue: 0
                         }
                     }
-                },
+                }
             ],
             menus: {
-                statisticFunctions: ['mean', 'min', 'max']
+                statisticFunctions: [
+                    {
+                        text: formatMessage({
+                            id: 'dataviewer.menu.statisticFunctions.mean',
+                            default: 'mean'
+                        }),
+                        value: 'mean'
+                    },
+                    {
+                        text: formatMessage({
+                            id: 'dataviewer.menu.statisticFunctions.min',
+                            default: 'min'
+                        }),
+                        value: 'min'
+                    },
+                    {
+                        text: formatMessage({
+                            id: 'dataviewer.menu.statisticFunctions.max',
+                            default: 'max'
+                        }),
+                        value: 'max'
+                    }
+                ]
             }
         };
     }

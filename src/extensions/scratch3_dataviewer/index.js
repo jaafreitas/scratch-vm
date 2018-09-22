@@ -33,7 +33,7 @@ class Scratch3DataViewerBlocks {
 
             name: formatMessage({
                 id: 'dataviewer.categoryName',
-                default: 'DataViewer'
+                default: 'Data Viewer'
             }),
 
             menuIconURI: menuIconURI,
@@ -79,7 +79,10 @@ class Scratch3DataViewerBlocks {
                         },
                         URL: {
                             type: ArgumentType.STRING,
-                            defaultValue: 'spreadsheet link'
+                            defaultValue: formatMessage({
+                                id: 'dataviewer.readCSVDataFromURL.default',
+                                default: 'spreadsheet link'
+                            })
                         },
                         LINE: {
                             type: ArgumentType.NUMBER,

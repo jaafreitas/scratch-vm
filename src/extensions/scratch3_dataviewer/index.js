@@ -174,31 +174,18 @@ class Scratch3DataViewerBlocks {
                     }
                 },
                 {
-                    opcode: 'mapDataValue',
+                    opcode: 'mapData',
                     text: formatMessage({
-                        id: 'dataviewer.mapDataValue',
-                        default: 'map data value to [NEW_MIN] [NEW_MAX]'
+                        id: 'dataviewer.mapData',
+                        default: 'map data [DATA_TYPE] to [NEW_MIN] [NEW_MAX]'
                     }),
                     blockType: BlockType.REPORTER,
                     arguments: {
-                        NEW_MIN: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0
+                        DATA_TYPE: {
+                            type: ArgumentType.STRING,
+                            menu: 'dataType',
+                            defaultValue: 'value'
                         },
-                        NEW_MAX: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 100
-                        }
-                    }
-                },
-                {
-                    opcode: 'mapDataIndex',
-                    text: formatMessage({
-                        id: 'dataviewer.mapDataIndex',
-                        default: 'map data index to [NEW_MIN] [NEW_MAX]'
-                    }),
-                    blockType: BlockType.REPORTER,
-                    arguments: {
                         NEW_MIN: {
                             type: ArgumentType.NUMBER,
                             defaultValue: 0
@@ -246,6 +233,22 @@ class Scratch3DataViewerBlocks {
                             default: 'max'
                         }),
                         value: 'max'
+                    }
+                ],
+                dataType: [
+                    {
+                        text: formatMessage({
+                            id: 'dataviewer.menu.dataType.value',
+                            default: 'value'
+                        }),
+                        value: 'value'
+                    },
+                    {
+                        text: formatMessage({
+                            id: 'dataviewer.menu.dataType.index',
+                            default: 'index'
+                        }),
+                        value: 'index'
                     }
                 ]
             }
@@ -369,17 +372,22 @@ class Scratch3DataViewerBlocks {
         return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min);
     }
 
-    mapDataIndex (args) {
-        if (this.getDataLength() > 0) {
-            return Cast.toNumber(this.mapValue(
-                this.getIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
-        }
-    }
-
-    mapDataValue (args) {
-        if (this.getDataLength() > 0) {
-            return Cast.toNumber(this.mapValue(
-                 this.getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+    mapData (args) {
+        switch(args.DATA_TYPE) {
+            case "index":
+                if (this.getDataLength() > 0) {
+                    return Cast.toNumber(this.mapValue(
+                        this.getIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                }
+                break;
+            case "value":
+                if (this.getDataLength() > 0) {
+                    return Cast.toNumber(this.mapValue(
+                         this.getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                }
+                break;
+            default:
+                return "error";
         }
     }
 

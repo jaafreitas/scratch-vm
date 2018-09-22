@@ -177,13 +177,10 @@ class Scratch3DataViewerBlocks {
                     opcode: 'mapDataValue',
                     text: formatMessage({
                         id: 'dataviewer.mapDataValue',
-                        default: 'map data value [VALUE] to [NEW_MIN] [NEW_MAX]'
+                        default: 'map data value to [NEW_MIN] [NEW_MAX]'
                     }),
                     blockType: BlockType.REPORTER,
                     arguments: {
-                        VALUE: {
-                            type: ArgumentType.NUMBER
-                        },
                         NEW_MIN: {
                             type: ArgumentType.NUMBER,
                             defaultValue: 0
@@ -198,13 +195,10 @@ class Scratch3DataViewerBlocks {
                     opcode: 'mapDataIndex',
                     text: formatMessage({
                         id: 'dataviewer.mapDataIndex',
-                        default: 'map data index [INDEX] to [NEW_MIN] [NEW_MAX]'
+                        default: 'map data index to [NEW_MIN] [NEW_MAX]'
                     }),
                     blockType: BlockType.REPORTER,
                     arguments: {
-                        INDEX: {
-                            type: ArgumentType.NUMBER
-                        },
                         NEW_MIN: {
                             type: ArgumentType.NUMBER,
                             defaultValue: 0
@@ -378,14 +372,14 @@ class Scratch3DataViewerBlocks {
     mapDataIndex (args) {
         if (this.getDataLength() > 0) {
             return Cast.toNumber(this.mapValue(
-                Cast.toNumber(args.INDEX), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                this.getIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
         }
     }
 
     mapDataValue (args) {
         if (this.getDataLength() > 0) {
             return Cast.toNumber(this.mapValue(
-                 Cast.toNumber(args.VALUE), this.getMin(), this.getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                 this.getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
         }
     }
 

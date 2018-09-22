@@ -13,31 +13,22 @@ const menuIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABTCAYAA
 
 const serverTimeoutMs = 10000; // 10 seconds (chosen arbitrarily).
 
-class DataViewer {
-    constructor (runtime) {
-        this._runtime = runtime;
-    }
-}
-
 class Scratch3DataViewerBlocks {
 
     constructor (runtime) {
-        this.runtime = runtime;
-
-        this.connect();
+        this._runtime = runtime;
     }
 
     getInfo () {
         return {
             id: 'dataviewer',
-
             name: formatMessage({
                 id: 'dataviewer.categoryName',
                 default: 'Data Viewer'
             }),
-
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
+
             blocks: [
                 {
                     opcode: 'setData',
@@ -131,14 +122,6 @@ class Scratch3DataViewerBlocks {
                     }
                 },
                 {
-                    opcode: 'getDataLength',
-                    text: formatMessage({
-                        id: 'dataviewer.getDataLength',
-                        default: 'data length'
-                    }),
-                    blockType: BlockType.REPORTER
-                },
-                {
                     opcode: 'getStatistic',
                     text: formatMessage({
                         id: 'dataviewer.getStatistic',
@@ -153,7 +136,6 @@ class Scratch3DataViewerBlocks {
                         }
                     }
                 },
-                '---',
                 {
                     opcode: 'changeDataScale',
                     text: formatMessage({
@@ -194,6 +176,14 @@ class Scratch3DataViewerBlocks {
                             defaultValue: 100
                         }
                     }
+                },
+                {
+                    opcode: 'getDataLength',
+                    text: formatMessage({
+                        id: 'dataviewer.getDataLength',
+                        default: 'data length'
+                    }),
+                    blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'getDataIndex',
@@ -254,26 +244,8 @@ class Scratch3DataViewerBlocks {
         };
     }
 
-    connect () {
-        this._device = new DataViewer(this.runtime);
-    }
-
-    dataLoop (args, util) {
-        if (this.dataIndex < this.getDataLength()) {
-            this.dataIndex++;
-        }
-        if (this.dataIndex < this.getDataLength()) {
-            util.startBranch(1, true);
-        }
-        else {
-            this.dataIndex = -1;
-        }
-    }
-
-    getDataIndex (args) {
-        if (args.INDEX < this.getDataLength()) {
-            return this.data[args.INDEX];
-        }
+    getDataLength (args) {
+        return this.data.length;
     }
 
     _getValue (args) {
@@ -282,29 +254,15 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    getValueIndex (args) {
-        switch(args.DATA_TYPE) {
-            case "index":
-                return this._getIndex();
-                break;
-            case "value":
-                return this._getValue();
-                break;
-            default:
-                return "error";
-        }
-    }
-
-    getDataLength (args) {
-        return this.data.length;
-    }
-
     _getIndex (args) {
         if (this.getDataLength() > 0 && this.dataIndex >= 0) {
             return this.dataIndex;
         }
     }
 
+    _mapValue (value, old_min, old_max, new_min, new_max) {
+        return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min);
+    }
 
     _getMean () {
         if (this.getDataLength() > 0) {
@@ -329,22 +287,6 @@ class Scratch3DataViewerBlocks {
             return this.data.reduce(function(a, b) {
                 return Math.max(a, b);
             });
-        }
-    }
-
-    getStatistic (args) {
-        switch(args.FNC) {
-            case "mean":
-                return this._getMean();
-                break;
-            case "min":
-                return this._getMin();
-                break;
-            case "max":
-                return this._getMax();
-                break;
-            default:
-                return "error";
         }
     }
 
@@ -377,38 +319,6 @@ class Scratch3DataViewerBlocks {
     addValueToData (args) {
         if (args.VALUE) {
            this.data.push(Cast.toNumber(args.VALUE));
-        }
-    }
-
-    mapValue (value, old_min, old_max, new_min, new_max) {
-        return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min);
-    }
-
-    mapData (args) {
-        switch(args.DATA_TYPE) {
-            case "index":
-                if (this.getDataLength() > 0) {
-                    return Cast.toNumber(this.mapValue(
-                        this._getIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
-                }
-                break;
-            case "value":
-                if (this.getDataLength() > 0) {
-                    return Cast.toNumber(this.mapValue(
-                         this._getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
-                }
-                break;
-            default:
-                return "error";
-        }
-    }
-
-    changeDataScale (args) {
-        const old_min = this._getMin();
-        const old_max = this._getMax();
-        for (var i = 0; i < this.getDataLength(); i += 1) {
-            this.data[i] = Cast.toNumber(this.mapValue(
-                this.data[i], old_min, old_max, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
         }
     }
 
@@ -482,6 +392,82 @@ class Scratch3DataViewerBlocks {
             });
         }
     }
+
+    dataLoop (args, util) {
+        if (this.dataIndex < this.getDataLength()) {
+            this.dataIndex++;
+        }
+        if (this.dataIndex < this.getDataLength()) {
+            util.startBranch(1, true);
+        }
+        else {
+            this.dataIndex = -1;
+        }
+    }
+
+    getValueIndex (args) {
+        switch(args.DATA_TYPE) {
+            case "index":
+                return this._getIndex();
+                break;
+            case "value":
+                return this._getValue();
+                break;
+            default:
+                return "error";
+        }
+    }
+
+    getStatistic (args) {
+        switch(args.FNC) {
+            case "mean":
+                return this._getMean();
+                break;
+            case "min":
+                return this._getMin();
+                break;
+            case "max":
+                return this._getMax();
+                break;
+            default:
+                return "error";
+        }
+    }
+
+    changeDataScale (args) {
+        const old_min = this._getMin();
+        const old_max = this._getMax();
+        for (var i = 0; i < this.getDataLength(); i += 1) {
+            this.data[i] = Cast.toNumber(this._mapValue(
+                this.data[i], old_min, old_max, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+        }
+    }
+
+    mapData (args) {
+        switch(args.DATA_TYPE) {
+            case "index":
+                if (this.getDataLength() > 0) {
+                    return Cast.toNumber(this._mapValue(
+                        this._getIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                }
+                break;
+            case "value":
+                if (this.getDataLength() > 0) {
+                    return Cast.toNumber(this._mapValue(
+                         this._getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                }
+                break;
+            default:
+                return "error";
+        }
+    }
+
+    getDataIndex (args) {
+        if (args.INDEX < this.getDataLength()) {
+            return this.data[args.INDEX];
+        }
+    }
+
 }
 
 module.exports = Scratch3DataViewerBlocks;

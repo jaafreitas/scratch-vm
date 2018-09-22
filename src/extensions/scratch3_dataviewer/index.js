@@ -116,20 +116,19 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.LOOP,
                 },
                 {
-                    opcode: 'getValue',
+                    opcode: 'getValueIndex',
                     text: formatMessage({
-                        id: 'dataviewer.getValue',
-                        default: 'value'
+                        id: 'dataviewer.getValueIndex',
+                        default: '[DATA_TYPE]'
                     }),
-                    blockType: BlockType.REPORTER //talvez  esses reporter blocks possam ser 1 único em menu (com exceção do data [])
-                },
-                {
-                    opcode: 'getIndex',
-                    text: formatMessage({
-                        id: 'dataviewer.getIndex',
-                        default: 'index'
-                    }),
-                    blockType: BlockType.REPORTER
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        DATA_TYPE: {
+                            type: ArgumentType.STRING,
+                            menu: 'dataType',
+                            defaultValue: 'value'
+                        }
+                    }
                 },
                 {
                     opcode: 'getDataLength',
@@ -277,9 +276,22 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    getValue (args) {
+    _getValue (args) {
         if (this.dataIndex < this.getDataLength()) {
             return this.data[this.dataIndex];
+        }
+    }
+
+    getValueIndex (args) {
+        switch(args.DATA_TYPE) {
+            case "index":
+                return this._getIndex();
+                break;
+            case "value":
+                return this._getValue();
+                break;
+            default:
+                return "error";
         }
     }
 
@@ -287,7 +299,7 @@ class Scratch3DataViewerBlocks {
         return this.data.length;
     }
 
-    getIndex (args) {
+    _getIndex (args) {
         if (this.getDataLength() > 0 && this.dataIndex >= 0) {
             return this.dataIndex;
         }
@@ -377,13 +389,13 @@ class Scratch3DataViewerBlocks {
             case "index":
                 if (this.getDataLength() > 0) {
                     return Cast.toNumber(this.mapValue(
-                        this.getIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                        this._getIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
                 }
                 break;
             case "value":
                 if (this.getDataLength() > 0) {
                     return Cast.toNumber(this.mapValue(
-                         this.getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                         this._getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
                 }
                 break;
             default:

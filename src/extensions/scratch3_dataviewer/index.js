@@ -70,7 +70,7 @@ class Scratch3DataViewerBlocks {
                     opcode: 'readCSVDataFromURL',
                     text: formatMessage({
                         id: 'dataviewer.readCSVDataFromURL',
-                        default: 'read .csv file [URL]: column [COLUMN] starting from line [LINE]'
+                        default: 'read .csv file [URL] column: [COLUMN] starting from line: [LINE]'
                     }),
                     blockType: BlockType.REPORTER,
                     arguments: {
@@ -94,7 +94,7 @@ class Scratch3DataViewerBlocks {
                     opcode: 'readThingSpeakData',
                     text: formatMessage({
                         id: 'dataviewer.readThingSpeakData',
-                        default: 'read ThingSpeak: channel [CHANNEL], field [FIELD]'
+                        default: 'read ThingSpeak channel: [CHANNEL] field: [FIELD]'
                     }),
                     blockType: BlockType.REPORTER,
                     arguments: {

@@ -33,6 +33,12 @@ class _StackFrame {
         this.justReported = null;
 
         /**
+         * The active block that is waiting on a promise.
+         * @type {string}
+         */
+        this.reporting = '';
+
+        /**
          * Persists reported inputs during async block.
          * @type {Object}
          */
@@ -179,6 +185,8 @@ class Thread {
          * @type {?Timer}
          */
         this.warpTimer = null;
+
+        this.justReported = null;
     }
 
     /**
@@ -310,9 +318,16 @@ class Thread {
      * @param {*} value Reported value to push.
      */
     pushReportedValue (value) {
-        const parentStackFrame = this.peekParentStackFrame();
-        if (parentStackFrame !== null) {
-            parentStackFrame.justReported = typeof value === 'undefined' ? null : value;
+        this.justReported = typeof value === 'undefined' ? null : value;
+    }
+
+    /**
+     * Initialize procedure parameters on this stack frame.
+     */
+    initParams () {
+        const stackFrame = this.peekStackFrame();
+        if (stackFrame.params === null) {
+            stackFrame.params = {};
         }
     }
 
@@ -324,9 +339,6 @@ class Thread {
      */
     pushParam (paramName, value) {
         const stackFrame = this.peekStackFrame();
-        if (stackFrame.params === null) {
-            stackFrame.params = {};
-        }
         stackFrame.params[paramName] = value;
     }
 
@@ -344,6 +356,7 @@ class Thread {
             if (frame.params.hasOwnProperty(paramName)) {
                 return frame.params[paramName];
             }
+            return null;
         }
         return null;
     }

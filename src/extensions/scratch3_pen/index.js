@@ -7,6 +7,7 @@ const formatMessage = require('format-message');
 const MathUtil = require('../../util/math-util');
 const RenderedTarget = require('../../sprites/rendered-target');
 const log = require('../../util/log');
+const StageLayering = require('../../engine/stage-layering');
 
 /**
  * Icon svg to be displayed at the left edge of each extension block, encoded as a data URI.
@@ -66,6 +67,7 @@ class Scratch3PenBlocks {
         this._onTargetMoved = this._onTargetMoved.bind(this);
 
         runtime.on('targetWasCreated', this._onTargetCreated);
+        runtime.on('RUNTIME_DISPOSED', this.clear.bind(this));
     }
 
     /**
@@ -87,22 +89,15 @@ class Scratch3PenBlocks {
         };
     }
 
-    /**
-     * Place the pen layer in front of the backdrop but behind everything else.
-     * We should probably handle this somewhere else... somewhere central that knows about pen, backdrop, video, etc.
-     * Maybe it should be in the GUI?
-     * @type {int}
-     */
-    static get PEN_ORDER () {
-        return 1;
-    }
 
     /**
      * The minimum and maximum allowed pen size.
+     * The maximum is twice the diagonal of the stage, so that even an
+     * off-stage sprite can fill it.
      * @type {{min: number, max: number}}
      */
     static get PEN_SIZE_RANGE () {
-        return {min: 1, max: 255};
+        return {min: 1, max: 1200};
     }
 
     /**
@@ -136,8 +131,7 @@ class Scratch3PenBlocks {
     _getPenLayerID () {
         if (this._penSkinId < 0 && this.runtime.renderer) {
             this._penSkinId = this.runtime.renderer.createPenSkin();
-            this._penDrawableId = this.runtime.renderer.createDrawable();
-            this.runtime.renderer.setDrawableOrder(this._penDrawableId, Scratch3PenBlocks.PEN_ORDER);
+            this._penDrawableId = this.runtime.renderer.createDrawable(StageLayering.PEN_LAYER);
             this.runtime.renderer.updateDrawableProperties(this._penDrawableId, {skinId: this._penSkinId});
         }
         return this._penSkinId;
@@ -289,7 +283,11 @@ class Scratch3PenBlocks {
     getInfo () {
         return {
             id: 'pen',
-            name: 'Pen',
+            name: formatMessage({
+                id: 'pen.categoryName',
+                default: 'Pen',
+                description: 'Label for the pen extension category'
+            }),
             blockIconURI: blockIconURI,
             blocks: [
                 {
@@ -479,7 +477,10 @@ class Scratch3PenBlocks {
                 }
             ],
             menus: {
-                colorParam: this._initColorParam()
+                colorParam: {
+                    acceptReporters: true,
+                    items: this._initColorParam()
+                }
             }
         };
     }
@@ -677,7 +678,7 @@ class Scratch3PenBlocks {
         const hueValue = Cast.toNumber(args.HUE);
         const colorValue = hueValue / 2;
         this._setOrChangeColorParam(ColorParam.COLOR, colorValue, penState, false);
-
+        this._setOrChangeColorParam(ColorParam.TRANSPARENCY, 0, penState, false);
         this._legacyUpdatePenColor(penState);
     }
 

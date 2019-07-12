@@ -23,6 +23,7 @@ class Scratch3DataBlocks {
             data_listcontents: this.getListContents,
             data_addtolist: this.addToList,
             data_deleteoflist: this.deleteOfList,
+            data_deletealloflist: this.deleteAllOfList,
             data_insertatlist: this.insertAtList,
             data_replaceitemoflist: this.replaceItemOfList,
             data_itemoflist: this.getItemOfList,
@@ -44,6 +45,10 @@ class Scratch3DataBlocks {
         const variable = util.target.lookupOrCreateVariable(
             args.VARIABLE.id, args.VARIABLE.name);
         variable.value = args.VALUE;
+
+        if (variable.isCloud) {
+            util.ioQuery('cloud', 'requestUpdateVariable', [variable.name, args.VALUE]);
+        }
     }
 
     changeVariableBy (args, util) {
@@ -51,7 +56,12 @@ class Scratch3DataBlocks {
             args.VARIABLE.id, args.VARIABLE.name);
         const castedValue = Cast.toNumber(variable.value);
         const dValue = Cast.toNumber(args.VALUE);
-        variable.value = castedValue + dValue;
+        const newValue = castedValue + dValue;
+        variable.value = newValue;
+
+        if (variable.isCloud) {
+            util.ioQuery('cloud', 'requestUpdateVariable', [variable.name, newValue]);
+        }
     }
 
     changeMonitorVisibility (id, visible) {
@@ -134,6 +144,13 @@ class Scratch3DataBlocks {
         }
         list.value.splice(index - 1, 1);
         list._monitorUpToDate = false;
+    }
+
+    deleteAllOfList (args, util) {
+        const list = util.target.lookupOrCreateList(
+            args.LIST.id, args.LIST.name);
+        list.value = [];
+        return;
     }
 
     insertAtList (args, util) {

@@ -21,7 +21,7 @@ const base = {
             loader: 'babel-loader',
             include: path.resolve(__dirname, 'src'),
             query: {
-                presets: [['env', {targets: {browsers: ['last 3 versions', 'Safari >= 8', 'iOS >= 8']}}]]
+                presets: [['@babel/preset-env', {targets: {browsers: ['last 3 versions', 'Safari >= 8', 'iOS >= 8']}}]]
             }
         },
         {
@@ -69,27 +69,25 @@ module.exports = [
         output: {
             libraryTarget: 'commonjs2',
             path: path.resolve('dist', 'node')
+        },
+        externals: {
+            'decode-html': true,
+            'format-message': true,
+            'htmlparser2': true,
+            'immutable': true,
+            'jszip': true,
+            'minilog': true,
+            'nets': true,
+            'scratch-parser': true,
+            'socket.io-client': true,
+            'text-encoding': true
         }
     }),
     // Playground
     defaultsDeep({}, base, {
         target: 'web',
         entry: {
-            'scratch-vm': './src/index.js',
-            'vendor': [
-                // FPS counter
-                'stats.js/build/stats.min.js',
-                // Syntax highlighter
-                'highlightjs/highlight.pack.min.js',
-                // Scratch Blocks
-                'scratch-blocks/dist/vertical.js',
-                // Audio
-                'scratch-audio',
-                // Storage
-                'scratch-storage',
-                // Renderer
-                'scratch-render'
-            ],
+            'benchmark': './src/playground/benchmark',
             'video-sensing-extension-debug': './src/extensions/scratch3_video_sensing/debug'
         },
         output: {
@@ -111,23 +109,19 @@ module.exports = [
                     loader: 'script-loader'
                 },
                 {
-                    test: require.resolve('highlightjs/highlight.pack.min.js'),
-                    loader: 'script-loader'
-                },
-                {
                     test: require.resolve('scratch-blocks/dist/vertical.js'),
                     loader: 'expose-loader?Blockly'
                 },
                 {
-                    test: require.resolve('scratch-audio'),
+                    test: require.resolve('scratch-audio/src/index.js'),
                     loader: 'expose-loader?AudioEngine'
                 },
                 {
-                    test: require.resolve('scratch-storage'),
+                    test: require.resolve('scratch-storage/src/index.js'),
                     loader: 'expose-loader?ScratchStorage'
                 },
                 {
-                    test: require.resolve('scratch-render'),
+                    test: require.resolve('scratch-render/src/index.js'),
                     loader: 'expose-loader?ScratchRender'
                 }
             ])
@@ -140,11 +134,11 @@ module.exports = [
                 from: 'node_modules/scratch-blocks/media',
                 to: 'media'
             }, {
-                from: 'node_modules/highlightjs/styles/zenburn.css'
-            }, {
                 from: 'node_modules/scratch-storage/dist/web'
             }, {
                 from: 'node_modules/scratch-render/dist/web'
+            }, {
+                from: 'node_modules/scratch-svg-renderer/dist/web'
             }, {
                 from: 'src/playground'
             }])

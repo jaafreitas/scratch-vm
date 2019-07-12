@@ -51,6 +51,8 @@ class Sequencer {
          * @type {!Runtime}
          */
         this.runtime = runtime;
+
+        this.activeThread = null;
     }
 
     /**
@@ -68,13 +70,17 @@ class Sequencer {
     stepThreads () {
         // Work time is 75% of the thread stepping interval.
         const WORK_TIME = 0.75 * this.runtime.currentStepTime;
+        // For compatibility with Scatch 2, update the millisecond clock
+        // on the Runtime once per step (see Interpreter.as in Scratch 2
+        // for original use of `currentMSecs`)
+        this.runtime.updateCurrentMSecs();
         // Start counting toward WORK_TIME.
         this.timer.start();
         // Count of active threads.
         let numActiveThreads = Infinity;
         // Whether `stepThreads` has run through a full single tick.
         let ranFirstTick = false;
-        const doneThreads = this.runtime.threads.map(() => null);
+        const doneThreads = [];
         // Conditions for continuing to stepping threads:
         // 1. We must have threads in the list, and some must be active.
         // 2. Time elapsed must be less than WORK_TIME.
@@ -91,18 +97,17 @@ class Sequencer {
             }
 
             numActiveThreads = 0;
+            let stoppedThread = false;
             // Attempt to run each thread one time.
-            for (let i = 0; i < this.runtime.threads.length; i++) {
-                const activeThread = this.runtime.threads[i];
+            const threads = this.runtime.threads;
+            for (let i = 0; i < threads.length; i++) {
+                const activeThread = this.activeThread = threads[i];
+                // Check if the thread is done so it is not executed.
                 if (activeThread.stack.length === 0 ||
                     activeThread.status === Thread.STATUS_DONE) {
                     // Finished with this thread.
-                    doneThreads[i] = activeThread;
+                    stoppedThread = true;
                     continue;
-                }
-                // A thread was removed, added or this thread was restarted.
-                if (doneThreads[i] !== null) {
-                    doneThreads[i] = null;
                 }
                 if (activeThread.status === Thread.STATUS_YIELD_TICK &&
                     !ranFirstTick) {
@@ -130,6 +135,13 @@ class Sequencer {
                 if (activeThread.status === Thread.STATUS_RUNNING) {
                     numActiveThreads++;
                 }
+                // Check if the thread completed while it just stepped to make
+                // sure we remove it before the next iteration of all threads.
+                if (activeThread.stack.length === 0 ||
+                    activeThread.status === Thread.STATUS_DONE) {
+                    // Finished with this thread.
+                    stoppedThread = true;
+                }
             }
             // We successfully ticked once. Prevents running STATUS_YIELD_TICK
             // threads on the next tick.
@@ -138,28 +150,25 @@ class Sequencer {
             if (this.runtime.profiler !== null) {
                 this.runtime.profiler.stop();
             }
-        }
-        // Filter inactive threads from `this.runtime.threads`.
-        numActiveThreads = 0;
-        for (let i = 0; i < this.runtime.threads.length; i++) {
-            const thread = this.runtime.threads[i];
-            if (doneThreads[i] === null) {
-                this.runtime.threads[numActiveThreads] = thread;
-                numActiveThreads++;
-            }
-        }
-        this.runtime.threads.length = numActiveThreads;
 
-        // Filter undefined and null values from `doneThreads`.
-        let numDoneThreads = 0;
-        for (let i = 0; i < doneThreads.length; i++) {
-            const maybeThread = doneThreads[i];
-            if (maybeThread !== null) {
-                doneThreads[numDoneThreads] = maybeThread;
-                numDoneThreads++;
+            // Filter inactive threads from `this.runtime.threads`.
+            if (stoppedThread) {
+                let nextActiveThread = 0;
+                for (let i = 0; i < this.runtime.threads.length; i++) {
+                    const thread = this.runtime.threads[i];
+                    if (thread.stack.length !== 0 &&
+                        thread.status !== Thread.STATUS_DONE) {
+                        this.runtime.threads[nextActiveThread] = thread;
+                        nextActiveThread++;
+                    } else {
+                        doneThreads.push(thread);
+                    }
+                }
+                this.runtime.threads.length = nextActiveThread;
             }
         }
-        doneThreads.length = numDoneThreads;
+
+        this.activeThread = null;
 
         return doneThreads;
     }
@@ -173,6 +182,12 @@ class Sequencer {
         if (!currentBlockId) {
             // A "null block" - empty branch.
             thread.popStack();
+
+            // Did the null follow a hat block?
+            if (thread.stack.length === 0) {
+                thread.status = Thread.STATUS_DONE;
+                return;
+            }
         }
         // Save the current block ID to notice if we did control flow.
         while ((currentBlockId = thread.peekStack())) {

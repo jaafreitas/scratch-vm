@@ -2,6 +2,7 @@ const RenderedTarget = require('./rendered-target');
 const Blocks = require('../engine/blocks');
 const {loadSoundFromAsset} = require('../import/load-sound');
 const {loadCostumeFromAsset} = require('../import/load-costume');
+const newBlockIds = require('../util/new-block-ids');
 const StringUtil = require('../util/string-util');
 const StageLayering = require('../engine/stage-layering');
 
@@ -18,7 +19,7 @@ class Sprite {
         this.runtime = runtime;
         if (!blocks) {
             // Shared set of blocks for all clones.
-            blocks = new Blocks();
+            blocks = new Blocks(runtime);
         }
         this.blocks = blocks;
         /**
@@ -93,11 +94,10 @@ class Sprite {
     /**
      * Delete a costume by index.
      * @param {number} index Costume index to be deleted
+     * @return {?object} The deleted costume
      */
     deleteCostumeAt (index) {
-        this.costumes_ = this.costumes_
-            .slice(0, index)
-            .concat(this.costumes_.slice(index + 1));
+        return this.costumes.splice(index, 1)[0];
     }
 
     /**
@@ -137,8 +137,14 @@ class Sprite {
 
     duplicate () {
         const newSprite = new Sprite(null, this.runtime);
+        const blocksContainer = this.blocks._blocks;
+        const originalBlocks = Object.keys(blocksContainer).map(key => blocksContainer[key]);
+        const copiedBlocks = JSON.parse(JSON.stringify(originalBlocks));
+        newBlockIds(copiedBlocks);
+        copiedBlocks.forEach(block => {
+            newSprite.blocks.createBlock(block);
+        });
 
-        newSprite.blocks = this.blocks.duplicate();
 
         const allNames = this.runtime.targets.map(t => t.sprite.name);
         newSprite.name = StringUtil.unusedName(this.name, allNames);
@@ -147,15 +153,14 @@ class Sprite {
 
         newSprite.costumes = this.costumes_.map(costume => {
             const newCostume = Object.assign({}, costume);
-            const costumeAsset = this.runtime.storage.get(costume.assetId);
-            assetPromises.push(loadCostumeFromAsset(newCostume, costumeAsset, this.runtime));
+            assetPromises.push(loadCostumeFromAsset(newCostume, this.runtime));
             return newCostume;
         });
 
         newSprite.sounds = this.sounds.map(sound => {
             const newSound = Object.assign({}, sound);
-            const soundAsset = this.runtime.storage.get(sound.assetId);
-            assetPromises.push(loadSoundFromAsset(newSound, soundAsset, this.runtime, newSprite));
+            const soundAsset = sound.asset;
+            assetPromises.push(loadSoundFromAsset(newSound, soundAsset, this.runtime, newSprite.soundBank));
             return newSound;
         });
 

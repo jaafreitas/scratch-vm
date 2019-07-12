@@ -21,7 +21,7 @@ const base = {
             loader: 'babel-loader',
             include: path.resolve(__dirname, 'src'),
             query: {
-                presets: [['env', {targets: {browsers: ['last 3 versions', 'Safari >= 8', 'iOS >= 8']}}]]
+                presets: [['@babel/preset-env', {targets: {browsers: ['last 3 versions', 'Safari >= 8', 'iOS >= 8']}}]]
             }
         },
         {
@@ -72,7 +72,6 @@ module.exports = [
         },
         externals: {
             'decode-html': true,
-            'escape-html': true,
             'format-message': true,
             'htmlparser2': true,
             'immutable': true,
@@ -88,19 +87,7 @@ module.exports = [
     defaultsDeep({}, base, {
         target: 'web',
         entry: {
-            'scratch-vm': './src/index.js',
-            'vendor': [
-                // FPS counter
-                'stats.js/build/stats.min.js',
-                // Scratch Blocks
-                'scratch-blocks/dist/vertical.js',
-                // Audio
-                'scratch-audio',
-                // Storage
-                'scratch-storage',
-                // Renderer
-                'scratch-render'
-            ],
+            'benchmark': './src/playground/benchmark',
             'video-sensing-extension-debug': './src/extensions/scratch3_video_sensing/debug'
         },
         output: {
@@ -150,6 +137,8 @@ module.exports = [
                 from: 'node_modules/scratch-storage/dist/web'
             }, {
                 from: 'node_modules/scratch-render/dist/web'
+            }, {
+                from: 'node_modules/scratch-svg-renderer/dist/web'
             }, {
                 from: 'src/playground'
             }])

@@ -5,8 +5,10 @@ const MonitorRecord = require('./monitor-record');
 const Clone = require('../util/clone');
 const {Map} = require('immutable');
 const BlocksExecuteCache = require('./blocks-execute-cache');
+const BlocksRuntimeCache = require('./blocks-runtime-cache');
 const log = require('../util/log');
 const Variable = require('./variable');
+const getMonitorIdForBlockWithArgs = require('../util/get-monitor-id');
 
 /**
  * @fileoverview
@@ -14,8 +16,16 @@ const Variable = require('./variable');
  * and handle updates from Scratch Blocks events.
  */
 
+/**
+ * Create a block container.
+ * @param {Runtime} runtime The runtime this block container operates within
+ * @param {boolean} optNoGlow Optional flag to indicate that blocks in this container
+ * should not request glows. This does not affect glows when clicking on a block to execute it.
+ */
 class Blocks {
-    constructor () {
+    constructor (runtime, optNoGlow) {
+        this.runtime = runtime;
+
         /**
          * All blocks in the workspace.
          * Keys are block IDs, values are metadata about the block.
@@ -58,9 +68,32 @@ class Blocks {
              * execute.
              * @type {object.<string, object>}
              */
-            _executeCached: {}
+            _executeCached: {},
+
+            /**
+             * A cache of block IDs and targets to start threads on as they are
+             * actively monitored.
+             * @type {Array<{blockId: string, target: Target}>}
+             */
+            _monitored: null,
+
+            /**
+             * A cache of hat opcodes to collection of theads to execute.
+             * @type {object.<string, object>}
+             */
+            scripts: {}
         };
 
+        /**
+         * Flag which indicates that blocks in this container should not glow.
+         * Blocks will still glow when clicked on, but this flag is used to control
+         * whether the blocks in this container can request a glow as part of
+         * a running stack. E.g. the flyout block container and the monitor block container
+         * should not be able to request a glow, but blocks containers belonging to
+         * sprites should.
+         * @type {boolean}
+         */
+        this.forceNoGlow = optNoGlow || false;
     }
 
     /**
@@ -214,11 +247,20 @@ class Blocks {
     }
 
     /**
-     * Get names of parameters for the given procedure.
+     * Get names and ids of parameters for the given procedure.
      * @param {?string} name Name of procedure to query.
      * @return {?Array.<string>} List of param names for a procedure.
      */
     getProcedureParamNamesAndIds (name) {
+        return this.getProcedureParamNamesIdsAndDefaults(name).slice(0, 2);
+    }
+
+    /**
+     * Get names, ids, and defaults of parameters for the given procedure.
+     * @param {?string} name Name of procedure to query.
+     * @return {?Array.<string>} List of param names for a procedure.
+     */
+    getProcedureParamNamesIdsAndDefaults (name) {
         const cachedNames = this._cache.procedureParamNames[name];
         if (typeof cachedNames !== 'undefined') {
             return cachedNames;
@@ -231,7 +273,9 @@ class Blocks {
                 block.mutation.proccode === name) {
                 const names = JSON.parse(block.mutation.argumentnames);
                 const ids = JSON.parse(block.mutation.argumentids);
-                this._cache.procedureParamNames[name] = [names, ids];
+                const defaults = JSON.parse(block.mutation.argumentdefaults);
+
+                this._cache.procedureParamNames[name] = [names, ids, defaults];
                 return this._cache.procedureParamNames[name];
             }
         }
@@ -241,7 +285,7 @@ class Blocks {
     }
 
     duplicate () {
-        const newBlocks = new Blocks();
+        const newBlocks = new Blocks(this.runtime, this.forceNoGlow);
         newBlocks._blocks = Clone.simple(this._blocks);
         newBlocks._scripts = Clone.simple(this._scripts);
         return newBlocks;
@@ -253,23 +297,20 @@ class Blocks {
      * serves as a generic adapter between the blocks, variables, and the
      * runtime interface.
      * @param {object} e Blockly "block" or "variable" event
-     * @param {?Runtime} optRuntime Optional runtime to forward click events to.
      */
-    blocklyListen (e, optRuntime) {
+    blocklyListen (e) {
         // Validate event
         if (typeof e !== 'object') return;
         if (typeof e.blockId !== 'string' && typeof e.varId !== 'string' &&
             typeof e.commentId !== 'string') {
             return;
         }
-        const stage = optRuntime.getTargetForStage();
-        const editingTarget = optRuntime.getEditingTarget();
+        const stage = this.runtime.getTargetForStage();
+        const editingTarget = this.runtime.getEditingTarget();
 
         // UI event: clicked scripts toggle in the runtime.
         if (e.element === 'stackclick') {
-            if (optRuntime) {
-                optRuntime.toggleScript(e.blockId, {stackClick: true});
-            }
+            this.runtime.toggleScript(e.blockId, {stackClick: true});
             return;
         }
 
@@ -289,7 +330,7 @@ class Blocks {
                 element: e.element,
                 name: e.name,
                 value: e.newValue
-            }, optRuntime);
+            });
             break;
         case 'move':
             this.moveBlock({
@@ -302,19 +343,15 @@ class Blocks {
             });
             break;
         case 'dragOutside':
-            if (optRuntime) {
-                optRuntime.emitBlockDragUpdate(e.isOutside);
-            }
+            this.runtime.emitBlockDragUpdate(e.isOutside);
             break;
         case 'endDrag':
-            if (optRuntime) {
-                optRuntime.emitBlockDragUpdate(false /* areBlocksOverGui */);
+            this.runtime.emitBlockDragUpdate(false /* areBlocksOverGui */);
 
-                // Drag blocks onto another sprite
-                if (e.isOutside) {
-                    const newBlocks = adapter(e);
-                    optRuntime.emitBlockEndDrag(newBlocks);
-                }
+            // Drag blocks onto another sprite
+            if (e.isOutside) {
+                const newBlocks = adapter(e);
+                this.runtime.emitBlockEndDrag(newBlocks, e.blockId);
             }
             break;
         case 'delete':
@@ -325,8 +362,8 @@ class Blocks {
                 return;
             }
             // Inform any runtime to forget about glows on this script.
-            if (optRuntime && this._blocks[e.blockId].topLevel) {
-                optRuntime.quietGlow(e.blockId);
+            if (this._blocks[e.blockId].topLevel) {
+                this.runtime.quietGlow(e.blockId);
             }
             this.deleteBlock(e.blockId);
             break;
@@ -338,19 +375,25 @@ class Blocks {
             // into a state where a local var was requested for the stage,
             // create a stage (global) var after checking for name conflicts
             // on all the sprites.
-            if (e.isLocal && editingTarget && !editingTarget.isStage) {
+            if (e.isLocal && editingTarget && !editingTarget.isStage && !e.isCloud) {
                 if (!editingTarget.lookupVariableById(e.varId)) {
                     editingTarget.createVariable(e.varId, e.varName, e.varType);
+                    this.emitProjectChanged();
                 }
             } else {
+                if (stage.lookupVariableById(e.varId)) {
+                    // Do not re-create a variable if it already exists
+                    return;
+                }
                 // Check for name conflicts in all of the targets
-                const allTargets = optRuntime.targets.filter(t => t.isOriginal);
+                const allTargets = this.runtime.targets.filter(t => t.isOriginal);
                 for (const target of allTargets) {
                     if (target.lookupVariableByNameAndType(e.varName, e.varType, true)) {
                         return;
                     }
                 }
-                stage.createVariable(e.varId, e.varName, e.varType);
+                stage.createVariable(e.varId, e.varName, e.varType, e.isCloud);
+                this.emitProjectChanged();
             }
             break;
         case 'var_rename':
@@ -364,22 +407,24 @@ class Blocks {
                 // This is a global variable
                 stage.renameVariable(e.varId, e.newName);
                 // Update all blocks on all targets that use the renamed variable
-                const targets = optRuntime.targets;
+                const targets = this.runtime.targets;
                 for (let i = 0; i < targets.length; i++) {
                     const currTarget = targets[i];
                     currTarget.blocks.updateBlocksAfterVarRename(e.varId, e.newName);
                 }
             }
+            this.emitProjectChanged();
             break;
         case 'var_delete': {
             const target = (editingTarget && editingTarget.variables.hasOwnProperty(e.varId)) ?
                 editingTarget : stage;
             target.deleteVariable(e.varId);
+            this.emitProjectChanged();
             break;
         }
         case 'comment_create':
-            if (optRuntime && optRuntime.getEditingTarget()) {
-                const currTarget = optRuntime.getEditingTarget();
+            if (this.runtime.getEditingTarget()) {
+                const currTarget = this.runtime.getEditingTarget();
                 currTarget.createComment(e.commentId, e.blockId, e.text,
                     e.xy.x, e.xy.y, e.width, e.height, e.minimized);
 
@@ -395,10 +440,11 @@ class Blocks {
                     currTarget.comments[e.commentId].y = e.xy.y;
                 }
             }
+            this.emitProjectChanged();
             break;
         case 'comment_change':
-            if (optRuntime && optRuntime.getEditingTarget()) {
-                const currTarget = optRuntime.getEditingTarget();
+            if (this.runtime.getEditingTarget()) {
+                const currTarget = this.runtime.getEditingTarget();
                 if (!currTarget.comments.hasOwnProperty(e.commentId)) {
                     log.warn(`Cannot change comment with id ${e.commentId} because it does not exist.`);
                     return;
@@ -415,11 +461,12 @@ class Blocks {
                 if (change.hasOwnProperty('text')) {
                     comment.text = change.text;
                 }
+                this.emitProjectChanged();
             }
             break;
         case 'comment_move':
-            if (optRuntime && optRuntime.getEditingTarget()) {
-                const currTarget = optRuntime.getEditingTarget();
+            if (this.runtime.getEditingTarget()) {
+                const currTarget = this.runtime.getEditingTarget();
                 if (currTarget && !currTarget.comments.hasOwnProperty(e.commentId)) {
                     log.warn(`Cannot change comment with id ${e.commentId} because it does not exist.`);
                     return;
@@ -428,11 +475,13 @@ class Blocks {
                 const newCoord = e.newCoordinate_;
                 comment.x = newCoord.x;
                 comment.y = newCoord.y;
+
+                this.emitProjectChanged();
             }
             break;
         case 'comment_delete':
-            if (optRuntime && optRuntime.getEditingTarget()) {
-                const currTarget = optRuntime.getEditingTarget();
+            if (this.runtime.getEditingTarget()) {
+                const currTarget = this.runtime.getEditingTarget();
                 if (!currTarget.comments.hasOwnProperty(e.commentId)) {
                     // If we're in this state, we have probably received
                     // a delete event from a workspace that we switched from
@@ -449,6 +498,8 @@ class Blocks {
                     }
                     delete block.comment;
                 }
+
+                this.emitProjectChanged();
             }
             break;
         }
@@ -464,6 +515,18 @@ class Blocks {
         this._cache.procedureParamNames = {};
         this._cache.procedureDefinitions = {};
         this._cache._executeCached = {};
+        this._cache._monitored = null;
+        this._cache.scripts = {};
+    }
+
+    /**
+     * Emit a project changed event if this is a block container
+     * that can affect the project state.
+     */
+    emitProjectChanged () {
+        if (!this.forceNoGlow) {
+            this.runtime.emitProjectChanged();
+        }
     }
 
     /**
@@ -486,27 +549,39 @@ class Blocks {
         }
 
         this.resetCache();
+
+        // A new block was actually added to the block container,
+        // emit a project changed event
+        this.emitProjectChanged();
     }
 
     /**
      * Block management: change block field values
      * @param {!object} args Blockly change event to be processed
-     * @param {?Runtime} optRuntime Optional runtime to allow changeBlock to change VM state.
      */
-    changeBlock (args, optRuntime) {
+    changeBlock (args) {
         // Validate
         if (['field', 'mutation', 'checkbox'].indexOf(args.element) === -1) return;
-        const block = this._blocks[args.id];
+        let block = this._blocks[args.id];
         if (typeof block === 'undefined') return;
-        const wasMonitored = block.isMonitored;
         switch (args.element) {
         case 'field':
+            // TODO when the field of a monitored block changes,
+            // update the checkbox in the flyout based on whether
+            // a monitor for that current combination of selected parameters exists
+            // e.g.
+            // 1. check (current [v year])
+            // 2. switch dropdown in flyout block to (current [v minute])
+            // 3. the checkbox should become unchecked if we're not already
+            //    monitoring current minute
+
+
             // Update block value
             if (!block.fields[args.name]) return;
             if (args.name === 'VARIABLE' || args.name === 'LIST' ||
                 args.name === 'BROADCAST_OPTION') {
                 // Get variable name using the id in args.value.
-                const variable = optRuntime.getEditingTarget().lookupVariableById(args.value);
+                const variable = this.runtime.getEditingTarget().lookupVariableById(args.value);
                 if (variable) {
                     block.fields[args.name].value = variable.name;
                     block.fields[args.name].id = args.value;
@@ -515,13 +590,21 @@ class Blocks {
                 // Changing the value in a dropdown
                 block.fields[args.name].value = args.value;
 
-                if (!optRuntime){
-                    break;
+                // The selected item in the sensing of block menu needs to change based on the
+                // selected target.  Set it to the first item in the menu list.
+                // TODO: (#1787)
+                if (block.opcode === 'sensing_of_object_menu') {
+                    if (block.fields.OBJECT.value === '_stage_') {
+                        this._blocks[block.parent].fields.PROPERTY.value = 'backdrop #';
+                    } else {
+                        this._blocks[block.parent].fields.PROPERTY.value = 'x position';
+                    }
+                    this.runtime.requestBlocksUpdate();
                 }
 
                 const flyoutBlock = block.shadow && block.parent ? this._blocks[block.parent] : block;
                 if (flyoutBlock.isMonitored) {
-                    optRuntime.requestUpdateMonitor(Map({
+                    this.runtime.requestUpdateMonitor(Map({
                         id: flyoutBlock.id,
                         params: this._getBlockParams(flyoutBlock)
                     }));
@@ -532,36 +615,61 @@ class Blocks {
             block.mutation = mutationAdapter(args.value);
             break;
         case 'checkbox': {
-            block.isMonitored = args.value;
-            if (!optRuntime) {
-                break;
+            // A checkbox usually has a one to one correspondence with the monitor
+            // block but in the case of monitored reporters that have arguments,
+            // map the old id to a new id, creating a new monitor block if necessary
+            if (block.fields && Object.keys(block.fields).length > 0 &&
+                block.opcode !== 'data_variable' && block.opcode !== 'data_listcontents') {
+
+                // This block has an argument which needs to get separated out into
+                // multiple monitor blocks with ids based on the selected argument
+                const newId = getMonitorIdForBlockWithArgs(block.id, block.fields);
+                // Note: we're not just constantly creating a longer and longer id everytime we check
+                // the checkbox because we're using the id of the block in the flyout as the base
+
+                // check if a block with the new id already exists, otherwise create
+                let newBlock = this.runtime.monitorBlocks.getBlock(newId);
+                if (!newBlock) {
+                    newBlock = JSON.parse(JSON.stringify(block));
+                    newBlock.id = newId;
+                    this.runtime.monitorBlocks.createBlock(newBlock);
+                }
+
+                block = newBlock; // Carry on through the rest of this code with newBlock
             }
+
+            const wasMonitored = block.isMonitored;
+            block.isMonitored = args.value;
 
             // Variable blocks may be sprite specific depending on the owner of the variable
             let isSpriteLocalVariable = false;
             if (block.opcode === 'data_variable') {
-                isSpriteLocalVariable = !optRuntime.getEditingTarget().isStage &&
-                    optRuntime.getEditingTarget().variables[block.fields.VARIABLE.id];
+                isSpriteLocalVariable = !(this.runtime.getTargetForStage().variables[block.fields.VARIABLE.id]);
             } else if (block.opcode === 'data_listcontents') {
-                isSpriteLocalVariable = !optRuntime.getEditingTarget().isStage &&
-                    optRuntime.getEditingTarget().variables[block.fields.LIST.id];
+                isSpriteLocalVariable = !(this.runtime.getTargetForStage().variables[block.fields.LIST.id]);
             }
 
-
             const isSpriteSpecific = isSpriteLocalVariable ||
-                (optRuntime.monitorBlockInfo.hasOwnProperty(block.opcode) &&
-                optRuntime.monitorBlockInfo[block.opcode].isSpriteSpecific);
-            block.targetId = isSpriteSpecific ? optRuntime.getEditingTarget().id : null;
+                (this.runtime.monitorBlockInfo.hasOwnProperty(block.opcode) &&
+                this.runtime.monitorBlockInfo[block.opcode].isSpriteSpecific);
+            if (isSpriteSpecific) {
+                // If creating a new sprite specific monitor, the only possible target is
+                // the current editing one b/c you cannot dynamically create monitors.
+                // Also, do not change the targetId if it has already been assigned
+                block.targetId = block.targetId || this.runtime.getEditingTarget().id;
+            } else {
+                block.targetId = null;
+            }
 
             if (wasMonitored && !block.isMonitored) {
-                optRuntime.requestHideMonitor(block.id);
+                this.runtime.requestHideMonitor(block.id);
             } else if (!wasMonitored && block.isMonitored) {
                 // Tries to show the monitor for specified block. If it doesn't exist, add the monitor.
-                if (!optRuntime.requestShowMonitor(block.id)) {
-                    optRuntime.requestAddMonitor(MonitorRecord({
+                if (!this.runtime.requestShowMonitor(block.id)) {
+                    this.runtime.requestAddMonitor(MonitorRecord({
                         id: block.id,
                         targetId: block.targetId,
-                        spriteName: block.targetId ? optRuntime.getTargetById(block.targetId).getName() : null,
+                        spriteName: block.targetId ? this.runtime.getTargetById(block.targetId).getName() : null,
                         opcode: block.opcode,
                         params: this._getBlockParams(block),
                         // @todo(vm#565) for numerical values with decimals, some countries use comma
@@ -573,6 +681,8 @@ class Blocks {
             break;
         }
         }
+
+        this.emitProjectChanged();
 
         this.resetCache();
     }
@@ -586,10 +696,19 @@ class Blocks {
             return;
         }
 
+        const block = this._blocks[e.id];
+        // Track whether a change actually occurred
+        // ignoring changes like routine re-positioning
+        // of a block when loading a workspace
+        let didChange = false;
+
         // Move coordinate changes.
         if (e.newCoordinate) {
-            this._blocks[e.id].x = e.newCoordinate.x;
-            this._blocks[e.id].y = e.newCoordinate.y;
+
+            didChange = (block.x !== e.newCoordinate.x) || (block.y !== e.newCoordinate.y);
+
+            block.x = e.newCoordinate.x;
+            block.y = e.newCoordinate.y;
         }
 
         // Remove from any old parent.
@@ -604,9 +723,10 @@ class Blocks {
                 oldParent.next = null;
             }
             this._blocks[e.id].parent = null;
+            didChange = true;
         }
 
-        // Has the block become a top-level block?
+        // Is this block a top-level block?
         if (typeof e.newParent === 'undefined') {
             this._addScript(e.id);
         } else {
@@ -623,6 +743,12 @@ class Blocks {
                 if (this._blocks[e.newParent].inputs.hasOwnProperty(e.newInput)) {
                     oldShadow = this._blocks[e.newParent].inputs[e.newInput].shadow;
                 }
+
+                // If the block being attached is itself a shadow, make sure to set
+                // both block and shadow to that blocks ID. This happens when adding
+                // inputs to a custom procedure.
+                if (this._blocks[e.id].shadow) oldShadow = e.id;
+
                 this._blocks[e.newParent].inputs[e.newInput] = {
                     name: e.newInput,
                     block: e.id,
@@ -630,8 +756,11 @@ class Blocks {
                 };
             }
             this._blocks[e.id].parent = e.newParent;
+            didChange = true;
         }
         this.resetCache();
+
+        if (didChange) this.emitProjectChanged();
     }
 
 
@@ -640,12 +769,23 @@ class Blocks {
      * @param {!object} runtime Runtime to run all blocks in.
      */
     runAllMonitored (runtime) {
-        Object.keys(this._blocks).forEach(blockId => {
-            if (this.getBlock(blockId).isMonitored) {
-                const targetId = this.getBlock(blockId).targetId;
-                runtime.addMonitorScript(blockId, targetId ? runtime.getTargetById(targetId) : null);
-            }
-        });
+        if (this._cache._monitored === null) {
+            this._cache._monitored = Object.keys(this._blocks)
+                .filter(blockId => this.getBlock(blockId).isMonitored)
+                .map(blockId => {
+                    const targetId = this.getBlock(blockId).targetId;
+                    return {
+                        blockId,
+                        target: targetId ? runtime.getTargetById(targetId) : null
+                    };
+                });
+        }
+
+        const monitored = this._cache._monitored;
+        for (let i = 0; i < monitored.length; i++) {
+            const {blockId, target} = monitored[i];
+            runtime.addMonitorScript(blockId, target);
+        }
     }
 
     /**
@@ -688,6 +828,7 @@ class Blocks {
         delete this._blocks[blockId];
 
         this.resetCache();
+        this.emitProjectChanged();
     }
 
     /**
@@ -696,11 +837,12 @@ class Blocks {
      * @param {Array<object>} optBlocks Optional list of blocks to constrain the search to.
      * This is useful for getting variable/list references for a stack of blocks instead
      * of all blocks on the workspace
+     * @param {?boolean} optIncludeBroadcast Optional whether to include broadcast fields.
      * @return {object} A map of variable ID to a list of all variable references
      * for that ID. A variable reference contains the field referencing that variable
      * and also the type of the variable being referenced.
      */
-    getAllVariableAndListReferences (optBlocks) {
+    getAllVariableAndListReferences (optBlocks, optIncludeBroadcast) {
         const blocks = optBlocks ? optBlocks : this._blocks;
         const allReferences = Object.create(null);
         for (const blockId in blocks) {
@@ -712,6 +854,9 @@ class Blocks {
             } else if (blocks[blockId].fields.LIST) {
                 varOrListField = blocks[blockId].fields.LIST;
                 varType = Variable.LIST_TYPE;
+            } else if (optIncludeBroadcast && blocks[blockId].fields.BROADCAST_OPTION) {
+                varOrListField = blocks[blockId].fields.BROADCAST_OPTION;
+                varType = Variable.BROADCAST_MESSAGE_TYPE;
             }
             if (varOrListField) {
                 const currVarId = varOrListField.id;
@@ -890,6 +1035,10 @@ class Blocks {
      */
     blockToXML (blockId, comments) {
         const block = this._blocks[blockId];
+        // block should exist, but currently some blocks' next property point
+        // to a blockId for non-existent blocks. Until we track down that behavior,
+        // this early exit allows the project to load.
+        if (!block) return;
         // Encode properties of this block.
         const tagName = (block.shadow) ? 'shadow' : 'block';
         let xmlString =
@@ -967,8 +1116,14 @@ class Blocks {
         let mutationString = `<${mutation.tagName}`;
         for (const prop in mutation) {
             if (prop === 'children' || prop === 'tagName') continue;
-            const mutationValue = (typeof mutation[prop] === 'string') ?
+            let mutationValue = (typeof mutation[prop] === 'string') ?
                 xmlEscape(mutation[prop]) : mutation[prop];
+
+            // Handle dynamic extension blocks
+            if (prop === 'blockInfo') {
+                mutationValue = xmlEscape(JSON.stringify(mutation[prop]));
+            }
+
             mutationString += ` ${prop}="${mutationValue}"`;
         }
         mutationString += '>';
@@ -1072,6 +1227,37 @@ BlocksExecuteCache.getCached = function (blocks, blockId, CacheType) {
 
     blocks._cache._executeCached[blockId] = cached;
     return cached;
+};
+
+/**
+ * Cache class constructor for runtime. Used to consider what threads should
+ * start based on hat data.
+ * @type {function}
+ */
+const RuntimeScriptCache = BlocksRuntimeCache._RuntimeScriptCache;
+
+/**
+ * Get an array of scripts from a block container prefiltered to match opcode.
+ * @param {Blocks} blocks - Container of blocks
+ * @param {string} opcode - Opcode to filter top blocks by
+ * @returns {Array.<RuntimeScriptCache>} - Array of RuntimeScriptCache cache
+ *   objects
+ */
+BlocksRuntimeCache.getScripts = function (blocks, opcode) {
+    let scripts = blocks._cache.scripts[opcode];
+    if (!scripts) {
+        scripts = blocks._cache.scripts[opcode] = [];
+
+        const allScripts = blocks._scripts;
+        for (let i = 0; i < allScripts.length; i++) {
+            const topBlockId = allScripts[i];
+            const block = blocks.getBlock(topBlockId);
+            if (block.opcode === opcode) {
+                scripts.push(new RuntimeScriptCache(blocks, topBlockId));
+            }
+        }
+    }
+    return scripts;
 };
 
 module.exports = Blocks;

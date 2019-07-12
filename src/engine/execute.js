@@ -63,11 +63,13 @@ const handleReport = function (resolvedValue, sequencer, thread, blockCached, la
             // true and used to be false, or the stack was activated explicitly
             // via stack click
             if (!thread.stackClick) {
-                const oldEdgeValue = sequencer.runtime.updateEdgeActivatedValue(
+                const hasOldEdgeValue = thread.target.hasEdgeActivatedValue(currentBlockId);
+                const oldEdgeValue = thread.target.updateEdgeActivatedValue(
                     currentBlockId,
                     resolvedValue
                 );
-                const edgeWasActivated = !oldEdgeValue && resolvedValue;
+
+                const edgeWasActivated = hasOldEdgeValue ? (!oldEdgeValue && resolvedValue) : resolvedValue;
                 if (!edgeWasActivated) {
                     sequencer.retireThread(thread);
                 }
@@ -110,8 +112,8 @@ const handlePromise = (primitiveReportedValue, sequencer, thread, blockCached, l
     // Promise handlers
     primitiveReportedValue.then(resolvedValue => {
         handleReport(resolvedValue, sequencer, thread, blockCached, lastOperation);
-        // If its a command block.
-        if (lastOperation && typeof resolvedValue === 'undefined') {
+        // If it's a command block or a top level reporter in a stackClick.
+        if (lastOperation) {
             let stackFrame;
             let nextBlockId;
             do {
@@ -475,6 +477,14 @@ const execute = function (sequencer, thread) {
 
         // Fields are set during opCached initialization.
 
+        // Blocks should glow when a script is starting,
+        // not after it has finished (see #1404).
+        // Only blocks in blockContainers that don't forceNoGlow
+        // should request a glow.
+        if (!blockContainer.forceNoGlow) {
+            thread.requestScriptGlowInFrame = true;
+        }
+
         // Inputs are set during previous steps in the loop.
 
         let primitiveReportedValue = null;
@@ -530,13 +540,6 @@ const execute = function (sequencer, thread) {
             break;
         } else if (thread.status === Thread.STATUS_RUNNING) {
             if (lastOperation) {
-                if (typeof primitiveReportedValue === 'undefined') {
-                    // No value reported - potentially a command block.
-                    // Edge-activated hats don't request a glow; all
-                    // commands do.
-                    thread.requestScriptGlowInFrame = true;
-                }
-
                 handleReport(primitiveReportedValue, sequencer, thread, opCached, lastOperation);
             } else {
                 // By definition a block that is not last in the list has a

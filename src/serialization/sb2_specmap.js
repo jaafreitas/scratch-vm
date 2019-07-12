@@ -503,6 +503,21 @@ const specMap = {
             }
         ]
     },
+    'drum:duration:elapsed:from:': {
+        opcode: 'music_midiPlayDrumForBeats',
+        argMap: [
+            {
+                type: 'input',
+                inputOp: 'math_number',
+                inputName: 'DRUM'
+            },
+            {
+                type: 'input',
+                inputOp: 'math_number',
+                inputName: 'BEATS'
+            }
+        ]
+    },
     'rest:elapsed:from:': {
         opcode: 'music_restForBeats',
         argMap: [
@@ -518,7 +533,7 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
-                inputOp: 'math_number',
+                inputOp: 'note',
                 inputName: 'NOTE'
             },
             {
@@ -534,6 +549,16 @@ const specMap = {
             {
                 type: 'input',
                 inputOp: 'music_menu_INSTRUMENT',
+                inputName: 'INSTRUMENT'
+            }
+        ]
+    },
+    'midiInstrument:': {
+        opcode: 'music_midiSetInstrument',
+        argMap: [
+            {
+                type: 'input',
+                inputOp: 'math_number',
                 inputName: 'INSTRUMENT'
             }
         ]
@@ -803,6 +828,7 @@ const specMap = {
             },
             {
                 type: 'input',
+                inputOp: 'substack',
                 inputName: 'SUBSTACK'
             }
         ]
@@ -812,6 +838,7 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
+                inputOp: 'substack',
                 inputName: 'SUBSTACK'
             }
         ]
@@ -821,10 +848,12 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
+                inputOp: 'boolean',
                 inputName: 'CONDITION'
             },
             {
                 type: 'input',
+                inputOp: 'substack',
                 inputName: 'SUBSTACK'
             }
         ]
@@ -834,14 +863,17 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
+                inputOp: 'boolean',
                 inputName: 'CONDITION'
             },
             {
                 type: 'input',
+                inputOp: 'substack',
                 inputName: 'SUBSTACK'
             },
             {
                 type: 'input',
+                inputOp: 'substack',
                 inputName: 'SUBSTACK2'
             }
         ]
@@ -851,6 +883,7 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
+                inputOp: 'boolean',
                 inputName: 'CONDITION'
             }
         ]
@@ -860,10 +893,12 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
+                inputOp: 'boolean',
                 inputName: 'CONDITION'
             },
             {
                 type: 'input',
+                inputOp: 'substack',
                 inputName: 'SUBSTACK'
             }
         ]
@@ -873,10 +908,12 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
+                inputOp: 'boolean',
                 inputName: 'CONDITION'
             },
             {
                 type: 'input',
+                inputOp: 'substack',
                 inputName: 'SUBSTACK'
             }
         ]
@@ -895,6 +932,7 @@ const specMap = {
             },
             {
                 type: 'input',
+                inputOp: 'substack',
                 inputName: 'SUBSTACK'
             }
         ]
@@ -948,6 +986,7 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
+                inputOp: 'substack',
                 inputName: 'SUBSTACK'
             }
         ]
@@ -1110,9 +1149,8 @@ const specMap = {
         opcode: 'sensing_current',
         argMap: [
             {
-                type: 'input',
-                inputOp: 'sensing_currentmenu',
-                inputName: 'CURRENTMENU'
+                type: 'field',
+                fieldName: 'CURRENTMENU'
             }
         ]
     },
@@ -1256,10 +1294,12 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
+                inputOp: 'boolean',
                 inputName: 'OPERAND1'
             },
             {
                 type: 'input',
+                inputOp: 'boolean',
                 inputName: 'OPERAND2'
             }
         ]
@@ -1269,10 +1309,12 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
+                inputOp: 'boolean',
                 inputName: 'OPERAND1'
             },
             {
                 type: 'input',
+                inputOp: 'boolean',
                 inputName: 'OPERAND2'
             }
         ]
@@ -1282,6 +1324,7 @@ const specMap = {
         argMap: [
             {
                 type: 'input',
+                inputOp: 'boolean',
                 inputName: 'OPERAND'
             }
         ]
@@ -1622,11 +1665,11 @@ const addExtensionOp = function (sb2Extension, sb2Opcode, blockInfo) {
 const weDo2 = 'LEGO WeDo 2.0';
 
 addExtensionOp(weDo2, 'motorOnFor', {
-    opcode: 'wedo2.motorOnFor',
+    opcode: 'wedo2_motorOnFor',
     argMap: [
         {
             type: 'input',
-            inputOp: 'wedo2.menu.motorID',
+            inputOp: 'wedo2_menu_MOTOR_ID',
             inputName: 'MOTOR_ID'
         },
         {
@@ -1638,33 +1681,33 @@ addExtensionOp(weDo2, 'motorOnFor', {
 });
 
 addExtensionOp(weDo2, 'motorOn', {
-    opcode: 'wedo2.motorOn',
+    opcode: 'wedo2_motorOn',
     argMap: [
         {
             type: 'input',
-            inputOp: 'wedo2.menu.motorID',
+            inputOp: 'wedo2_menu_MOTOR_ID',
             inputName: 'MOTOR_ID'
         }
     ]
 });
 
 addExtensionOp(weDo2, 'motorOff', {
-    opcode: 'wedo2.motorOff',
+    opcode: 'wedo2_motorOff',
     argMap: [
         {
             type: 'input',
-            inputOp: 'wedo2.menu.motorID',
+            inputOp: 'wedo2_menu_MOTOR_ID',
             inputName: 'MOTOR_ID'
         }
     ]
 });
 
 addExtensionOp(weDo2, 'startMotorPower', {
-    opcode: 'wedo2.startMotorPower',
+    opcode: 'wedo2_startMotorPower',
     argMap: [
         {
             type: 'input',
-            inputOp: 'wedo2.menu.motorID',
+            inputOp: 'wedo2_menu_MOTOR_ID',
             inputName: 'MOTOR_ID'
         },
         {
@@ -1676,23 +1719,23 @@ addExtensionOp(weDo2, 'startMotorPower', {
 });
 
 addExtensionOp(weDo2, 'setMotorDirection', {
-    opcode: 'wedo2.setMotorDirection',
+    opcode: 'wedo2_setMotorDirection',
     argMap: [
         {
             type: 'input',
-            inputOp: 'wedo2.menu.motorID',
+            inputOp: 'wedo2_menu_MOTOR_ID',
             inputName: 'MOTOR_ID'
         },
         {
             type: 'input',
-            inputOp: 'wedo2.menu.motorDirection',
-            inputName: 'DIRECTION'
+            inputOp: 'wedo2_menu_MOTOR_DIRECTION',
+            inputName: 'MOTOR_DIRECTION'
         }
     ]
 });
 
 addExtensionOp(weDo2, 'setLED', {
-    opcode: 'wedo2.setLightHue',
+    opcode: 'wedo2_setLightHue',
     argMap: [
         {
             type: 'input',
@@ -1703,7 +1746,7 @@ addExtensionOp(weDo2, 'setLED', {
 });
 
 addExtensionOp(weDo2, 'playNote', {
-    opcode: 'wedo2.playNoteFor',
+    opcode: 'wedo2_playNoteFor',
     argMap: [
         {
             type: 'input',
@@ -1719,11 +1762,11 @@ addExtensionOp(weDo2, 'playNote', {
 });
 
 addExtensionOp(weDo2, 'whenDistance', {
-    opcode: 'wedo2.whenDistance',
+    opcode: 'wedo2_whenDistance',
     argMap: [
         {
             type: 'input',
-            inputOp: 'wedo2.menu.lessMore',
+            inputOp: 'wedo2_menu_OP',
             inputName: 'OP'
         },
         {
@@ -1735,39 +1778,39 @@ addExtensionOp(weDo2, 'whenDistance', {
 });
 
 addExtensionOp(weDo2, 'whenTilted', {
-    opcode: 'wedo2.whenTilted',
+    opcode: 'wedo2_whenTilted',
     argMap: [
         {
             type: 'input',
-            inputOp: 'wedo2.menu.tiltDirectionAny',
-            inputName: 'DIRECTION'
+            inputOp: 'wedo2_menu_TILT_DIRECTION_ANY',
+            inputName: 'TILT_DIRECTION_ANY'
         }
     ]
 });
 
 addExtensionOp(weDo2, 'getDistance', {
-    opcode: 'wedo2.getDistance',
+    opcode: 'wedo2_getDistance',
     argMap: []
 });
 
 addExtensionOp(weDo2, 'isTilted', {
-    opcode: 'wedo2.isTilted',
+    opcode: 'wedo2_isTilted',
     argMap: [
         {
             type: 'input',
-            inputOp: 'wedo2.menu.tiltDirectionAny',
-            inputName: 'DIRECTION'
+            inputOp: 'wedo2_menu_TILT_DIRECTION_ANY',
+            inputName: 'TILT_DIRECTION_ANY'
         }
     ]
 });
 
 addExtensionOp(weDo2, 'getTilt', {
-    opcode: 'wedo2.getTiltAngle',
+    opcode: 'wedo2_getTiltAngle',
     argMap: [
         {
             type: 'input',
-            inputOp: 'wedo2.menu.tiltDirection',
-            inputName: 'DIRECTION'
+            inputOp: 'wedo2_menu_TILT_DIRECTION',
+            inputName: 'TILT_DIRECTION'
         }
     ]
 });

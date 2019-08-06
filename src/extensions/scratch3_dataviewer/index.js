@@ -193,7 +193,7 @@ class Scratch3DataViewerBlocks {
                     arguments: {
                         INDEX: {
                             type: ArgumentType.NUMBER,
-                            defaultValue: 0
+                            defaultValue: 1
                         }
                     }
                 }
@@ -256,9 +256,16 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    getIndex (args) {
+    _getInternalIndex (args) {
         if (this.getDataLength() > 0 && this.dataIndex >= 0) {
             return this.dataIndex;
+        }
+    }
+
+    getIndex (args) {
+        const internalIndex = this._getInternalIndex();
+        if (internalIndex) {
+            return internalIndex + 1;
         }
     }
 
@@ -320,11 +327,11 @@ class Scratch3DataViewerBlocks {
 
     addValueToData (args) {
         if (args.VALUE) {
-            if (!this.data) {
+            if (this.getDataLength() > 0) {
+                this.data.push(Cast.toNumber(args.VALUE));
+            } else {
                 args.DATA = args.VALUE;
                 this.setData(args);
-            } else {
-                this.data.push(Cast.toNumber(args.VALUE));
             }
         }
     }
@@ -442,7 +449,7 @@ class Scratch3DataViewerBlocks {
             case "index":
                 if (this.getDataLength() > 0) {
                     return Cast.toNumber(this._mapValue(
-                        this.getIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                        this._getInternalIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
                 }
                 break;
             case "value":
@@ -457,8 +464,8 @@ class Scratch3DataViewerBlocks {
     }
 
     getDataIndex (args) {
-        if (args.INDEX < this.getDataLength()) {
-            return this.data[args.INDEX];
+        if (args.INDEX > 0 && args.INDEX <= this.getDataLength()) {
+            return this.data[args.INDEX - 1];
         }
     }
 

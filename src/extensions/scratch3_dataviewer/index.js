@@ -104,19 +104,20 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.LOOP,
                 },
                 {
-                    opcode: 'getValueIndex',
+                    opcode: 'getValue',
                     text: formatMessage({
-                        id: 'dataviewer.getValueIndex',
-                        default: '[DATA_TYPE]'
+                        id: 'dataviewer.getValue',
+                        default: 'data'
                     }),
-                    blockType: BlockType.REPORTER,
-                    arguments: {
-                        DATA_TYPE: {
-                            type: ArgumentType.STRING,
-                            menu: 'dataType',
-                            defaultValue: 'value'
-                        }
-                    }
+                    blockType: BlockType.REPORTER
+                },
+                {
+                    opcode: 'getIndex',
+                    text: formatMessage({
+                        id: 'dataviewer.getIndex',
+                        default: 'index'
+                    }),
+                    blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'getStatistic',
@@ -249,13 +250,13 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    _getValue (args) {
+    getValue (args) {
         if (this.dataIndex < this.getDataLength()) {
             return this.data[this.dataIndex];
         }
     }
 
-    _getIndex (args) {
+    getIndex (args) {
         if (this.getDataLength() > 0 && this.dataIndex >= 0) {
             return this.dataIndex;
         }
@@ -411,19 +412,6 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    getValueIndex (args) {
-        switch(args.DATA_TYPE) {
-            case "index":
-                return this._getIndex();
-                break;
-            case "value":
-                return this._getValue();
-                break;
-            default:
-                return "error";
-        }
-    }
-
     getStatistic (args) {
         switch(args.FNC) {
             case "mean":
@@ -454,13 +442,13 @@ class Scratch3DataViewerBlocks {
             case "index":
                 if (this.getDataLength() > 0) {
                     return Cast.toNumber(this._mapValue(
-                        this._getIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                        this.getIndex(), 0, this.getDataLength() - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
                 }
                 break;
             case "value":
                 if (this.getDataLength() > 0) {
                     return Cast.toNumber(this._mapValue(
-                         this._getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                         this.getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
                 }
                 break;
             default:

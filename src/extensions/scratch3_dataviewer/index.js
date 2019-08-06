@@ -251,8 +251,10 @@ class Scratch3DataViewerBlocks {
     }
 
     getValue (args) {
-        if (this.dataIndex < this.getDataLength()) {
+        if (this.getDataLength() > 0 && this.dataIndex >= 0) {
             return this.data[this.dataIndex];
+        } else {
+            return '';
         }
     }
 
@@ -266,6 +268,8 @@ class Scratch3DataViewerBlocks {
         const internalIndex = this._getInternalIndex();
         if (internalIndex) {
             return internalIndex + 1;
+        } else {
+            return '';
         }
     }
 
@@ -330,7 +334,7 @@ class Scratch3DataViewerBlocks {
             if (this.getDataLength() > 0) {
                 this.data.push(Cast.toNumber(args.VALUE));
             } else {
-                args.DATA = args.VALUE;
+                args.DATA = Cast.toString(args.VALUE);
                 this.setData(args);
             }
         }

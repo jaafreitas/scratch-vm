@@ -266,7 +266,7 @@ class Scratch3DataViewerBlocks {
 
     getIndex (args) {
         const internalIndex = this._getInternalIndex();
-        if (internalIndex) {
+        if (internalIndex >= 0) {
             return internalIndex + 1;
         } else {
             return '';

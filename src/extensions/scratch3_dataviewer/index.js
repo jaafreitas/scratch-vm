@@ -22,10 +22,7 @@ class Scratch3DataViewerBlocks {
     getInfo () {
         return {
             id: 'dataviewer',
-            name: formatMessage({
-                id: 'dataviewer.categoryName',
-                default: 'Data Viewer'
-            }),
+            name: 'Data Viewer',
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
 
@@ -245,7 +242,11 @@ class Scratch3DataViewerBlocks {
     }
 
     getDataLength (args) {
-        return this.data.length;
+        if (this.data) {
+            return this.data.length;
+        } else {
+            return 0;
+        }
     }
 
     _getValue (args) {
@@ -318,7 +319,12 @@ class Scratch3DataViewerBlocks {
 
     addValueToData (args) {
         if (args.VALUE) {
-           this.data.push(Cast.toNumber(args.VALUE));
+            if (!this.data) {
+                args.DATA = args.VALUE;
+                this.setData(args);
+            } else {
+                this.data.push(Cast.toNumber(args.VALUE));
+            }
         }
     }
 

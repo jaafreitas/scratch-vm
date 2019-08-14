@@ -22,10 +22,13 @@ class Scratch3DataViewerBlocks {
     getInfo () {
         return {
             id: 'dataviewer',
-            name: 'Data Viewer',
+            name: formatMessage({
+                id: 'dataviewer.categoryName',
+                default: 'Data Viewer',
+                description: 'Label for the Data Viewer extension category'
+            }),
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
-
             blocks: [
                 {
                     opcode: 'setData',

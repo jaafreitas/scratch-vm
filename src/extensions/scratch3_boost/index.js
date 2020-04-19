@@ -93,12 +93,23 @@ const BoostPortFeedback = {
  * @readonly
  * @enum {number}
  */
-const BoostPort = {
+
+const BoostPort10000223OrOlder = {
     A: 55,
     B: 56,
     C: 1,
     D: 2
 };
+
+const BoostPort10000224OrNewer = {
+    A: 0,
+    B: 1,
+    C: 2,
+    D: 3
+};
+
+// Set default port mapping to support the newer firmware
+let BoostPort = BoostPort10000224OrNewer;
 
 /**
  * Ids for each color sensor value used by the extension.
@@ -155,11 +166,51 @@ const BoostMessage = {
 };
 
 /**
+ * Enum for Hub Property Types
+ * @readonly
+ * @enum {number}
+ */
+
+const BoostHubProperty = {
+    ADVERTISEMENT_NAME: 0x01,
+    BUTTON: 0x02,
+    FW_VERSION: 0x03,
+    HW_VERSION: 0x04,
+    RSSI: 0x05,
+    BATTERY_VOLTAGE: 0x06,
+    BATTERY_TYPE: 0x07,
+    MANUFACTURER_NAME: 0x08,
+    RADIO_FW_VERSION: 0x09,
+    LEGO_WP_VERSION: 0x0A,
+    SYSTEM_TYPE_ID: 0x0B,
+    HW_NETWORK_ID: 0x0C,
+    PRIMARY_MAC: 0x0D,
+    SECONDARY_MAC: 0x0E,
+    HW_NETWORK_FAMILY: 0x0F
+};
+
+/**
+ * Enum for Hub Property Operations
+ * @readonly
+ * @enum {number}
+ */
+
+const BoostHubPropertyOperation = {
+    SET: 0x01,
+    ENABLE_UPDATES: 0x02,
+    DISABLE_UPDATES: 0x03,
+    RESET: 0x04,
+    REQUEST_UPDATE: 0x05,
+    UPDATE: 0x06
+};
+
+/**
  * Enum for Motor Subcommands (for 0x81)
  * @readonly
  * @enum {number}
  */
 const BoostOutputSubCommand = {
+    START_POWER: 0x01,
     START_POWER_PAIR: 0x02,
     SET_ACC_TIME: 0x05,
     SET_DEC_TIME: 0x06,
@@ -541,12 +592,10 @@ class BoostMotor {
     turnOff (useLimiter = true) {
         const cmd = this._parent.generateOutputCommand(
             this._index,
-            BoostOutputExecution.EXECUTE_IMMEDIATELY ^ BoostOutputExecution.COMMAND_FEEDBACK,
-            BoostOutputSubCommand.START_SPEED,
+            BoostOutputExecution.EXECUTE_IMMEDIATELY,
+            BoostOutputSubCommand.START_POWER,
             [
-                BoostMotorEndState.FLOAT,
-                BoostMotorEndState.FLOAT,
-                BoostMotorProfile.DO_NOT_USE
+                BoostMotorEndState.FLOAT
             ]
         );
 
@@ -800,13 +849,13 @@ class Boost {
         }
         this._ble = new BLE(this._runtime, this._extensionId, {
             filters: [{
-                services: [BoostBLE.service]/* ,
+                services: [BoostBLE.service],
                 manufacturerData: {
-                    0: {
-                        dataPrefix: [0x97, 0x03, 0x00, 0x40],
-                        mask: [0xFF, 0xFF, 0, 0xFF]
+                    0x0397: {
+                        dataPrefix: [0x00, 0x40],
+                        mask: [0x00, 0xFF]
                     }
-                } commented out until feature is enabled in scratch-link */
+                }
             }],
             optionalServices: []
         }, this._onConnect, this.reset);
@@ -945,6 +994,19 @@ class Boost {
             this._onMessage
         );
         this._pingDeviceId = window.setInterval(this._pingDevice, BoostPingInterval);
+
+        // Send a request for firmware version.
+        setTimeout(() => {
+            const command = [
+                0x00, // Hub ID
+                BoostMessage.HUB_PROPERTIES,
+                BoostHubProperty.FW_VERSION,
+                BoostHubPropertyOperation.REQUEST_UPDATE
+            ];
+            command.unshift(command.length + 1);
+            this.send(BoostBLE.characteristic, command, false);
+        }, 500);
+
     }
 
     /**
@@ -968,6 +1030,25 @@ class Boost {
         const portID = data[3];
 
         switch (messageType) {
+        
+        case BoostMessage.HUB_PROPERTIES: {
+            const property = data[3];
+            switch (property) {
+            case BoostHubProperty.FW_VERSION: {
+                // Establish firmware version 1.0.00.0224 as a 32-bit signed integer (little endian)
+                const fwVersion10000224 = int32ArrayToNumber([0x24, 0x02, 0x00, 0x10]);
+                const fwHub = int32ArrayToNumber(data.slice(5, data.length));
+                if (fwHub < fwVersion10000224) {
+                    BoostPort = BoostPort10000223OrOlder;
+                    log.info('Move Hub firmware older than version 1.0.00.0224 detected. Using old port mapping.');
+                } else {
+                    BoostPort = BoostPort10000224OrNewer;
+                }
+                break;
+            }
+            }
+            break;
+        }
         case BoostMessage.HUB_ATTACHED_IO: { // IO Attach/Detach events
             const event = data[4];
             const typeId = data[5];
@@ -1012,6 +1093,7 @@ class Boost {
                 break;
             case BoostIO.CURRENT:
             case BoostIO.VOLTAGE:
+            case BoostIO.LED:
                 break;
             default:
                 log.warn(`Unknown sensor value! Type: ${type}`);
@@ -1852,7 +1934,7 @@ class Scratch3BoostBlocks {
             log.warn('Asked for a motor position that doesnt exist!');
             return false;
         }
-        if (portID && this._peripheral.motor(portID)) {
+        if (portID !== null && this._peripheral.motor(portID)) {
             let val = this._peripheral.motor(portID).position;
             // Boost motor A position direction is reversed by design
             // so we have to reverse the position here

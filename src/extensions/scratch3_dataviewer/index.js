@@ -40,7 +40,7 @@ class Scratch3DataViewerBlocks {
                     arguments: {
                         DATA: {
                             type: ArgumentType.STRING,
-                            defaultValue: ''
+                            defaultValue: ' '
                         }
                     }
                 },
@@ -53,7 +53,8 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.COMMAND,
                     arguments: {
                         VALUE: {
-                            type: ArgumentType.NUMBER
+                            type: ArgumentType.NUMBER,
+                            defaultValue: ' '
                         }
                     }
                 },
@@ -66,7 +67,8 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.REPORTER,
                     arguments: {
                         COLUMN: {
-                            type: ArgumentType.NUMBER
+                            type: ArgumentType.NUMBER,
+                            defaultValue: ' '
                         },
                         URL: {
                             type: ArgumentType.STRING,
@@ -90,10 +92,12 @@ class Scratch3DataViewerBlocks {
                     blockType: BlockType.REPORTER,
                     arguments: {
                         FIELD: {
-                            type: ArgumentType.NUMBER
+                            type: ArgumentType.NUMBER,
+                            defaultValue: ' '
                         },
                         CHANNEL: {
-                            type: ArgumentType.NUMBER
+                            type: ArgumentType.NUMBER,
+                            defaultValue: ' '
                         }
                     }
                 },

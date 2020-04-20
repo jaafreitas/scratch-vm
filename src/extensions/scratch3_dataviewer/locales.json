@@ -1,0 +1,27 @@
+{
+    "pt-br": {
+        "gui.extension.dataviewer.name": "Visualizador de Dados",
+        "gui.extension.dataviewer.description": "Brinque com seus dados",
+
+        "dataviewer.categoryName": "Visualizador de Dados",
+        "dataviewer.setData": "definir dados como [DATA]",
+        "dataviewer.addValueToData": "incluir valor [VALUE] em dados",
+        "dataviewer.readCSVDataFromURL": "ler arquivo .csv [URL] coluna: [COLUMN] começando na linha: [LINE]",
+        "dataviewer.readCSVDataFromURL.default": "link para a planilha",
+        "dataviewer.readThingSpeakData": "ler ThingSpeak canal: [CHANNEL] campo: [FIELD]",
+        "dataviewer.dataLoop": "ler todos os valores de dados",
+        "dataviewer.getValue": "valor",
+        "dataviewer.getIndex": "índice",
+        "dataviewer.getStatistic": "[FNC]",
+        "dataviewer.changeDataScale": "mudar permanentemente a escala de valores para [NEW_MIN] [NEW_MAX]",
+        "dataviewer.mapData": "mudar a escala de [DATA_TYPE] para [NEW_MIN] [NEW_MAX]",
+        "dataviewer.getDataLength": "quantidade de dados ",
+        "dataviewer.getDataIndex": "valor no índice [INDEX] de dados",
+
+        "dataviewer.menu.statisticFunctions.mean": "média",
+        "dataviewer.menu.statisticFunctions.min": "mínimo",
+        "dataviewer.menu.statisticFunctions.max": "máximo",
+        "dataviewer.menu.dataType.value": "valor",
+        "dataviewer.menu.dataType.index": "índice"
+    }
+}

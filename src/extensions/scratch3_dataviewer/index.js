@@ -19,9 +19,26 @@ class Scratch3DataViewerBlocks {
         this._runtime = runtime;
     }
 
+    _setupTranslations () {
+        const localeSetup = formatMessage.setup();
+        const extTranslations = require('./locales.json');
+        for (const locale in extTranslations) {
+            if (!localeSetup.translations[locale]) {
+                localeSetup.translations[locale] = {};
+            }
+            Object.assign(localeSetup.translations[locale], extTranslations[locale]);
+        }
+    }
+
     getInfo () {
+        this._setupTranslations();
+
         return {
             id: 'dataviewer',
+            // Colors should be synced with documentation.
+            // color1: '#444444',
+            // color2: '#000000',
+            // color3: '#BBBBBB',
             name: formatMessage({
                 id: 'dataviewer.categoryName',
                 default: 'Data Viewer',
@@ -466,7 +483,7 @@ class Scratch3DataViewerBlocks {
             case "value":
                 if (this.getDataLength() > 0) {
                     return Cast.toNumber(this._mapValue(
-                         this.getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                        this.getValue(), this._getMin(), this._getMax(), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
                 }
                 break;
             default:

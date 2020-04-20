@@ -53,10 +53,31 @@ class Scratch3ScientificModellingBlocks {
         }
     }
 
+    _setupTranslations () {
+        const localeSetup = formatMessage.setup();
+        const extTranslations = require('./locales.json');
+        for (const locale in extTranslations) {
+            if (!localeSetup.translations[locale]) {
+                localeSetup.translations[locale] = {};
+            }
+            Object.assign(localeSetup.translations[locale], extTranslations[locale]);
+        }
+    }    
+
     getInfo () {
+        this._setupTranslations();
+        
         return {
             id: 'scientificModelling',
-            name: 'Scientific Modelling',
+            color1: '#666666',
+            color2: '#000000',
+            color3: '#BBBBBB',
+            name: formatMessage({
+                id: 'scientificModelling.categoryName',
+                default: 'Scientific Modelling',
+                description: 'Label for the Scientific Modelling extension category'
+            }),
+
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [

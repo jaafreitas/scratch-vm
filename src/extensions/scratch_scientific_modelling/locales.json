@@ -1,0 +1,9 @@
+{
+    "pt-br": {
+        "gui.extension.scientificmodelling.name": "Modelagem científica",
+        "gui.extension.scientificmodelling.description": "Faça experimentações científicas",
+
+        "scientificModelling.categoryName": "Modelagem científica",
+        "scientificModelling.createParticles": "crie [PARTICLES] partículas"
+    }
+}

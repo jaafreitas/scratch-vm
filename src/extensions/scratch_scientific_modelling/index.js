@@ -3,6 +3,7 @@ const BlockType = require('../../extension-support/block-type');
 const Cast = require('../../util/cast');
 const formatMessage = require('format-message');
 const Motion = require('../../blocks/scratch3_motion');
+const Looks = require('../../blocks/scratch3_looks');
 
 /**
  * Icon png to be displayed at the left edge of each extension block, encoded as a data URI.
@@ -21,21 +22,26 @@ const menuIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKIAAACiCAYAA
 class Scratch3ScientificModellingBlocks {
     constructor(runtime) {
         this.runtime = runtime;
-
+        this.vel=5;
         this.motion = new Motion(this.runtime);
-
+        this.looks = new Looks(this.runtime);
+        this.temp=50;
         this._lastUpdate = Date.now();
         this._loop();
     }
+    
+    get DEFAULT_SPEED() {
+        return this.vel
+    }
 
-    static get DEFAULT_SPEED() {
-        return 5;
+    get DEFAULT_TEMPERATURE() {      
+        return this.temp       
     }
 
     static get INTERVAL() {
         return 33;
     }
-
+    
     _loop() {
         setTimeout(this._loop.bind(this), Math.max(this.runtime.currentStepTime, Scratch3ScientificModellingBlocks.INTERVAL));
 
@@ -95,26 +101,108 @@ class Scratch3ScientificModellingBlocks {
                             defaultValue: 10,
                         }
                     }
+                },
+                
+                {
+                    //added
+                    opcode: 'setParrticleSpeed',
+                    blockType: BlockType.COMMAND,
+                    text: 'set particles speed to [PARTICLESPEED]',
+                    arguments: {
+                        PARTICLESPEED: {
+                            type: ArgumentType.NUMBER,
+                            menu:'particlespeed',
+                            defaultValue: ''
+                        }
+                    }
+                },
+
+                {
+                    //added
+                    opcode: 'setParrticleTemperature',
+                    blockType: BlockType.COMMAND,
+                    text: 'set particles temperature to [PARTICLETEMPERATURE]',
+                    arguments: {
+                        PARTICLETEMPERATURE: {
+                            type: ArgumentType.STRING,
+                            menu: 'particletemperature',
+                            defaultValue: ''
+                            
+                        }
+                    }
+                },
+
+                {
+                    //added
+                    opcode: 'temperatureReporter',
+                    blockType: BlockType.REPORTER,
+                    text: 'temperature',
+                    arguments: {
+                    }
+                },
+
+                {
+                    //added
+                    opcode: 'speedReporter',
+                    blockType: BlockType.REPORTER,
+                    text: 'speed',
+                    arguments: {
+                    }
                 }
+               
             ],
             menus: {
+                //added
+                
+                particletemperature: {
+                    //acceptReporters: true,
+                    items: this.particleTemperatureMenu
+                },
+                particlespeed: {
+                    //acceptReporters: true,
+                    items: this.particleSpeedMenu
+                }
             }
         };
     }
-
+//added
+    
+    get particleTemperatureMenu () {
+        return [
+            {text: 'high', value:'100' },
+            {text: 'medium', value: '50'},
+            {text: 'low', value: '0'}
+        ];
+    }
+    get particleSpeedMenu () {
+        return [
+            {text: 'high', value:'5' },
+            {text: 'medium', value: '2.5'},
+            {text: 'low', value: '1'}
+        ];
+    }
+  
+// end of addtion
     createParticles (args, util) {
         if (!util.target) return;
-
+        // this makes sure we will not create invisible particles
+        this.looks.show({}, { target: util.target});
+        
         const mumberOfParticles = Cast.toString(args.PARTICLES);
         for (let i = 0; i < mumberOfParticles; i++) {
             // Based on scratch3_control.createClone()
             const newClone = util.target.makeClone();
+            
             if (newClone) {
                 this.runtime.addTarget(newClone);
                 // Place behind the original target.
                 newClone.goBehindOther(util.target);
 
-                newClone.speed = Scratch3ScientificModellingBlocks.DEFAULT_SPEED;
+                newClone.speed = this.vel;
+                //this.vel = this.vel;
+                newClone.temperature = this.temp;
+                //this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
+                
 
                 // Place in a ramdom position.
                 this.motion.goTo({ TO: '_random_' }, { target: newClone});
@@ -122,6 +210,46 @@ class Scratch3ScientificModellingBlocks {
                 this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
             }
         }
+        //felt like i should hide the static particle
+        this.looks.hide({}, { target: util.target});
+        
+    }
+    //added
+    //more complex particle creator
+    
+    setParrticleSpeed (args, util){
+        var velocity = Cast.toString(args.PARTICLESPEED);
+        this.vel = velocity;
+        
+    
+        for (let i = 0; i < this.runtime.targets.length; i++) {
+            const util = { target: this.runtime.targets[i] };
+            if (util.target.speed) {
+                util.target.speed= this.vel
+            }
+        }
+    
+    }
+    setParrticleTemperature (args, util){
+        var temperature = Cast.toString(args.PARTICLETEMPERATURE);
+        this.temp = temperature;
+        
+        for (let i = 0; i < this.runtime.targets.length; i++) {
+            const util = { target: this.runtime.targets[i] };
+            if (util.target.temperature) {
+                util.target.temperature= this.temp
+                
+            }
+        }
+    }
+
+    temperatureReporter (){
+        if (!this.temp) {return "undefined"};
+        return this.temp
+    }
+    speedReporter (){
+        if (!this.vel) {return "undefined"};
+        return this.vel
     }
 }
 

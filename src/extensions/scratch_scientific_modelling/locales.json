@@ -4,6 +4,19 @@
         "gui.extension.scientificmodelling.description": "Faça experimentações científicas",
 
         "scientificModelling.categoryName": "Modelagem científica",
-        "scientificModelling.createParticles": "crie [PARTICLES] partículas"
+        "scientificModelling.createParticles": "crie [PARTICLES] partículas",
+        "scientificModelling.setCostume": "mude a fantasia para [PARTICLECOSTUME]",
+        "scientificModelling.setParticleSpeed": "mude a velocidade das partículas para [PARTICLESPEED]",
+        "scientificModelling.setParticleTemperature": "mude a temperatura das partículas para [PARTICLETEMPERATURE]",
+        "scientificModelling.whenTemperatureIs": "quando a temperatura é [WHENTEMPMENU]",
+        "scientificModelling.createParticlesOP": "crie [NUMBERPARTICLE] [COLORMENUOP] partículas [PARTICLEPOSITIONOP]",
+        "scientificModelling.temperatureReporter": "temperatura", 
+        "scientificModelling.speedReporter": "velocidade",
+        "scientificModelling.speedMenuHigh": "alto",
+        "scientificModelling.speedMenuMedium": "médio",
+        "scientificModelling.speedMenuLow": "baixo",
+        "scientificModelling.opositeDirection": "vá para a direção oposta",
+        "scientificModelling.positionMenuRandom": "aleatoriamente",
+        "scientificModelling.positionMenuCenter": "no centro"
     }
 }

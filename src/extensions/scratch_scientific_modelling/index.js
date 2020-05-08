@@ -4,6 +4,7 @@ const Cast = require('../../util/cast');
 const formatMessage = require('format-message');
 const Motion = require('../../blocks/scratch3_motion');
 const Looks = require('../../blocks/scratch3_looks');
+const Runtime = require('../../engine/runtime');
 
 /**
  * Icon png to be displayed at the left edge of each extension block, encoded as a data URI.
@@ -26,6 +27,10 @@ class Scratch3ScientificModellingBlocks {
         this.motion = new Motion(this.runtime);
         this.looks = new Looks(this.runtime);
         this.temp=50;
+        this.hasParticles = false;
+        // Clear target motion state values when the project starts.
+        this.runtime.on(Runtime.PROJECT_RUN_START, this.reset.bind(this));
+        
         this._lastUpdate = Date.now();
         this._loop();
     }
@@ -40,6 +45,17 @@ class Scratch3ScientificModellingBlocks {
 
     static get INTERVAL() {
         return 33;
+    }
+
+    /**
+     * Reset the extension's data motion detection data. This will clear out
+     * for example old frames, so the first analyzed frame will not be compared
+     * against a frame from before reset was called.
+     */
+    reset () {
+        this.hasParticles = false;
+        console.log('dentro da funçao reset')
+        
     }
     
     _loop() {
@@ -101,27 +117,57 @@ class Scratch3ScientificModellingBlocks {
                             defaultValue: 10,
                         }
                     }
+                }, 
+
+                {
+                    //added
+                    opcode: 'setCostume',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.setCostume',
+                        default: 'set particle costume to [PARTICLECOSTUME]',
+                        description: 'changes the costume of the sprite to [PARTICLECOSTUME]'
+                    }), 
+                    
+                    arguments: {
+                        PARTICLECOSTUME: {
+                            type: ArgumentType.NUMBER,
+                            //menu: 'particlecostume',
+                            defaultValue: 1
+                            
+                        }
+                    }
                 },
                 
                 {
                     //added
-                    opcode: 'setParrticleSpeed',
+                    opcode: 'setParticleSpeed',
                     blockType: BlockType.COMMAND,
-                    text: 'set particles speed to [PARTICLESPEED]',
+                    text:  formatMessage({
+                        id: 'scientificModelling.setParticleSpeed',
+                        default: 'set particles speed to [PARTICLESPEED]',
+                        description: 'sets particles speed to [PARTICLESPEED]'
+                    }),
+                    
                     arguments: {
                         PARTICLESPEED: {
-                            type: ArgumentType.NUMBER,
+                            type: ArgumentType.STRING,
                             menu:'particlespeed',
                             defaultValue: ''
                         }
                     }
                 },
-
+               
                 {
                     //added
-                    opcode: 'setParrticleTemperature',
+                    opcode: 'setParticleTemperature',
                     blockType: BlockType.COMMAND,
-                    text: 'set particles temperature to [PARTICLETEMPERATURE]',
+                    text: formatMessage({
+                        id: 'scientificModelling.setParticleTemperature',
+                        default: 'set particles temperature to [PARTICLETEMPERATURE]',
+                        description: 'sets particles temperature to [PARTICLETEMPERATURE]'
+                    }),
+                    
                     arguments: {
                         PARTICLETEMPERATURE: {
                             type: ArgumentType.STRING,
@@ -134,9 +180,78 @@ class Scratch3ScientificModellingBlocks {
 
                 {
                     //added
+                    opcode: 'opositeDirection',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.opositeDirection',
+                        default: 'go to the oposite direction',
+                        description: 'reverse sprites direction'
+                    }),
+                    
+                    arguments: {
+                    }
+                },
+
+                {
+                    //added
+                    opcode: 'whenTemperatureIs',
+                    blockType: BlockType.HAT,
+                    text: formatMessage({
+                        id: 'scientificModelling.whenTemperatureIs',
+                        default: 'when temperature is [WHENTEMPMENU]',
+                        description: 'checks if the temperature is equal to [WHENTEMPMENU]'
+                    }), 
+                    
+                    arguments: {
+                        WHENTEMPMENU: {
+                            type: ArgumentType.STRING,
+                            menu: 'whenparticletemperature',
+                            defaultValue: ''
+                            
+                        }
+                    }
+                },
+
+                {
+                    //added
+                    opcode: 'createParticlesOP',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.createParticlesOP',
+                        default: 'create [NUMBERPARTICLE] [COLORMENUOP] particles [PARTICLEPOSITIONOP]',
+                        description: 'create [NUMBERPARTICLE] particles with [COLORMENUOP] costume at [PARTICLEPOSITIONOP] position'
+                    }), 
+                    
+                    arguments: {
+                        NUMBERPARTICLE: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "10",
+                        },
+                        
+                        COLORMENUOP: {
+                            type: ArgumentType.STRING,
+                            menu: 'particlecolors',
+                            defaultValue:''
+                        },
+                        PARTICLEPOSITIONOP: {
+                            type: ArgumentType.STRING,
+                            menu: 'particleposition',
+                            defaultValue:''
+                        }
+                        
+                    }
+                },
+
+                {
+                    //added
                     opcode: 'temperatureReporter',
                     blockType: BlockType.REPORTER,
-                    text: 'temperature',
+                    text: formatMessage({
+                        id: 'scientificModelling.temperatureReporter',
+                        default: 'temperature',
+                        description: 'reports the temperature'
+                    }), 
+                    
                     arguments: {
                     }
                 },
@@ -145,7 +260,12 @@ class Scratch3ScientificModellingBlocks {
                     //added
                     opcode: 'speedReporter',
                     blockType: BlockType.REPORTER,
-                    text: 'speed',
+                    text: formatMessage({
+                        id: 'scientificModelling.speedReporter',
+                        default:  'speed',
+                        description: 'reports the speed'
+                    }), 
+                   
                     arguments: {
                     }
                 }
@@ -153,43 +273,118 @@ class Scratch3ScientificModellingBlocks {
             ],
             menus: {
                 //added
-                
+                /*
+                particlecostume: {
+                    //acceptReporters: true,
+                    items: this.particleCostume
+                },
+                */
+                particlecolors: {
+                    //acceptReporters: true,
+                    items: this.particleColors
+                },
+                particleposition: {
+                    //acceptReporters: true,
+                    items: this.particlePosition
+                },
                 particletemperature: {
                     //acceptReporters: true,
                     items: this.particleTemperatureMenu
+                },
+                whenparticletemperature: {
+                    //acceptReporters: true,
+                    items: this.whenParticleTemperatureMenu
                 },
                 particlespeed: {
                     //acceptReporters: true,
                     items: this.particleSpeedMenu
                 }
+
             }
         };
     }
 //added
-    
+    get particleColors () {
+        return [
+            {text: 'costume1', value: '1'},
+            {text: 'costume2', value: '2'},
+            {text: 'costume3', value: '3'}
+        ];
+    }
     get particleTemperatureMenu () {
         return [
-            {text: 'high', value:'100' },
-            {text: 'medium', value: '50'},
-            {text: 'low', value: '0'}
+            {text:formatMessage({
+                id: 'scientificModelling.speedMenuHigh',
+                default: 'high'}),
+             value:'100' },
+            {text:formatMessage({
+                id: 'scientificModelling.speedMenuMedium',
+                default: 'medium'}),
+             value: '50'},
+            {text:formatMessage({
+                id: 'scientificModelling.speedMenuLow',
+                default: 'low'}),
+             value: '0'}
+        ];
+    }
+    get whenParticleTemperatureMenu () {
+        return [
+            {text:formatMessage({
+                id: 'scientificModelling.speedMenuHigh',}),
+            value:'100' },
+            {text:formatMessage({
+                id: 'scientificModelling.speedMenuMedium',}),
+            value: '50'},
+            {text:formatMessage({
+                id: 'scientificModelling.speedMenuLow',}),
+            value: '0'}
         ];
     }
     get particleSpeedMenu () {
         return [
-            {text: 'high', value:'5' },
-            {text: 'medium', value: '2.5'},
-            {text: 'low', value: '1'}
+            {text:formatMessage({
+                id: 'scientificModelling.speedMenuHigh',
+                }),
+            value:'5' },
+             {text:formatMessage({
+                id: 'scientificModelling.speedMenuMedium',}),
+        
+            value: '2.5'},
+            {text:formatMessage({
+                id: 'scientificModelling.speedMenuLow',
+                }),
+            value: '0'}
         ];
     }
-  
+    get particlePosition () {
+        return [
+            {text:formatMessage({
+                id: 'scientificModelling.positionMenuRandom',
+                default: 'randomly'}),
+            value:'randomly'},
+            {text:formatMessage({
+                id: 'scientificModelling.positionMenuCenter',
+                default: 'center'}),
+            value:'center'},
+           
+        ];
+    }/*
+    get particleCostume () {
+        var menulist = [];
+        var costumelength = util.target.sprite.costume.length
+        for(let i=0;i < costumelength; i++){
+            
+            menulist.push( {text:'i', value:i},)
+        }
+        return menulist
+    }*/
 // end of addtion
     createParticles (args, util) {
         if (!util.target) return;
         // this makes sure we will not create invisible particles
-        this.looks.show({}, { target: util.target});
-        
-        const mumberOfParticles = Cast.toString(args.PARTICLES);
-        for (let i = 0; i < mumberOfParticles; i++) {
+        this.looks.show({}, { target: util.target});  
+        const numberOfParticles = Cast.toString(args.PARTICLES);
+        for (let i = 0; i < numberOfParticles; i++) {
             // Based on scratch3_control.createClone()
             const newClone = util.target.makeClone();
             
@@ -197,7 +392,6 @@ class Scratch3ScientificModellingBlocks {
                 this.runtime.addTarget(newClone);
                 // Place behind the original target.
                 newClone.goBehindOther(util.target);
-
                 newClone.speed = this.vel;
                 //this.vel = this.vel;
                 newClone.temperature = this.temp;
@@ -210,30 +404,109 @@ class Scratch3ScientificModellingBlocks {
                 this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
             }
         }
-        //felt like i should hide the static particle
+        //hides the static sprite
         this.looks.hide({}, { target: util.target});
+        this.hasParticles = true;
+        
         
     }
-    //added
-    //more complex particle creator
+    createParticlesOP (args, util) {
+        const numberOfParticles = Cast.toString(args.NUMBERPARTICLE);
+        //const chosenCostume = Cast.toString(args.COLORMENUOP);
+        const chosenPosition = Cast.toString(args.PARTICLEPOSITIONOP);
+        // this makes sure we will not create invisible particles
+        this.looks.show({}, { target: util.target});
+        if (!util.target) return;
+        this.looks.switchCostume({COSTUME:args.COLORMENUOP}, { target: util.target});
+        if (chosenPosition == 'randomly') {
+            for (let i = 0; i < numberOfParticles; i++) {
+                // Based on scratch3_control.createClone()
+                const newClone = util.target.makeClone(); 
+                if (newClone) {
+                    this.runtime.addTarget(newClone);
+                    // Place behind the original target.
+                    newClone.goBehindOther(util.target);
     
-    setParrticleSpeed (args, util){
+                    newClone.speed = this.vel;
+                    //this.vel = this.vel;
+                    newClone.temperature = this.temp;
+                    //this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
+                    
+    
+                    // Place in a ramdom position.
+                    this.motion.goTo({ TO: '_random_' }, { target: newClone});
+                    // Point in a ramdom direction.
+                    this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
+                }
+            }
+        }
+        if (chosenPosition == 'center') {
+            //places the sprite at the center of the canvas
+            util.target.setXY(0,0);
+            for (let i = 0; i < numberOfParticles;) {
+                // Based on scratch3_control.createClone()
+                const newClone = util.target.makeClone(); 
+                if (newClone) {
+                    var r = Math.sqrt(((newClone.x)*(newClone.x)) +  ((newClone.y)*(newClone.y)));
+                    if ( r > 50){return}
+                    if (r < 50) {
+                        this.runtime.addTarget(newClone);
+                        // Place behind the original target.
+                        newClone.goBehindOther(util.target);
+    
+                        newClone.speed = this.vel;
+                        //this.vel = this.vel;
+                        newClone.temperature = this.temp;
+                        //this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
+                        
+                        // Point in a ramdom direction.
+                        this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
+                        i++;
+                    }
+                }   
+            }
+        }
+        //hides the static sprite
+        this.looks.hide({}, { target: util.target});
+        this.hasParticles = true;
+        
+    }
+    setCostume (args, util){
+        /*
+        var costumeLength = util.target.sprite.costumes.length
+        this.looks.show({}, { target: util.target});
+        if (costumeNumber> costumeLength) {
+            costumeNumber =  costumeLength -1
+            
+        }*/
+        // changes the costume of the sprite
+        this.looks.switchCostume({COSTUME:args.PARTICLECOSTUME}, { target: util.target});
+        //this.looks.hide({}, { target: util.target});
+        //this.looks.show({}, { target: util.target});
+    }
+    opositeDirection (util){
+        const allTargets = this.runtime.targets;
+        for (let i = 0; i < allTargets.length; i++) {
+            if(allTargets[i].speed){
+                allTargets[i].direction =  allTargets[i].direction + 180;
+            }
+        }
+        //this.motion.turnLeft({ DEGREES: 180 }, util.target);
+    }
+    setParticleSpeed (args, util){
         var velocity = Cast.toString(args.PARTICLESPEED);
         this.vel = velocity;
-        
-    
         for (let i = 0; i < this.runtime.targets.length; i++) {
             const util = { target: this.runtime.targets[i] };
             if (util.target.speed) {
-                util.target.speed= this.vel
+                util.target.speed= velocity
             }
         }
     
     }
-    setParrticleTemperature (args, util){
+    setParticleTemperature (args, util){
         var temperature = Cast.toString(args.PARTICLETEMPERATURE);
         this.temp = temperature;
-        
         for (let i = 0; i < this.runtime.targets.length; i++) {
             const util = { target: this.runtime.targets[i] };
             if (util.target.temperature) {
@@ -242,14 +515,37 @@ class Scratch3ScientificModellingBlocks {
             }
         }
     }
-
+    whenTemperatureIs (args){
+        var checkTemperature = Cast.toString(args.WHENTEMPMENU);
+        console.log(this.hasParticles);
+        return checkTemperature == this.temp
+           
+       
+        
+    }
     temperatureReporter (){
         if (!this.temp) {return "undefined"};
-        return this.temp
+        if (this.temp == 100) {
+            return formatMessage({id: 'scientificModelling.speedMenuHigh',})
+        }
+        if (this.temp == 50) {
+            return formatMessage({id: 'scientificModelling.speedMenuMedium',})
+        }
+        if (this.temp == 0) {
+            return formatMessage({id: 'scientificModelling.speedMenuLow',})
+        }
     }
     speedReporter (){
         if (!this.vel) {return "undefined"};
-        return this.vel
+        if (this.vel == 5) {
+            return formatMessage({id: 'scientificModelling.speedMenuHigh',})
+        }
+        if (this.vel == 2.5) {
+            return formatMessage({id: 'scientificModelling.speedMenuMedium',})
+        }
+        if (this.vel == 0) {
+            return formatMessage({id: 'scientificModelling.speedMenuLow',})
+        }
     }
 }
 

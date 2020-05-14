@@ -17,6 +17,10 @@
         "scientificModelling.speedMenuLow": "baixo",
         "scientificModelling.opositeDirection": "vá para a direção oposta",
         "scientificModelling.positionMenuRandom": "aleatoriamente",
-        "scientificModelling.positionMenuCenter": "no centro"
-    }
+        "scientificModelling.positionMenuCenter": "no centro",
+        "scientificModelling.whenTouchingAnotherParticle": "quando tocando outra partícula",
+        "scientificModelling.numberParticleReporter": "número de partículas",
+        "scientificModelling.colisionReporter": "colisões por tempo",
+        "scientificModelling.ifTouchingInvert": "se tocando vá para a direção oposta"
+    }   
 }

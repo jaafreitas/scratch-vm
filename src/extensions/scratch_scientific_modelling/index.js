@@ -23,14 +23,14 @@ const menuIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKIAAACiCAYAA
 class Scratch3ScientificModellingBlocks {
     constructor(runtime) {
         this.runtime = runtime;
-        this.vel=5;
+        this.vel = 0;
         this.motion = new Motion(this.runtime);
         this.looks = new Looks(this.runtime);
-        this.temp=50;
+        this.temp = 50;
         this.hasParticles = false;
+        this.particleCounter = 0;
         // Clear target motion state values when the project starts.
-        this.runtime.on(Runtime.PROJECT_RUN_START, this.reset.bind(this));
-        
+        this.runtime.on(Runtime.PROJECT_START, this.reset.bind(this));
         this._lastUpdate = Date.now();
         this._loop();
     }
@@ -52,29 +52,35 @@ class Scratch3ScientificModellingBlocks {
      * for example old frames, so the first analyzed frame will not be compared
      * against a frame from before reset was called.
      */
+
     reset () {
         this.hasParticles = false;
-        console.log('dentro da funçao reset')
-        
+        this.particleCounter = 0;  
     }
     
     _loop() {
         setTimeout(this._loop.bind(this), Math.max(this.runtime.currentStepTime, Scratch3ScientificModellingBlocks.INTERVAL));
-
         const time = Date.now();
         const offset = time - this._lastUpdate;
         if (offset > Scratch3ScientificModellingBlocks.INTERVAL) {
             this._lastUpdate = time;
+            this.isTouchingList = [];
             for (let i = 0; i < this.runtime.targets.length; i++) {
                 const util = { target: this.runtime.targets[i] };
                 if (util.target.speed) {
                     this.motion.moveSteps({ STEPS: util.target.speed }, util);
                     this.motion.ifOnEdgeBounce({}, util);
+                    util.target.isTouchingSprite(util.target.sprite.name);
+                    if (util.target.isTouchingSprite(util.target.sprite.name) == true) {
+                        this.isTouchingList.push(util.target)
+                    }
+                    //console.log(util.target.isTouchingSprite(util.target.sprite.name))
+                    //console.log(util.target)
+                    
                 }
             }
         }
     }
-
     _setupTranslations () {
         const localeSetup = formatMessage.setup();
         const extTranslations = require('./locales.json');
@@ -128,7 +134,6 @@ class Scratch3ScientificModellingBlocks {
                         default: 'set particle costume to [PARTICLECOSTUME]',
                         description: 'changes the costume of the sprite to [PARTICLECOSTUME]'
                     }), 
-                    
                     arguments: {
                         PARTICLECOSTUME: {
                             type: ArgumentType.NUMBER,
@@ -148,7 +153,6 @@ class Scratch3ScientificModellingBlocks {
                         default: 'set particles speed to [PARTICLESPEED]',
                         description: 'sets particles speed to [PARTICLESPEED]'
                     }),
-                    
                     arguments: {
                         PARTICLESPEED: {
                             type: ArgumentType.STRING,
@@ -167,7 +171,6 @@ class Scratch3ScientificModellingBlocks {
                         default: 'set particles temperature to [PARTICLETEMPERATURE]',
                         description: 'sets particles temperature to [PARTICLETEMPERATURE]'
                     }),
-                    
                     arguments: {
                         PARTICLETEMPERATURE: {
                             type: ArgumentType.STRING,
@@ -187,9 +190,16 @@ class Scratch3ScientificModellingBlocks {
                         default: 'go to the oposite direction',
                         description: 'reverse sprites direction'
                     }),
-                    
-                    arguments: {
-                    }
+                },
+
+                {
+                    //added
+                    opcode: 'ifTouchingInvert',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.ifTouchingInvert',
+                        default: 'if touching go to the oposite direction',
+                    }),
                 },
 
                 {
@@ -201,7 +211,6 @@ class Scratch3ScientificModellingBlocks {
                         default: 'when temperature is [WHENTEMPMENU]',
                         description: 'checks if the temperature is equal to [WHENTEMPMENU]'
                     }), 
-                    
                     arguments: {
                         WHENTEMPMENU: {
                             type: ArgumentType.STRING,
@@ -214,6 +223,16 @@ class Scratch3ScientificModellingBlocks {
 
                 {
                     //added
+                    opcode: 'whenTouchingAnotherParticle',
+                    blockType: BlockType.HAT,
+                    text: formatMessage({
+                        id: 'scientificModelling.whenTouchingAnotherParticle',
+                        default: 'when touching another particle',
+                    }), 
+                },
+
+                {
+                    //added
                     opcode: 'createParticlesOP',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
@@ -221,7 +240,6 @@ class Scratch3ScientificModellingBlocks {
                         default: 'create [NUMBERPARTICLE] [COLORMENUOP] particles [PARTICLEPOSITIONOP]',
                         description: 'create [NUMBERPARTICLE] particles with [COLORMENUOP] costume at [PARTICLEPOSITIONOP] position'
                     }), 
-                    
                     arguments: {
                         NUMBERPARTICLE: {
                             type: ArgumentType.NUMBER,
@@ -265,9 +283,26 @@ class Scratch3ScientificModellingBlocks {
                         default:  'speed',
                         description: 'reports the speed'
                     }), 
-                   
-                    arguments: {
-                    }
+                },
+
+                {
+                    //added
+                    opcode: 'numberParticleReporter',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'scientificModelling.numberParticleReporter',
+                        default:  'number of particles'
+                    }), 
+                },
+
+                {
+                    //added
+                    opcode: 'colisionReporter',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'scientificModelling.colisionReporter',
+                        default:  'colisions per time'
+                    }), 
                 }
                
             ],
@@ -311,6 +346,7 @@ class Scratch3ScientificModellingBlocks {
             {text: 'costume3', value: '3'}
         ];
     }
+
     get particleTemperatureMenu () {
         return [
             {text:formatMessage({
@@ -327,6 +363,7 @@ class Scratch3ScientificModellingBlocks {
              value: '0'}
         ];
     }
+
     get whenParticleTemperatureMenu () {
         return [
             {text:formatMessage({
@@ -340,6 +377,7 @@ class Scratch3ScientificModellingBlocks {
             value: '0'}
         ];
     }
+
     get particleSpeedMenu () {
         return [
             {text:formatMessage({
@@ -356,6 +394,7 @@ class Scratch3ScientificModellingBlocks {
             value: '0'}
         ];
     }
+
     get particlePosition () {
         return [
             {text:formatMessage({
@@ -368,12 +407,12 @@ class Scratch3ScientificModellingBlocks {
             value:'center'},
            
         ];
-    }/*
+    }
+    /*
     get particleCostume () {
         var menulist = [];
         var costumelength = util.target.sprite.costume.length
         for(let i=0;i < costumelength; i++){
-            
             menulist.push( {text:'i', value:i},)
         }
         return menulist
@@ -387,7 +426,6 @@ class Scratch3ScientificModellingBlocks {
         for (let i = 0; i < numberOfParticles; i++) {
             // Based on scratch3_control.createClone()
             const newClone = util.target.makeClone();
-            
             if (newClone) {
                 this.runtime.addTarget(newClone);
                 // Place behind the original target.
@@ -396,20 +434,18 @@ class Scratch3ScientificModellingBlocks {
                 //this.vel = this.vel;
                 newClone.temperature = this.temp;
                 //this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
-                
-
                 // Place in a ramdom position.
                 this.motion.goTo({ TO: '_random_' }, { target: newClone});
                 // Point in a ramdom direction.
                 this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
+                this.particleCounter = this.particleCounter + 1;
             }
         }
         //hides the static sprite
         this.looks.hide({}, { target: util.target});
         this.hasParticles = true;
-        
-        
     }
+
     createParticlesOP (args, util) {
         const numberOfParticles = Cast.toString(args.NUMBERPARTICLE);
         //const chosenCostume = Cast.toString(args.COLORMENUOP);
@@ -426,44 +462,40 @@ class Scratch3ScientificModellingBlocks {
                     this.runtime.addTarget(newClone);
                     // Place behind the original target.
                     newClone.goBehindOther(util.target);
-    
                     newClone.speed = this.vel;
                     //this.vel = this.vel;
                     newClone.temperature = this.temp;
                     //this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
-                    
-    
                     // Place in a ramdom position.
                     this.motion.goTo({ TO: '_random_' }, { target: newClone});
                     // Point in a ramdom direction.
                     this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
+                    this.particleCounter = this.particleCounter + 1;
                 }
             }
         }
         if (chosenPosition == 'center') {
             //places the sprite at the center of the canvas
-            util.target.setXY(0,0);
             for (let i = 0; i < numberOfParticles;) {
+                //moves the sprite to a random position
+                this.motion.goTo({ TO: '_random_' }, { target: util.target});
                 // Based on scratch3_control.createClone()
-                const newClone = util.target.makeClone(); 
-                if (newClone) {
-                    var r = Math.sqrt(((newClone.x)*(newClone.x)) +  ((newClone.y)*(newClone.y)));
-                    if ( r > 50){return}
-                    if (r < 50) {
-                        this.runtime.addTarget(newClone);
-                        // Place behind the original target.
-                        newClone.goBehindOther(util.target);
-    
-                        newClone.speed = this.vel;
-                        //this.vel = this.vel;
-                        newClone.temperature = this.temp;
-                        //this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
-                        
-                        // Point in a ramdom direction.
-                        this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
-                        i++;
-                    }
-                }   
+                var r = Math.sqrt(((util.target.x)*(util.target.x)) +  ((util.target.y)*(util.target.y)));
+                if (r < 50) {
+                    const newClone = util.target.makeClone();
+                    this.runtime.addTarget(newClone);
+                    // Place behind the original target.
+                    newClone.goBehindOther(util.target);
+                    newClone.speed = this.vel;
+                    //this.vel = this.vel;
+                    newClone.temperature = this.temp;
+                    //this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
+                    // Point in a ramdom direction.
+                    this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
+                    i++;
+                    this.particleCounter = this.particleCounter + 1;
+                }
+                  
             }
         }
         //hides the static sprite
@@ -471,6 +503,7 @@ class Scratch3ScientificModellingBlocks {
         this.hasParticles = true;
         
     }
+
     setCostume (args, util){
         /*
         var costumeLength = util.target.sprite.costumes.length
@@ -484,45 +517,75 @@ class Scratch3ScientificModellingBlocks {
         //this.looks.hide({}, { target: util.target});
         //this.looks.show({}, { target: util.target});
     }
+
     opositeDirection (util){
         const allTargets = this.runtime.targets;
-        for (let i = 0; i < allTargets.length; i++) {
-            if(allTargets[i].speed){
-                allTargets[i].direction =  allTargets[i].direction + 180;
+        if (this.isTouchingList.length != 0) {
+            for (let i = 0; i < this.isTouchingList.length; i++) {
+                this.isTouchingList[i].direction = this.isTouchingList[i].direction + 180;  
+            }
+        }
+        else{
+            for (let i = 0; i < allTargets.length; i++) {
+                if(allTargets[i].speed){
+                    allTargets[i].direction =  allTargets[i].direction + 180;
+                }
             }
         }
         //this.motion.turnLeft({ DEGREES: 180 }, util.target);
     }
+
+    ifTouchingInvert (){
+        if (this.isTouchingList.length != 0) {
+            for (let i = 0; i < this.isTouchingList.length; i++) {
+                this.isTouchingList[i].direction = this.isTouchingList[i].direction + 180;  
+            }
+        }
+    }
+
     setParticleSpeed (args, util){
         var velocity = Cast.toString(args.PARTICLESPEED);
         this.vel = velocity;
         for (let i = 0; i < this.runtime.targets.length; i++) {
             const util = { target: this.runtime.targets[i] };
-            if (util.target.speed) {
+            if (util.target.speed != undefined) {
                 util.target.speed= velocity
             }
         }
     
     }
+
     setParticleTemperature (args, util){
         var temperature = Cast.toString(args.PARTICLETEMPERATURE);
         this.temp = temperature;
         for (let i = 0; i < this.runtime.targets.length; i++) {
             const util = { target: this.runtime.targets[i] };
             if (util.target.temperature) {
-                util.target.temperature= this.temp
-                
+                util.target.temperature= this.temp   
             }
         }
     }
+
     whenTemperatureIs (args){
         var checkTemperature = Cast.toString(args.WHENTEMPMENU);
-        console.log(this.hasParticles);
-        return checkTemperature == this.temp
-           
-       
-        
+        return checkTemperature == this.temp 
     }
+
+    whenTouchingAnotherParticle (){
+        var isTouching = false;
+        this.isTouchingList = [];
+        for (let i = 0; i < this.runtime.targets.length; i++) {
+            const util = { target: this.runtime.targets[i] };
+            //util.target.isTouchingSprite(util.target.sprite.name);
+            if (util.target.isTouchingSprite(util.target.sprite.name) == true) {
+                isTouching = true;
+                this.isTouchingList.push(util.target)
+            }
+        }
+        //console.log(this.isTouchingList);
+        return isTouching
+    }   
+
     temperatureReporter (){
         if (!this.temp) {return "undefined"};
         if (this.temp == 100) {
@@ -535,6 +598,7 @@ class Scratch3ScientificModellingBlocks {
             return formatMessage({id: 'scientificModelling.speedMenuLow',})
         }
     }
+
     speedReporter (){
         if (!this.vel) {return "undefined"};
         if (this.vel == 5) {
@@ -547,6 +611,15 @@ class Scratch3ScientificModellingBlocks {
             return formatMessage({id: 'scientificModelling.speedMenuLow',})
         }
     }
-}
 
+    colisionReporter (){
+        // 1 colision has 2 particles so we divide it by 2 to know the colision number
+        var colisionCounter = this.isTouchingList.length / 2;
+        return colisionCounter
+    }
+
+    numberParticleReporter (){
+        return this.particleCounter
+    }
+}
 module.exports = Scratch3ScientificModellingBlocks;

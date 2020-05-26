@@ -20,7 +20,8 @@
         "scientificModelling.positionMenuCenter": "no centro",
         "scientificModelling.whenTouchingAnotherParticle": "quando tocando outra partícula",
         "scientificModelling.numberParticleReporter": "número de partículas",
-        "scientificModelling.colisionReporter": "colisões por tempo",
-        "scientificModelling.ifTouchingInvert": "se tocando vá para a direção oposta"
+        "scientificModelling.collisionReporter": "colisões por tempo",
+        "scientificModelling.ifTouchingInvert": "se tocando vá para a direção oposta",
+        "scientificModelling.touchingAnotherParticle": "tocando outra partícula"
     }   
 }

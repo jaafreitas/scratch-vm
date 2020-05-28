@@ -29,14 +29,16 @@ class Scratch3ScientificModellingBlocks {
         this.looks = new Looks(this.runtime);
         this.data = new Data(this.runtime);
         this.temp = 50;
-        this.hasParticles = false;
-        this.particleCounter = this.runtime.targets.length -1;
-        // Clear target motion state values when the project starts.
-        this.runtime.on(Runtime.PROJECT_START, this.reset.bind(this));
+
+        this.runtime.on(Runtime.PROJECT_START, this._projectStart.bind(this));
+        this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
+        this.runtime.on(Runtime.PROJECT_RUN_STOP, this._projectRunStop.bind(this));
+        this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
+
         this._lastUpdate = Date.now();
         this._loop();
     }
-    
+
     get DEFAULT_SPEED() {
         return this.vel
     }
@@ -49,17 +51,31 @@ class Scratch3ScientificModellingBlocks {
         return 33;
     }
 
-    /**
-     * Reset the extension's data motion detection data. This will clear out
-     * for example old frames, so the first analyzed frame will not be compared
-     * against a frame from before reset was called.
-     */
+    _particles () {
+        return this.runtime.targets.filter(target => target.speed !== undefined);
+    }
 
-    reset () {
-        this.hasParticles = false;
-        this.particleCounter = this.runtime.targets.length -1;  
+    _projectStart () {
+        console.log("PROJECT_START");
+        console.log(this);
     }
     
+    _projectRunStart() {
+        console.log("PROJECT_RUN_START") ;
+        console.log(this);
+    }
+
+    _projectRunStop() {
+        console.log("PROJECT_RUN_STOP");
+        console.log(this);
+    }
+
+    _projectStopAll () {
+        console.log("PROJECT_STOP_ALL");
+        console.log(this);
+        this._particles().map(target => target.speed = undefined);
+    }
+
     _loop() {
         setTimeout(this._loop.bind(this), Math.max(this.runtime.currentStepTime, Scratch3ScientificModellingBlocks.INTERVAL));
         const time = Date.now();
@@ -74,7 +90,6 @@ class Scratch3ScientificModellingBlocks {
                 if (util.target.speed) {
                     this.motion.moveSteps({ STEPS: util.target.speed }, util);
                     this.motion.ifOnEdgeBounce({}, util);
-                    console.log(util.target.isTouchingSprite('Ball2'))
                     if (util.target.isTouchingSprite(util.target.sprite.name) == true) {
                         this.isTouchingList.push(util.target)
                     }
@@ -478,14 +493,12 @@ class Scratch3ScientificModellingBlocks {
                 this.motion.goTo({ TO: '_random_' }, { target: newClone});
                 // Point in a ramdom direction.
                 this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
-                this.particleCounter = this.particleCounter + 1;
             }
         }
         //hides the static sprite
         //this.looks.hide({}, { target: util.target});
         console.log('end of creation');
         console.log(util.target);
-        this.hasParticles = true;
     }
 
     createParticlesOP (args, util) {
@@ -520,7 +533,6 @@ class Scratch3ScientificModellingBlocks {
                     this.motion.goTo({ TO: '_random_' }, { target: newClone});
                     // Point in a ramdom direction.
                     this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
-                    this.particleCounter = this.particleCounter + 1;
                 }
             }
         }
@@ -543,14 +555,12 @@ class Scratch3ScientificModellingBlocks {
                     // Point in a ramdom direction.
                     this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
                     i++;
-                    this.particleCounter = this.particleCounter + 1;
                 }
                   
             }
         }
         //hides the static sprite
         this.looks.hide({}, { target: util.target});
-        this.hasParticles = true;
         
     }
 // delete this block
@@ -676,7 +686,7 @@ class Scratch3ScientificModellingBlocks {
     }
 
     numberParticleReporter () {
-        return this.particleCounter
+        return this._particles().length;
     }
 }
 module.exports = Scratch3ScientificModellingBlocks;

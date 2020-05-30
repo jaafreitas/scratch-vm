@@ -51,16 +51,15 @@ class Scratch3ScientificModellingBlocks {
 
     _particles () {
         return this.runtime.targets.filter(target => target.hasOwnProperty('speed'));
-        // this.runtime.targets.filter(target => target.speed !== 'undefined');
     }
 
     _projectStart () {
         // console.log('PROJECT_START');
         // console.log(this);
     }
-
+    
     _projectRunStart () {
-        // console.log('PROJECT_RUN_START');
+        // console.log('PROJECT_RUN_START') ;
         // console.log(this);
     }
 
@@ -76,7 +75,7 @@ class Scratch3ScientificModellingBlocks {
             this._particles()[i].speed = 0;
         }
         this.vel = 0;
-        // this._particles().map(target => target.speed = 'undefined');
+        // this._particles().map(target => target.speed = undefined);
     }
 
     _loop () {
@@ -486,7 +485,7 @@ class Scratch3ScientificModellingBlocks {
             }
         }
         // hides the static sprite
-        // this.looks.hide({}, { target: util.target})
+        // this.looks.hide({}, { target: util.target});
     }
 
     createParticlesOP (args, util) {

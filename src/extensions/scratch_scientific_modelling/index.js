@@ -22,65 +22,84 @@ const blockIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYA
 const menuIconURI = 'data:image/png;base64,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';
 
 class Scratch3ScientificModellingBlocks {
-    constructor(runtime) {
+    constructor (runtime) {
         this.runtime = runtime;
         this.vel = 0;
         this.motion = new Motion(this.runtime);
         this.looks = new Looks(this.runtime);
         this.data = new Data(this.runtime);
         this.temp = 50;
-        this.hasParticles = false;
-        this.particleCounter = this.runtime.targets.length -1;
-        // Clear target motion state values when the project starts.
-        this.runtime.on(Runtime.PROJECT_START, this.reset.bind(this));
+        this.runtime.on(Runtime.PROJECT_START, this._projectStart.bind(this));
+        this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
+        this.runtime.on(Runtime.PROJECT_RUN_STOP, this._projectRunStop.bind(this));
+        this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
         this._lastUpdate = Date.now();
         this._loop();
     }
-    
-    get DEFAULT_SPEED() {
-        return this.vel
+
+    get DEFAULT_SPEED () {
+        return this.vel;
     }
 
-    get DEFAULT_TEMPERATURE() {      
-        return this.temp       
+    get DEFAULT_TEMPERATURE () {
+        return this.temp;
     }
 
-    static get INTERVAL() {
+    static get INTERVAL () {
         return 33;
     }
 
-    /**
-     * Reset the extension's data motion detection data. This will clear out
-     * for example old frames, so the first analyzed frame will not be compared
-     * against a frame from before reset was called.
-     */
-
-    reset () {
-        this.hasParticles = false;
-        this.particleCounter = this.runtime.targets.length -1;  
+    _particles () {
+        return this.runtime.targets.filter(target => target.hasOwnProperty('speed'));
+        // this.runtime.targets.filter(target => target.speed !== 'undefined');
     }
-    
-    _loop() {
-        setTimeout(this._loop.bind(this), Math.max(this.runtime.currentStepTime, Scratch3ScientificModellingBlocks.INTERVAL));
+
+    _projectStart () {
+        // console.log('PROJECT_START');
+        // console.log(this);
+    }
+
+    _projectRunStart () {
+        // console.log('PROJECT_RUN_START');
+        // console.log(this);
+    }
+
+    _projectRunStop () {
+        // console.log('PROJECT_RUN_STOP');
+        // console.log(this);
+    }
+
+    _projectStopAll () {
+        // console.log('PROJECT_STOP_ALL');
+        // console.log(this);
+        for (let i = 0; i < this._particles().length; i++) {
+            this._particles()[i].speed = 0;
+        }
+        this.vel = 0;
+        // this._particles().map(target => target.speed = 'undefined');
+    }
+
+    _loop () {
+        // scratch has a limit of 120 for length of line
+        const a = Scratch3ScientificModellingBlocks.INTERVAL;
+        setTimeout(this._loop.bind(this), Math.max(this.runtime.currentStepTime, a));
         const time = Date.now();
         const offset = time - this._lastUpdate;
         if (offset > Scratch3ScientificModellingBlocks.INTERVAL) {
             this._lastUpdate = time;
             this.isTouchingList = [];
-            //this.isTouchingList = this.runtime.targets.filter(this.runtime.targets.isTouchingSprite);
+            // this.isTouchingList = this.runtime.targets.filter(this.runtime.targets.isTouchingSprite);
             for (let i = 0; i < this.runtime.targets.length; i++) {
-                const util = { target: this.runtime.targets[i] };
-                //this.isTouchingList = this.runtime.targets.filter(util.target.isTouchingSprite);
+                const util = {target: this.runtime.targets[i]};
+                // this.isTouchingList = this.runtime.targets.filter(util.target.isTouchingSprite);
                 if (util.target.speed) {
-                    this.motion.moveSteps({ STEPS: util.target.speed }, util);
+                    this.motion.moveSteps({STEPS: util.target.speed}, util);
                     this.motion.ifOnEdgeBounce({}, util);
-                    console.log(util.target.isTouchingSprite('Ball2'))
-                    if (util.target.isTouchingSprite(util.target.sprite.name) == true) {
-                        this.isTouchingList.push(util.target)
+                    if (util.target.isTouchingSprite(util.target.sprite.name) === true) {
+                        this.isTouchingList.push(util.target);
                     }
-                    //console.log(util.target.isTouchingSprite(util.target.sprite.name))
-                    //console.log(util.target)
-                    
+                    // console.log(util.target.isTouchingSprite(util.target.sprite.name))
+                    // console.log(util.target)
                 }
             }
         }
@@ -94,7 +113,7 @@ class Scratch3ScientificModellingBlocks {
             }
             Object.assign(localeSetup.translations[locale], extTranslations[locale]);
         }
-    }    
+    }
 
     getInfo () {
         this._setupTranslations();
@@ -124,10 +143,10 @@ class Scratch3ScientificModellingBlocks {
                     arguments: {
                         PARTICLES: {
                             type: ArgumentType.NUMBER,
-                            defaultValue: 10,
+                            defaultValue: 10
                         }
                     }
-                }, 
+                },
                 // delete this block
                 /*
                 {
@@ -138,7 +157,7 @@ class Scratch3ScientificModellingBlocks {
                         id: 'scientificModelling.setCostume',
                         default: 'set particle costume to [PARTICLECOSTUME]',
                         description: 'changes the costume of the sprite to [PARTICLECOSTUME]'
-                    }), 
+                    }),
                     arguments: {
                         PARTICLECOSTUME: {
                             type: ArgumentType.NUMBER,
@@ -150,10 +169,9 @@ class Scratch3ScientificModellingBlocks {
                 },
                 */
                 {
-                    //added
                     opcode: 'setParticleSpeed',
                     blockType: BlockType.COMMAND,
-                    text:  formatMessage({
+                    text: formatMessage({
                         id: 'scientificModelling.setParticleSpeed',
                         default: 'set particles speed to [PARTICLESPEED]',
                         description: 'sets particles speed to [PARTICLESPEED]'
@@ -161,7 +179,7 @@ class Scratch3ScientificModellingBlocks {
                     arguments: {
                         PARTICLESPEED: {
                             type: ArgumentType.STRING,
-                            menu:'particlespeed',
+                            menu: 'particlespeed',
                             defaultValue: ''
                         }
                     }
@@ -169,7 +187,6 @@ class Scratch3ScientificModellingBlocks {
                 // delete this
                 /*
                 {
-                    //added
                     opcode: 'setParticleTemperature',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
@@ -190,35 +207,32 @@ class Scratch3ScientificModellingBlocks {
                 */
 
                 {
-                    //added
                     opcode: 'opositeDirection',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'scientificModelling.opositeDirection',
                         default: 'go to the oposite direction',
                         description: 'reverse sprites direction'
-                    }),
+                    })
                 },
 
                 {
-                    //added
                     opcode: 'ifTouchingInvert',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'scientificModelling.ifTouchingInvert',
-                        default: 'if touching go to the oposite direction',
-                    }),
+                        default: 'if touching go to the oposite direction'
+                    })
                 },
 
                 {
-                    //added
                     opcode: 'whenTemperatureIs',
                     blockType: BlockType.HAT,
                     text: formatMessage({
                         id: 'scientificModelling.whenTemperatureIs',
                         default: 'when temperature is [WHENTEMPMENU]',
                         description: 'checks if the temperature is equal to [WHENTEMPMENU]'
-                    }), 
+                    }),
                     arguments: {
                         WHENTEMPMENU: {
                             type: ArgumentType.STRING,
@@ -228,15 +242,14 @@ class Scratch3ScientificModellingBlocks {
                         }
                     }
                 },
-/*
+                /*
                 {
-                    //added
                     opcode: 'whenTouchingAnotherParticle',
                     blockType: BlockType.HAT,
                     text: formatMessage({
                         id: 'scientificModelling.whenTouchingAnotherParticle',
                         default: 'when touching another particle',
-                    }), 
+                    }),
                 },
 */
                 {
@@ -244,34 +257,33 @@ class Scratch3ScientificModellingBlocks {
                     blockType: BlockType.BOOLEAN,
                     text: formatMessage({
                         id: 'scientificModelling.touchingAnotherParticle',
-                        default: 'touching another particle',
+                        default: 'touching another particle'
+
                     })
                 },
 
                 {
-                    //added
                     opcode: 'createParticlesOP',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'scientificModelling.createParticlesOP',
-                        default: 'create [NUMBERPARTICLE] [COLORMENUOP] particles [PARTICLEPOSITIONOP]',
-                        description: 'create [NUMBERPARTICLE] particles with [COLORMENUOP] costume at [PARTICLEPOSITIONOP] position'
-                    }), 
+                        default: 'create [NUMBERPARTICLE] [COLORMENUOP] particles [PARTICLEPOSITIONOP]'
+                    }),
                     arguments: {
                         NUMBERPARTICLE: {
                             type: ArgumentType.NUMBER,
-                            defaultValue: "10",
+                            defaultValue: '10'
                         },
                         
                         COLORMENUOP: {
                             type: ArgumentType.STRING,
                             menu: 'particlecolors',
-                            defaultValue:''
+                            defaultValue: ''
                         },
                         PARTICLEPOSITIONOP: {
                             type: ArgumentType.STRING,
                             menu: 'particleposition',
-                            defaultValue:''
+                            defaultValue: ''
                         }
                         
                     }
@@ -279,14 +291,13 @@ class Scratch3ScientificModellingBlocks {
                 // delete this
                 /*
                 {
-                    //added
                     opcode: 'temperatureReporter',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'scientificModelling.temperatureReporter',
                         default: 'temperature',
                         description: 'reports the temperature'
-                    }), 
+                    }),
                     
                     arguments: {
                     }
@@ -294,70 +305,64 @@ class Scratch3ScientificModellingBlocks {
                 */
 
                 {
-                    //added
                     opcode: 'speedReporter',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'scientificModelling.speedReporter',
-                        default:  'speed',
-                        description: 'reports the speed'
-                    }), 
+                        default: 'speed'
+                    })
                 },
 
                 {
-                    //added
                     opcode: 'numberParticleReporter',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'scientificModelling.numberParticleReporter',
-                        default:  'number of particles'
-                    }), 
+                        default: 'number of particles'
+                    })
                 },
 
                 {
-                    //added
                     opcode: 'collisionReporter',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'scientificModelling.collisionReporter',
-                        default:  'collisions per time'
-                    }), 
+                        default: 'collisions per time'
+                    })
                 }
                
             ],
             menus: {
-                //added
                 /*
                 particlecostume: {
-                    //acceptReporters: true,
+                    // acceptReporters: true,
                     items: this.particleCostume
                 },
                 */
                 particlecolors: {
-                    //acceptReporters: true,
+                    // acceptReporters: true,
                     items: this.particleColors
                 },
                 particleposition: {
-                    //acceptReporters: true,
+                    // acceptReporters: true,
                     items: this.particlePosition
                 },
                 particletemperature: {
-                    //acceptReporters: true,
+                    // acceptReporters: true,
                     items: this.particleTemperatureMenu
                 },
                 whenparticletemperature: {
-                    //acceptReporters: true,
+                    // acceptReporters: true,
                     items: this.whenParticleTemperatureMenu
                 },
                 particlespeed: {
-                    //acceptReporters: true,
+                    // acceptReporters: true,
                     items: this.particleSpeedMenu
                 }
 
             }
         };
     }
-//added
     get particleColors () {
         /*
         if ( ){
@@ -377,62 +382,62 @@ class Scratch3ScientificModellingBlocks {
 
     get particleTemperatureMenu () {
         return [
-            {text:formatMessage({
+            {text: formatMessage({
                 id: 'scientificModelling.speedMenuHigh',
                 default: 'high'}),
-             value:'100' },
-            {text:formatMessage({
+            value: '100'},
+            {text: formatMessage({
                 id: 'scientificModelling.speedMenuMedium',
                 default: 'medium'}),
-             value: '50'},
-            {text:formatMessage({
+            value: '50'},
+            {text: formatMessage({
                 id: 'scientificModelling.speedMenuLow',
                 default: 'low'}),
-             value: '0'}
+            value: '0'}
         ];
     }
 
     get whenParticleTemperatureMenu () {
         return [
-            {text:formatMessage({
-                id: 'scientificModelling.speedMenuHigh',}),
-            value:'100' },
-            {text:formatMessage({
-                id: 'scientificModelling.speedMenuMedium',}),
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuHigh'}),
+            value: '100'},
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuMedium'}),
             value: '50'},
-            {text:formatMessage({
-                id: 'scientificModelling.speedMenuLow',}),
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuLow'}),
             value: '0'}
         ];
     }
 
     get particleSpeedMenu () {
         return [
-            {text:formatMessage({
-                id: 'scientificModelling.speedMenuHigh',
-                }),
-            value:'5' },
-             {text:formatMessage({
-                id: 'scientificModelling.speedMenuMedium',}),
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuHigh'
+            }),
+            value: '5'},
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuMedium'}),
         
             value: '2.5'},
-            {text:formatMessage({
-                id: 'scientificModelling.speedMenuLow',
-                }),
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuLow'
+            }),
             value: '0'}
         ];
     }
 
     get particlePosition () {
         return [
-            {text:formatMessage({
+            {text: formatMessage({
                 id: 'scientificModelling.positionMenuRandom',
                 default: 'randomly'}),
-            value:'randomly'},
-            {text:formatMessage({
+            value: 'randomly'},
+            {text: formatMessage({
                 id: 'scientificModelling.positionMenuCenter',
                 default: 'center'}),
-            value:'center'},
+            value: 'center'}
            
         ];
     }
@@ -445,21 +450,21 @@ class Scratch3ScientificModellingBlocks {
         }
         return menulist
     }*/
-// end of addtion
+    // end of addtion
     createParticles (args, util) {
         if (!util.target) return;
-        var numberOfClones = util.target.sprite.clones.length;
-        var numberOfParticles = Cast.toNumber(args.PARTICLES);
-        if (numberOfClones == 1) {
+        const numberOfClones = util.target.sprite.clones.length;
+        let numberOfParticles = Cast.toNumber(args.PARTICLES);
+        if (numberOfClones === 1) {
             util.target.speed = this.vel;
             util.target.temperature = this.temp;
-            this.motion.goTo({ TO: '_random_' }, { target: util.target});
-            this.motion.pointTowards({ TOWARDS: '_random_' }, { target: util.target});
+            this.motion.goTo({TO: '_random_'}, {target: util.target});
+            this.motion.pointTowards({TOWARDS: '_random_'}, {target: util.target});
             numberOfParticles = numberOfParticles - 1;
         }
         // this makes sure we will not create invisible particles
-        this.looks.show({}, { target: util.target});  
-        let totalParticle = this.runtime._cloneCounter + numberOfParticles;
+        this.looks.show({}, {target: util.target});
+        const totalParticle = this.runtime._cloneCounter + numberOfParticles;
         if (totalParticle >= 299) {
             numberOfParticles = 299 - this.runtime._cloneCounter;
         }
@@ -471,89 +476,86 @@ class Scratch3ScientificModellingBlocks {
                 // Place behind the original target.
                 newClone.goBehindOther(util.target);
                 newClone.speed = this.vel;
-                //this.vel = this.vel;
+                // this.vel = this.vel;
                 newClone.temperature = this.temp;
-                //this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
+                // this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
                 // Place in a ramdom position.
-                this.motion.goTo({ TO: '_random_' }, { target: newClone});
+                this.motion.goTo({TO: '_random_'}, {target: newClone});
                 // Point in a ramdom direction.
-                this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
-                this.particleCounter = this.particleCounter + 1;
+                this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
             }
         }
-        //hides the static sprite
-        //this.looks.hide({}, { target: util.target});
-        console.log('end of creation');
-        console.log(util.target);
-        this.hasParticles = true;
+        // hides the static sprite
+        // this.looks.hide({}, { target: util.target})
     }
 
     createParticlesOP (args, util) {
-        var numberOfParticles = Cast.toNumber(args.NUMBERPARTICLE);
-        //const chosenCostume = Cast.toString(args.COLORMENUOP);
+        let numberOfParticles = Cast.toNumber(args.NUMBERPARTICLE);
+        // const chosenCostume = Cast.toString(args.COLORMENUOP);
         const chosenPosition = Cast.toString(args.PARTICLEPOSITIONOP);
+        const numberOfClones = util.target.sprite.clones.length;
         // this makes sure we will not create invisible particles
-        this.looks.show({}, { target: util.target});
-        let totalParticle = this.runtime._cloneCounter + numberOfParticles;
-        util.target.speed = this.vel;
-        util.target.temperature = this.temp;
-        this.motion.goTo({ TO: '_random_' }, { target: util.target});
-        this.motion.pointTowards({ TOWARDS: '_random_' }, { target: util.target});
+        this.looks.show({}, {target: util.target});
+        if (numberOfClones === 1) {
+            util.target.speed = this.vel;
+            util.target.temperature = this.temp;
+            this.motion.goTo({TO: '_random_'}, {target: util.target});
+            this.motion.pointTowards({TOWARDS: '_random_'}, {target: util.target});
+            numberOfParticles = numberOfParticles - 1;
+        }
+        const totalParticle = this.runtime._cloneCounter + numberOfParticles;
         if (totalParticle >= 299) {
             numberOfParticles = 299 - this.runtime._cloneCounter;
         }
         if (!util.target) return;
-        this.looks.switchCostume({COSTUME:args.COLORMENUOP}, { target: util.target});
-        if (chosenPosition == 'randomly') {
+        this.looks.switchCostume({COSTUME: args.COLORMENUOP}, {target: util.target});
+        if (chosenPosition === 'randomly') {
             for (let i = 0; i < numberOfParticles; i++) {
                 // Based on scratch3_control.createClone()
-                const newClone = util.target.makeClone(); 
+                const newClone = util.target.makeClone();
                 if (newClone) {
                     this.runtime.addTarget(newClone);
                     // Place behind the original target.
                     newClone.goBehindOther(util.target);
                     newClone.speed = this.vel;
-                    //this.vel = this.vel;
+                    // this.vel = this.vel;
                     newClone.temperature = this.temp;
-                    //this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
+                    // this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
                     // Place in a ramdom position.
-                    this.motion.goTo({ TO: '_random_' }, { target: newClone});
+                    this.motion.goTo({TO: '_random_'}, {target: newClone});
                     // Point in a ramdom direction.
-                    this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
-                    this.particleCounter = this.particleCounter + 1;
+                    this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
                 }
             }
         }
-        if (chosenPosition == 'center') {
-            //places the sprite at the center of the canvas
+        if (chosenPosition === 'center') {
+            // places the sprite at the center of the canvas
             for (let i = 0; i < numberOfParticles;) {
-                //moves the sprite to a random position
-                this.motion.goTo({ TO: '_random_' }, { target: util.target});
+                // moves the sprite to a random position
+                this.motion.goTo({TO: '_random_'}, {target: util.target});
                 // Based on scratch3_control.createClone()
-                var r = Math.sqrt(((util.target.x)*(util.target.x)) +  ((util.target.y)*(util.target.y)));
+                const r = Math.sqrt(((util.target.x) * (util.target.x)) + ((util.target.y) * (util.target.y)));
                 if (r < 50) {
                     const newClone = util.target.makeClone();
                     this.runtime.addTarget(newClone);
                     // Place behind the original target.
                     newClone.goBehindOther(util.target);
                     newClone.speed = this.vel;
-                    //this.vel = this.vel;
+                    // this.vel = this.vel;
                     newClone.temperature = this.temp;
-                    //this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
+                    // this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
                     // Point in a ramdom direction.
-                    this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
+                    this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
                     i++;
-                    this.particleCounter = this.particleCounter + 1;
                 }
                   
             }
         }
-        //hides the static sprite
-        this.looks.hide({}, { target: util.target});
-        this.hasParticles = true;
+        // hides the static sprite
+        // this.looks.hide({}, {target: util.target});
         
     }
-// delete this block
+    // delete this block
     /*
     setCostume (args, util){
         /*
@@ -572,46 +574,46 @@ class Scratch3ScientificModellingBlocks {
     
     opositeDirection (args, util) {
         util.target.setDirection(util.target.direction - 180);
-        //this.motion.turnLeft({ DEGREES: 180 }, util.target);
+        // this.motion.turnLeft({ DEGREES: 180 }, util.target);
     }
 
     ifTouchingInvert () {
-        if (this.isTouchingList.length != 0) {
+        if (this.isTouchingList.length !== 0) {
             for (let i = 0; i < this.isTouchingList.length; i++) {
-                this.isTouchingList[i].direction = this.isTouchingList[i].direction + 180;  
+                this.isTouchingList[i].direction = this.isTouchingList[i].direction + 180;
             }
         }
     }
 
-    setParticleSpeed (args, util) {
-        var velocity = Cast.toString(args.PARTICLESPEED);
+    setParticleSpeed (args) {
+        const velocity = Cast.toNumber(args.PARTICLESPEED);
         this.vel = velocity;
         for (let i = 0; i < this.runtime.targets.length; i++) {
-            const util = { target: this.runtime.targets[i] };
-            if (util.target.speed != undefined) {
-                util.target.speed= velocity
+            const util = {target: this.runtime.targets[i]};
+            if (util.target.hasOwnProperty('speed')) {
+                util.target.speed = velocity;
             }
         }
     
     }
     // delete this
     
-    setParticleTemperature (args, util) {
-        console.log(util.target)
+    setParticleTemperature (/* args, util*/) {
+        // console.log(util.target);
         /*
         var tsVariable = []
         tsVariable.id = 'temperatureSlider';
         tsVariable.name = 'temperatureSlider';
         tsVariable.value = 10;
         */
-        //this.data.setVariableTo({VARIABLE:tsVariable},{target: util.target})
+        // this.data.setVariableTo({VARIABLE:tsVariable},{target: util.target})
         /*
         var temperature = Cast.toString(args.PARTICLETEMPERATURE);
         this.temp = temperature;
         for (let i = 0; i < this.runtime.targets.length; i++) {
             const util = { target: this.runtime.targets[i] };
             if (util.target.temperature) {
-                util.target.temperature= this.temp   
+                // util.target.temperature = this.temp
             }
         }
         */
@@ -619,64 +621,69 @@ class Scratch3ScientificModellingBlocks {
     
 
     whenTemperatureIs (args) {
-        var checkTemperature = Cast.toString(args.WHENTEMPMENU);
-        return checkTemperature == this.temp 
+        const checkTemperature = Cast.toString(args.WHENTEMPMENU);
+        return checkTemperature === this.temp;
     }
 
-    whenTouchingAnotherParticle (args, util) {
-        var isTouching = false;
+    whenTouchingAnotherParticle () {
+        let isTouching = false;
         this.isTouchingList = [];
         for (let i = 0; i < this.runtime.targets.length; i++) {
-            const util = { target: this.runtime.targets[i] };
-            //util.target.isTouchingSprite(util.target.sprite.name);
-            if (util.target.isTouchingSprite(util.target.sprite.name) == true) {
+            const util = {target: this.runtime.targets[i]};
+            // util.target.isTouchingSprite(util.target.sprite.name);
+            if (util.target.isTouchingSprite(util.target.sprite.name) === true) {
                 isTouching = true;
-                this.isTouchingList.push(util.target)
+                this.isTouchingList.push(util.target);
             }
         }
-        //console.log(this.isTouchingList);
-        return isTouching
+        // console.log(this.isTouchingList);
+        return isTouching;
     }
     
     touchingAnotherParticle (args, util) {
-        return util.target.isTouchingSprite(util.target.sprite.name)
+        return util.target.isTouchingSprite(util.target.sprite.name);
     }
 
     temperatureReporter () {
-        if (!this.temp) {return "undefined"};
-        if (this.temp == 100) {
-            return formatMessage({id: 'scientificModelling.speedMenuHigh',})
+        if (!this.temp) {
+            return 'undefined';
         }
-        if (this.temp == 50) {
-            return formatMessage({id: 'scientificModelling.speedMenuMedium',})
+        if (this.temp === 100) {
+            return formatMessage({id: 'scientificModelling.speedMenuHigh'});
         }
-        if (this.temp == 0) {
-            return formatMessage({id: 'scientificModelling.speedMenuLow',})
+        if (this.temp === 50) {
+            return formatMessage({id: 'scientificModelling.speedMenuMedium'});
+        }
+        if (this.temp === 0) {
+            return formatMessage({id: 'scientificModelling.speedMenuLow'});
         }
     }
 
     speedReporter () {
-        if (!this.vel) {return "undefined"};
-        if (this.vel == 5) {
-            return formatMessage({id: 'scientificModelling.speedMenuHigh',})
+        if (this.vel === 'undefined') {
+            return 'undefined';
         }
-        if (this.vel == 2.5) {
-            return formatMessage({id: 'scientificModelling.speedMenuMedium',})
+        if (this.vel === 5) {
+            return formatMessage({id: 'scientificModelling.speedMenuHigh'});
         }
-        if (this.vel == 0) {
-            return formatMessage({id: 'scientificModelling.speedMenuLow',})
+        if (this.vel === 2.5) {
+            return formatMessage({id: 'scientificModelling.speedMenuMedium'});
+        }
+        if (this.vel === 0) {
+            return formatMessage({id: 'scientificModelling.speedMenuLow'});
         }
     }
+    
 
     collisionReporter () {
         // 1 collision has 2 particles so we divide it by 2 to know the collision number
-        var collisionCounter = this.isTouchingList.length / 2;
-        collision = Math.round(collisionCounter);
-        return collisionCounter
+        let collisionCounter = this.isTouchingList.length / 2;
+        collisionCounter = Math.round(collisionCounter);
+        return collisionCounter;
     }
 
     numberParticleReporter () {
-        return this.particleCounter
+        return this._particles().length;
     }
 }
 module.exports = Scratch3ScientificModellingBlocks;

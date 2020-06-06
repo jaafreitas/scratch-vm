@@ -28,13 +28,15 @@ class Scratch3ScientificModellingBlocks {
         this.motion = new Motion(this.runtime);
         this.looks = new Looks(this.runtime);
         this.data = new Data(this.runtime);
-        this.temp = 50;
+        this.temp = 'medium';
         this.runtime.on(Runtime.PROJECT_START, this._projectStart.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_STOP, this._projectRunStop.bind(this));
         this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
         this._lastUpdate = Date.now();
         this._loop();
+        this._temperatureVar();
+        this.limiter = true;
     }
 
     get DEFAULT_SPEED () {
@@ -78,12 +80,36 @@ class Scratch3ScientificModellingBlocks {
         // this._particles().map(target => target.speed = undefined);
     }
 
+    _temperatureVar () {
+        const tsVariableId = 'temperatureSlider';
+        const tsVariableName = 'temperature slider';
+        this.runtime.targets[0].lookupOrCreateVariable(tsVariableId, tsVariableName, '');
+    }
+
     _loop () {
         // scratch has a limit of 120 for length of line
         const a = Scratch3ScientificModellingBlocks.INTERVAL;
         setTimeout(this._loop.bind(this), Math.max(this.runtime.currentStepTime, a));
         const time = Date.now();
         const offset = time - this._lastUpdate;
+        if (this.runtime.targets[0].variables.hasOwnProperty('temperatureSlider')) {
+            const tsValue = this.runtime.targets[0].variables.temperatureSlider.value;
+            for (let i = 0; i < this.runtime.targets.length; i++) {
+                const util = {target: this.runtime.targets[i]};
+                if (util.target.hasOwnProperty('temperature')) {
+                    util.target.temperature = tsValue;
+                }
+            }
+            if (tsValue > 70) {
+                this.temp = 'high';
+            }
+            if (tsValue < 70 && tsValue > 40) {
+                this.temp = 'medium';
+            }
+            if (tsValue < 40) {
+                this.temp = 'low';
+            }
+        }
         if (offset > Scratch3ScientificModellingBlocks.INTERVAL) {
             this._lastUpdate = time;
             this.isTouchingList = [];
@@ -204,7 +230,7 @@ class Scratch3ScientificModellingBlocks {
                     
                 },
                 */
-
+                
                 {
                     opcode: 'opositeDirection',
                     blockType: BlockType.COMMAND,
@@ -214,7 +240,7 @@ class Scratch3ScientificModellingBlocks {
                         description: 'reverse sprites direction'
                     })
                 },
-
+                
                 {
                     opcode: 'ifTouchingInvert',
                     blockType: BlockType.COMMAND,
@@ -382,15 +408,15 @@ class Scratch3ScientificModellingBlocks {
     get particleTemperatureMenu () {
         return [
             {text: formatMessage({
-                id: 'scientificModelling.speedMenuHigh',
+                id: 'scientificModelling.temperatureMenuHigh',
                 default: 'high'}),
             value: '100'},
             {text: formatMessage({
-                id: 'scientificModelling.speedMenuMedium',
+                id: 'scientificModelling.temperatureMenuMedium',
                 default: 'medium'}),
             value: '50'},
             {text: formatMessage({
-                id: 'scientificModelling.speedMenuLow',
+                id: 'scientificModelling.temperatureMenuLow',
                 default: 'low'}),
             value: '0'}
         ];
@@ -399,29 +425,38 @@ class Scratch3ScientificModellingBlocks {
     get whenParticleTemperatureMenu () {
         return [
             {text: formatMessage({
-                id: 'scientificModelling.speedMenuHigh'}),
-            value: '100'},
+                id: 'scientificModelling.temperatureMenuHigh',
+                default: 'high'
+            }),
+            value: 'high'},
             {text: formatMessage({
-                id: 'scientificModelling.speedMenuMedium'}),
-            value: '50'},
+                id: 'scientificModelling.temperatureMenuMedium',
+                default: 'medium'
+            }),
+            value: 'medium'},
             {text: formatMessage({
-                id: 'scientificModelling.speedMenuLow'}),
-            value: '0'}
+                id: 'scientificModelling.temperatureMenuLow',
+                default: 'low'
+            }),
+            value: 'low'}
         ];
     }
 
     get particleSpeedMenu () {
         return [
             {text: formatMessage({
-                id: 'scientificModelling.speedMenuHigh'
+                id: 'scientificModelling.speedMenuHigh',
+                default: 'high'
             }),
             value: '5'},
             {text: formatMessage({
-                id: 'scientificModelling.speedMenuMedium'}),
-        
+                id: 'scientificModelling.speedMenuMedium',
+                default: 'medium'
+            }),
             value: '2.5'},
             {text: formatMessage({
-                id: 'scientificModelling.speedMenuLow'
+                id: 'scientificModelling.speedMenuLow',
+                default: 'low'
             }),
             value: '0'}
         ];
@@ -493,6 +528,9 @@ class Scratch3ScientificModellingBlocks {
         // const chosenCostume = Cast.toString(args.COLORMENUOP);
         const chosenPosition = Cast.toString(args.PARTICLEPOSITIONOP);
         const numberOfClones = util.target.sprite.clones.length;
+        // checks if the costume will change
+        const currentCostume = util.target.currentCostume;
+        const requestedCostume = args.COLORMENUOP;
         // this makes sure we will not create invisible particles
         this.looks.show({}, {target: util.target});
         if (numberOfClones === 1) {
@@ -534,7 +572,7 @@ class Scratch3ScientificModellingBlocks {
                 this.motion.goTo({TO: '_random_'}, {target: util.target});
                 // Based on scratch3_control.createClone()
                 const r = Math.sqrt(((util.target.x) * (util.target.x)) + ((util.target.y) * (util.target.y)));
-                if (r < 50) {
+                if (r < 80) {
                     const newClone = util.target.makeClone();
                     this.runtime.addTarget(newClone);
                     // Place behind the original target.
@@ -549,6 +587,10 @@ class Scratch3ScientificModellingBlocks {
                 }
                   
             }
+        }
+        if (currentCostume !== requestedCostume) {
+            this.looks.switchCostume({COSTUME: currentCostume + 1}, {target: util.target});
+            // console.log(currentCostume);
         }
         // hides the static sprite
         // this.looks.hide({}, {target: util.target});
@@ -565,7 +607,7 @@ class Scratch3ScientificModellingBlocks {
             
         }
         // changes the costume of the sprite
-        this.looks.switchCostume({COSTUME:args.PARTICLECOSTUME}, { target: util.target});
+        this.looks.switchCostume({COSTUME:args.PARTICLECOSTUME}, {target: util.target});
         //this.looks.hide({}, { target: util.target});
         //this.looks.show({}, { target: util.target});
     }
@@ -573,19 +615,20 @@ class Scratch3ScientificModellingBlocks {
     
     opositeDirection (args, util) {
         util.target.setDirection(util.target.direction - 180);
-        // this.motion.turnLeft({ DEGREES: 180 }, util.target);
+        this.motion.moveSteps({STEPS: util.target.speed},{target: util.target});
+        // console.log(util);
     }
 
     ifTouchingInvert () {
         if (this.isTouchingList.length !== 0) {
             for (let i = 0; i < this.isTouchingList.length; i++) {
-                this.isTouchingList[i].direction = this.isTouchingList[i].direction + 180;
+                this.isTouchingList[i].direction = this.isTouchingList[i].direction - 180;
             }
         }
     }
 
     setParticleSpeed (args) {
-        const velocity = Cast.toNumber(args.PARTICLESPEED);
+        const velocity = Cast.toString(args.PARTICLESPEED);
         this.vel = velocity;
         for (let i = 0; i < this.runtime.targets.length; i++) {
             const util = {target: this.runtime.targets[i]};
@@ -621,7 +664,11 @@ class Scratch3ScientificModellingBlocks {
 
     whenTemperatureIs (args) {
         const checkTemperature = Cast.toString(args.WHENTEMPMENU);
+        // console.log(checkTemperature+' entrada'+this.temp)
+        // console.log(checkTemperature === this.temp);
+
         return checkTemperature === this.temp;
+        
     }
 
     whenTouchingAnotherParticle () {
@@ -644,18 +691,7 @@ class Scratch3ScientificModellingBlocks {
     }
 
     temperatureReporter () {
-        if (!this.temp) {
-            return 'undefined';
-        }
-        if (this.temp === 100) {
-            return formatMessage({id: 'scientificModelling.speedMenuHigh'});
-        }
-        if (this.temp === 50) {
-            return formatMessage({id: 'scientificModelling.speedMenuMedium'});
-        }
-        if (this.temp === 0) {
-            return formatMessage({id: 'scientificModelling.speedMenuLow'});
-        }
+        return this.temp;
     }
 
     speedReporter () {

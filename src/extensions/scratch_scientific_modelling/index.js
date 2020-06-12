@@ -6,6 +6,7 @@ const Motion = require('../../blocks/scratch3_motion');
 const Looks = require('../../blocks/scratch3_looks');
 const Data = require('../../blocks/scratch3_data');
 const Runtime = require('../../engine/runtime');
+const MonitorRecord = require('../../engine/monitor-record');
 
 /**
  * Icon png to be displayed at the left edge of each extension block, encoded as a data URI.
@@ -81,9 +82,27 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _temperatureVar () {
-        const tsVariableId = 'temperatureSlider';
-        const tsVariableName = 'temperature slider';
-        this.runtime.targets[0].lookupOrCreateVariable(tsVariableId, tsVariableName, '');
+        const args = { VARIABLE: { id: 'temperatureSlider', name: 'temperature slider' }, VALUE: 50 }
+        const stage = this.runtime.getTargetForStage();
+        if (stage) {
+            this.data.setVariableTo(args, { target: stage });            
+            // Show the new variable on toolbox
+            this.runtime.requestBlocksUpdate();
+
+            // Show the new variable on monitor
+            const monitor = MonitorRecord({
+                id: args.VARIABLE.id,
+                opcode: 'data_variable',
+                value: args.VALUE,
+                mode: 'slider',
+                sliderMin: -20,
+                sliderMax: 120,
+                isDiscrete: true,
+                visible: true,
+                params: {VARIABLE: args.VARIABLE.name}
+            });
+            this.runtime.requestAddMonitor(monitor);
+        }
     }
 
     _loop () {

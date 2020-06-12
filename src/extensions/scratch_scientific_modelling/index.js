@@ -34,8 +34,7 @@ class Scratch3ScientificModellingBlocks {
         this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_STOP, this._projectRunStop.bind(this));
         this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
-        this._lastUpdate = Date.now();
-        this._loop();
+        this._steppingInterval = null;
         this._temperatureVar();
         this.limiter = true;
     }
@@ -48,10 +47,6 @@ class Scratch3ScientificModellingBlocks {
         return this.temp;
     }
 
-    static get INTERVAL () {
-        return 33;
-    }
-
     _particles () {
         return this.runtime.targets.filter(target => target.hasOwnProperty('speed'));
     }
@@ -62,8 +57,14 @@ class Scratch3ScientificModellingBlocks {
     }
     
     _projectRunStart () {
-        // console.log('PROJECT_RUN_START') ;
+        // console.log('PROJECT_RUN_START');
         // console.log(this);
+        if (this._steppingInterval) {
+            clearInterval(this._steppingInterval);
+        }
+        this._steppingInterval = setInterval(() => {
+            this._step();
+        }, this.runtime.currentStepTime);
     }
 
     _projectRunStop () {
@@ -74,11 +75,10 @@ class Scratch3ScientificModellingBlocks {
     _projectStopAll () {
         // console.log('PROJECT_STOP_ALL');
         // console.log(this);
-        for (let i = 0; i < this._particles().length; i++) {
-            this._particles()[i].speed = 0;
+        if (this._steppingInterval) {
+            clearInterval(this._steppingInterval);
         }
         this.vel = 0;
-        // this._particles().map(target => target.speed = undefined);
     }
 
     _temperatureVar () {
@@ -105,12 +105,9 @@ class Scratch3ScientificModellingBlocks {
         }
     }
 
-    _loop () {
-        // scratch has a limit of 120 for length of line
-        const a = Scratch3ScientificModellingBlocks.INTERVAL;
-        setTimeout(this._loop.bind(this), Math.max(this.runtime.currentStepTime, a));
-        const time = Date.now();
-        const offset = time - this._lastUpdate;
+    _step () {
+        // TODO: runtime.getTargetForStage() ao invés de targets[0]?
+        // TODO: getVariable?        
         if (this.runtime.targets[0].variables.hasOwnProperty('temperatureSlider')) {
             const tsValue = this.runtime.targets[0].variables.temperatureSlider.value;
             for (let i = 0; i < this.runtime.targets.length; i++) {
@@ -129,22 +126,19 @@ class Scratch3ScientificModellingBlocks {
                 this.temp = 'low';
             }
         }
-        if (offset > Scratch3ScientificModellingBlocks.INTERVAL) {
-            this._lastUpdate = time;
-            this.isTouchingList = [];
-            // this.isTouchingList = this.runtime.targets.filter(this.runtime.targets.isTouchingSprite);
-            for (let i = 0; i < this.runtime.targets.length; i++) {
-                const util = {target: this.runtime.targets[i]};
-                // this.isTouchingList = this.runtime.targets.filter(util.target.isTouchingSprite);
-                if (util.target.speed) {
-                    this.motion.moveSteps({STEPS: util.target.speed}, util);
-                    this.motion.ifOnEdgeBounce({}, util);
-                    if (util.target.isTouchingSprite(util.target.sprite.name) === true) {
-                        this.isTouchingList.push(util.target);
-                    }
-                    // console.log(util.target.isTouchingSprite(util.target.sprite.name))
-                    // console.log(util.target)
+        this.isTouchingList = [];
+        // this.isTouchingList = this.runtime.targets.filter(this.runtime.targets.isTouchingSprite);
+        for (let i = 0; i < this.runtime.targets.length; i++) {
+            const util = {target: this.runtime.targets[i]};
+            // this.isTouchingList = this.runtime.targets.filter(util.target.isTouchingSprite);
+            if (util.target.speed) {
+                this.motion.moveSteps({STEPS: util.target.speed}, util);
+                this.motion.ifOnEdgeBounce({}, util);
+                if (util.target.isTouchingSprite(util.target.sprite.name) === true) {
+                    this.isTouchingList.push(util.target);
                 }
+                // console.log(util.target.isTouchingSprite(util.target.sprite.name))
+                // console.log(util.target)
             }
         }
     }
@@ -516,6 +510,7 @@ class Scratch3ScientificModellingBlocks {
         // we want to create
         const totalParticles = this.runtime._cloneCounter + numberOfParticles;
         // verifies if after the creation there will be more clones than the amount allowed
+        // TODO: usar runtime.clonesAvailable()?
         if (totalParticles >= 299) {
             numberOfParticles = 299 - this.runtime._cloneCounter;
         }

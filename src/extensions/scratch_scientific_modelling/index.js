@@ -6,6 +6,7 @@ const formatMessage = require('format-message');
 const Motion = require('../../blocks/scratch3_motion');
 const Looks = require('../../blocks/scratch3_looks');
 const Data = require('../../blocks/scratch3_data');
+const Control = require('../../blocks/scratch3_control');
 const Runtime = require('../../engine/runtime');
 const MonitorRecord = require('../../engine/monitor-record');
 
@@ -30,6 +31,7 @@ class Scratch3ScientificModellingBlocks {
         this.motion = new Motion(this.runtime);
         this.looks = new Looks(this.runtime);
         this.data = new Data(this.runtime);
+        this.control = new Control(this.runtime);
         this.temp = 'medium';
         this.runtime.on(Runtime.PROJECT_START, this._projectStart.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
@@ -53,40 +55,29 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _projectStart () {
-        // console.log('PROJECT_START');
-        // console.log(this);
+        
     }
     
     _projectRunStart () {
-        // console.log('PROJECT_RUN_START');
-        // console.log(this);
-        if (this._steppingInterval) {
-            clearInterval(this._steppingInterval);
-        }
-        this._steppingInterval = setInterval(() => {
-            this._step();
-        }, this.runtime.currentStepTime);
+        this._createStepInterval();
     }
 
     _projectRunStop () {
-        // console.log('PROJECT_RUN_STOP');
-        // console.log(this);
+
     }
 
     _projectStopAll () {
-        // console.log('PROJECT_STOP_ALL');
-        // console.log(this);
         if (this._steppingInterval) {
             clearInterval(this._steppingInterval);
         }
-        this.vel = 0;
+        // this.vel = 0;
     }
 
     _temperatureVar () {
-        const args = { VARIABLE: { id: 'temperatureSlider', name: 'temperature slider' }, VALUE: 50 }
+        const args = {VARIABLE: {id: 'temperatureSlider', name: 'temperature slider'}, VALUE: 50};
         const stage = this.runtime.getTargetForStage();
         if (stage) {
-            this.data.setVariableTo(args, { target: stage });            
+            this.data.setVariableTo(args, {target: stage});
             // Show the new variable on toolbox
             this.runtime.requestBlocksUpdate();
 
@@ -106,9 +97,17 @@ class Scratch3ScientificModellingBlocks {
         }
     }
 
+    _createStepInterval () {
+        if (this._steppingInterval) {
+            clearInterval(this._steppingInterval);
+        }
+        this._steppingInterval = setInterval(() => {
+            this._step();
+        }, this.runtime.currentStepTime);
+    }
     _step () {
         // TODO: runtime.getTargetForStage() ao invés de targets[0]?
-        // TODO: getVariable?        
+        // TODO: getVariable?
         if (this.runtime.targets[0].variables.hasOwnProperty('temperatureSlider')) {
             const tsValue = this.runtime.targets[0].variables.temperatureSlider.value;
             for (let i = 0; i < this.runtime.targets.length; i++) {
@@ -280,6 +279,15 @@ class Scratch3ScientificModellingBlocks {
                             
                         }
                     }
+                },
+
+                {
+                    opcode: 'go',
+                    blockType: BlockType.HAT,
+                    text: formatMessage({
+                        id: 'scientificModelling.go',
+                        default: 'go'
+                    })
                 },
                 /*
                 {
@@ -533,8 +541,7 @@ class Scratch3ScientificModellingBlocks {
                 this.motion.goTo({TO: '_random_'}, {target: newClone});
                 this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
                 if (newClone.isTouchingSprite(util.target.sprite.name) === true){
-                    this.runtime.disposeTarget(newClone);
-                    this.runtime.stopForTarget(newClone);
+                    this.control.deleteClone({}, {target: newClone});
                     i = i - 1;
                     c++;
                     continue;
@@ -543,10 +550,12 @@ class Scratch3ScientificModellingBlocks {
                 newClone.speed = this.vel;
                 // this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
                 newClone.temperature = this.temp;
+                newClone.limiter = true;
             }
         }
         // hides the static sprite
         this.looks.hide({}, {target: util.target});
+        
     }
 
     createParticlesOP (args, util) {
@@ -582,8 +591,7 @@ class Scratch3ScientificModellingBlocks {
                     this.motion.goTo({TO: '_random_'}, {target: newClone});
                     this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
                     if (newClone.isTouchingSprite(util.target.sprite.name) === true){
-                        this.runtime.disposeTarget(newClone);
-                        this.runtime.stopForTarget(newClone);
+                        this.control.deleteClone({}, {target: newClone});
                         i = i - 1;
                         c++;
                         continue;
@@ -592,6 +600,7 @@ class Scratch3ScientificModellingBlocks {
                     newClone.speed = this.vel;
                     // this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
                     newClone.temperature = this.temp;
+                    newClone.limiter = true;
                 }
             }
         }
@@ -612,8 +621,7 @@ class Scratch3ScientificModellingBlocks {
                     this.motion.goTo({TO: '_random_'}, {target: newClone});
                     const r = Math.sqrt(((newClone.x) * (newClone.x)) + ((newClone.y) * (newClone.y)));
                     if (newClone.isTouchingSprite(util.target.sprite.name) === true || r > 80){
-                        this.runtime.disposeTarget(newClone);
-                        this.runtime.stopForTarget(newClone);
+                        this.control.deleteClone({}, {target: newClone});
                         i = i - 1;
                         c++;
                         continue;
@@ -622,6 +630,7 @@ class Scratch3ScientificModellingBlocks {
                     newClone.speed = this.vel;
                     // this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
                     newClone.temperature = this.temp;
+                    newClone.limiter = true;
                 }
                     
                 
@@ -629,7 +638,6 @@ class Scratch3ScientificModellingBlocks {
         }
         if (currentCostume !== requestedCostume) {
             this.looks.switchCostume({COSTUME: currentCostume + 1}, {target: util.target});
-            // console.log(currentCostume);
         }
         // hides the static sprite
         this.looks.hide({}, {target: util.target});
@@ -655,7 +663,7 @@ class Scratch3ScientificModellingBlocks {
     opositeDirection (args, util) {
         util.target.setDirection(util.target.direction - 180);
         this.motion.moveSteps({STEPS: util.target.speed}, {target: util.target});
-        // console.log(util.target);
+    
     }
 
     ifTouchingInvert () {
@@ -680,7 +688,6 @@ class Scratch3ScientificModellingBlocks {
     // delete this
     
     setParticleTemperature (/* args, util*/) {
-        // console.log(util.target);
         /*
         var tsVariable = []
         tsVariable.id = 'temperatureSlider';
@@ -703,13 +710,24 @@ class Scratch3ScientificModellingBlocks {
 
     whenTemperatureIs (args) {
         const checkTemperature = Cast.toString(args.WHENTEMPMENU);
-        // console.log(checkTemperature+' entrada'+this.temp)
-        // console.log(checkTemperature === this.temp);
+        // this._createStepInterval();
 
         return checkTemperature === this.temp;
         
     }
 
+    go (args, util) {
+        
+        
+        if (util.target.limiter === true) {
+            this._createStepInterval();
+            util.target.limiter = false;
+            return true
+            
+        }
+        return false
+    }
+    /*
     whenTouchingAnotherParticle () {
         let isTouching = false;
         this.isTouchingList = [];
@@ -721,10 +739,9 @@ class Scratch3ScientificModellingBlocks {
                 this.isTouchingList.push(util.target);
             }
         }
-        // console.log(this.isTouchingList);
         return isTouching;
     }
-    
+    */
     touchingAnotherParticle (args, util) {
         return util.target.isTouchingSprite(util.target.sprite.name);
     }

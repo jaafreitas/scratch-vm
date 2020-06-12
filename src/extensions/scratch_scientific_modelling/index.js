@@ -1,3 +1,4 @@
+/* eslint no-console: "warn" */
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const Cast = require('../../util/cast');

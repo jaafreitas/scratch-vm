@@ -55,7 +55,7 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _projectStart () {
-        
+        this._createStepInterval();
     }
     
     _projectRunStart () {
@@ -69,6 +69,7 @@ class Scratch3ScientificModellingBlocks {
     _projectStopAll () {
         if (this._steppingInterval) {
             clearInterval(this._steppingInterval);
+            this._steppingInterval = null;
         }
         // this.vel = 0;
     }
@@ -98,13 +99,13 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _createStepInterval () {
-        if (this._steppingInterval) {
-            clearInterval(this._steppingInterval);
+        if (!this._steppingInterval) {
+            this._steppingInterval = setInterval(() => {
+                this._step();
+            }, this.runtime.currentStepTime);
         }
-        this._steppingInterval = setInterval(() => {
-            this._step();
-        }, this.runtime.currentStepTime);
     }
+
     _step () {
         // TODO: runtime.getTargetForStage() ao invés de targets[0]?
         // TODO: getVariable?
@@ -266,6 +267,7 @@ class Scratch3ScientificModellingBlocks {
                 {
                     opcode: 'whenTemperatureIs',
                     blockType: BlockType.HAT,
+                    shouldRestartExistingThreads: false,
                     text: formatMessage({
                         id: 'scientificModelling.whenTemperatureIs',
                         default: 'when temperature is [WHENTEMPMENU]',
@@ -284,6 +286,7 @@ class Scratch3ScientificModellingBlocks {
                 {
                     opcode: 'go',
                     blockType: BlockType.HAT,
+                    shouldRestartExistingThreads: false,
                     text: formatMessage({
                         id: 'scientificModelling.go',
                         default: 'go'
@@ -710,22 +713,16 @@ class Scratch3ScientificModellingBlocks {
 
     whenTemperatureIs (args) {
         const checkTemperature = Cast.toString(args.WHENTEMPMENU);
-        // this._createStepInterval();
-
-        return checkTemperature === this.temp;
-        
+        return checkTemperature === this.temp;        
     }
 
     go (args, util) {
-        
-        
-        if (util.target.limiter === true) {
-            this._createStepInterval();
+        if (util.target.limiter) {
             util.target.limiter = false;
-            return true
-            
+            return true;
+        } else {
+            return false;
         }
-        return false
     }
     /*
     whenTouchingAnotherParticle () {

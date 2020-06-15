@@ -713,16 +713,15 @@ class Scratch3ScientificModellingBlocks {
 
     whenTemperatureIs (args) {
         const checkTemperature = Cast.toString(args.WHENTEMPMENU);
-        return checkTemperature === this.temp;        
+        return checkTemperature === this.temp;
     }
 
     go (args, util) {
         if (util.target.limiter) {
             util.target.limiter = false;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
     /*
     whenTouchingAnotherParticle () {

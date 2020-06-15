@@ -720,7 +720,7 @@ class Scratch3ScientificModellingBlocks {
     }
 
     go (args, util) {
-        if (util.target.limiter) {
+        if (util.target.limiter === true) {
             console.log('a');
             return true;
         } else {

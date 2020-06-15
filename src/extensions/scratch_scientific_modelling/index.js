@@ -141,6 +141,9 @@ class Scratch3ScientificModellingBlocks {
                 // console.log(util.target.isTouchingSprite(util.target.sprite.name))
                 // console.log(util.target)
             }
+            if (util.target.limiter === true) {
+                util.target.limiter = false;
+            }
         }
     }
     _setupTranslations () {
@@ -718,7 +721,7 @@ class Scratch3ScientificModellingBlocks {
 
     go (args, util) {
         if (util.target.limiter) {
-            util.target.limiter = false;
+            console.log('a');
             return true;
         } else {
             return false;

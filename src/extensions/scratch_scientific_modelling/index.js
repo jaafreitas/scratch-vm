@@ -39,7 +39,7 @@ class Scratch3ScientificModellingBlocks {
         this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
         this._steppingInterval = null;
         this._temperatureVar();
-        this.limiter = true;
+        this.limiter = false;
     }
 
     get DEFAULT_SPEED () {
@@ -70,6 +70,7 @@ class Scratch3ScientificModellingBlocks {
         if (this._steppingInterval) {
             clearInterval(this._steppingInterval);
             this._steppingInterval = null;
+            this.limiter = false;
         }
         // this.vel = 0;
     }
@@ -141,7 +142,7 @@ class Scratch3ScientificModellingBlocks {
                 // console.log(util.target.isTouchingSprite(util.target.sprite.name))
                 // console.log(util.target)
             }
-            if (util.target.limiter === true) {
+            if (util.target.limiter === true && this.limiter === true) {
                 util.target.limiter = false;
             }
         }
@@ -721,6 +722,7 @@ class Scratch3ScientificModellingBlocks {
 
     go (args, util) {
         if (util.target.limiter === true) {
+            this.limiter = true;
             console.log('a');
             return true;
         }

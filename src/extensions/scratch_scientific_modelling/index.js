@@ -514,40 +514,36 @@ class Scratch3ScientificModellingBlocks {
         return menulist
     }*/
     // end of addtion
-    
-    createParticles (args, util) {
-        if (!util.target) return;
-        // current number of clones of the sprite we are cloning
-        // const numberOfClones = util.target.sprite.clones.length;
-        // number of clones requested
-        let numberOfParticles = Cast.toNumber(args.PARTICLES);
+
+    _checkNumberOfParticles (numberOfParticles) {
         // this.runtime._cloneCounter gives us the total of existing clones
         // total particles is the sum of the total of existing clones with the number of clones
         // we want to create
         const totalParticles = this.runtime._cloneCounter + numberOfParticles;
         // verifies if after the creation there will be more clones than the amount allowed
-        // TODO: usar runtime.clonesAvailable()?
-        if (totalParticles >= 299) {
-            numberOfParticles = 299 - this.runtime._cloneCounter;
+        if (totalParticles >= 300) {
+            numberOfParticles = 300 - this.runtime._cloneCounter;
         }
-        // tells scratch to show the particle we are cloning
-        // if you clone a hidden particle the clone will be hidden
+        return numberOfParticles;
+    }
+
+    _createNParticlesRandomly (numberOfParticles, util, rm) {
         this.looks.show({}, {target: util.target});
-        // counter
         let c = 0;
         for (let i = 0; i < numberOfParticles; i++) {
-            // stops it from crashing
+            // moves the sprite to a random position
+            // Based on scratch3_control.createClone()
             if (c > 600) {
                 this.looks.hide({}, {target: util.target});
                 return;
             }
-            // based on scratch3_control.createClone()
             const newClone = util.target.makeClone();
             if (newClone) {
                 this.runtime.addTarget(newClone);
-                this.motion.goTo({TO: '_random_'}, {target: newClone});
                 this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
-                if (newClone.isTouchingSprite(util.target.sprite.name) === true){
+                this.motion.goTo({TO: '_random_'}, {target: newClone});
+                const r = Math.sqrt(((newClone.x) * (newClone.x)) + ((newClone.y) * (newClone.y)));
+                if (newClone.isTouchingSprite(util.target.sprite.name) === true || r > rm){
                     this.control.deleteClone({}, {target: newClone});
                     i = i - 1;
                     c++;
@@ -560,94 +556,48 @@ class Scratch3ScientificModellingBlocks {
                 newClone.limiter = true;
             }
         }
-        // hides the static sprite
         this.looks.hide({}, {target: util.target});
+    }
+    
+    createParticles (args, util) {
+        if (!util.target) return;
+        // number of clones requested
+        let numberOfParticles = Cast.toNumber(args.PARTICLES);
+        const rm = 300;
+        numberOfParticles = this._checkNumberOfParticles(numberOfParticles);
+        // TODO: usar runtime.clonesAvailable()?
+        this._createNParticlesRandomly(numberOfParticles, util, rm);
+        // console.log(this._particles());
         
     }
 
     createParticlesOP (args, util) {
+        if (!util.target) return;
         //  number of particles requested to create
-        let numberOfParticles = Cast.toNumber(args.NUMBERPARTICLE);
+        const numberOfParticles = Cast.toNumber(args.NUMBERPARTICLE);
         // where the particles will be created
         const chosenPosition = Cast.toString(args.PARTICLEPOSITIONOP);
-        // const numberOfClones = util.target.sprite.clones.lenght;
-        const currentCostume = util.target.currentCostume;
+        // const currentCostume = util.target.currentCostume;
         const requestedCostume = args.COLORMENUOP;
-        this.looks.show({}, {target: util.target});
-        const totalParticles = this.runtime._cloneCounter + numberOfParticles;
-        if (totalParticles >= 299) {
-            numberOfParticles = 299 - this.runtime._cloneCounter;
-        }
-        if (!util.target) return;
+        // console.log(requestedCostume);
+        this._checkNumberOfParticles(numberOfParticles);
         //  switch costumes of the original sprite
         this.looks.switchCostume({COSTUME: requestedCostume}, {target: util.target});
-        let c = 0;
         // loop for creating particles ramdomly
         if (chosenPosition === 'randomly') {
-            for (let i = 0; i < numberOfParticles; i++) {
-                // stops it from crashing
-                if (c > 600) {
-                    this.looks.hide({}, {target: util.target});
-                    this.looks.switchCostume({COSTUME: currentCostume + 1}, {target: util.target});
-                    return;
-                }
-                // based on scratch3_control.createClone()
-                const newClone = util.target.makeClone();
-                if (newClone) {
-                    this.runtime.addTarget(newClone);
-                    this.motion.goTo({TO: '_random_'}, {target: newClone});
-                    this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
-                    if (newClone.isTouchingSprite(util.target.sprite.name) === true){
-                        this.control.deleteClone({}, {target: newClone});
-                        i = i - 1;
-                        c++;
-                        continue;
-                    }
-                    // this.vel = Scratch3ScientificModellingBlocks.DEFAULT_SPEED;
-                    newClone.speed = this.vel;
-                    // this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
-                    newClone.temperature = this.temp;
-                    newClone.limiter = true;
-                }
-            }
+            const rm = 300;
+            this._createNParticlesRandomly(numberOfParticles, util, rm);
         }
         // loop for creating clones at the center
         if (chosenPosition === 'center') {
-            for (let i = 0; i < numberOfParticles; i++) {
-                // moves the sprite to a random position
-                // Based on scratch3_control.createClone()
-                if (c > 600) {
-                    this.looks.hide({}, {target: util.target});
-                    return;
-                }
-                // const r = Math.sqrt(((util.target.x) * (util.target.x)) + ((util.target.y) * (util.target.y)));
-                const newClone = util.target.makeClone();
-                if (newClone) {
-                    this.runtime.addTarget(newClone);
-                    this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
-                    this.motion.goTo({TO: '_random_'}, {target: newClone});
-                    const r = Math.sqrt(((newClone.x) * (newClone.x)) + ((newClone.y) * (newClone.y)));
-                    if (newClone.isTouchingSprite(util.target.sprite.name) === true || r > 80){
-                        this.control.deleteClone({}, {target: newClone});
-                        i = i - 1;
-                        c++;
-                        continue;
-                    }
-                    // this.vel = Scratch3ScientificModellingBlocks.DEFAULT_SPEED;
-                    newClone.speed = this.vel;
-                    // this.temp = Scratch3ScientificModellingBlocks.DEFAULT_TEMPERATURE;
-                    newClone.temperature = this.temp;
-                    newClone.limiter = true;
-                }
-                    
-                
-            }
+            const rm = 80;
+            this._createNParticlesRandomly(numberOfParticles, util, rm);
         }
+        /*
         if (currentCostume !== requestedCostume) {
             this.looks.switchCostume({COSTUME: currentCostume + 1}, {target: util.target});
         }
-        // hides the static sprite
-        this.looks.hide({}, {target: util.target});
+        */
     }
 
     // delete this block
@@ -673,11 +623,9 @@ class Scratch3ScientificModellingBlocks {
     
     }
 
-    ifTouchingInvert () {
-        if (this.isTouchingList.length !== 0) {
-            for (let i = 0; i < this.isTouchingList.length; i++) {
-                this.isTouchingList[i].direction = this.isTouchingList[i].direction - 180;
-            }
+    ifTouchingInvert (args, util) {
+        if (util.target.isTouchingSprite(util.target.sprite.name) === true) {
+            this.opositeDirection(args, util);
         }
     }
 
@@ -723,7 +671,6 @@ class Scratch3ScientificModellingBlocks {
     go (args, util) {
         if (util.target.limiter === true) {
             this.limiter = true;
-            console.log('a');
             return true;
         }
         return false;

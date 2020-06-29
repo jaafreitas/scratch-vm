@@ -1,5 +1,6 @@
 /* eslint no-console: "warn" */
 const ArgumentType = require('../../extension-support/argument-type');
+const ExtensionManager = require('../../extension-support/extension-manager');
 const BlockType = require('../../extension-support/block-type');
 const Cast = require('../../util/cast');
 const formatMessage = require('format-message');
@@ -27,6 +28,7 @@ const menuIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKIAAACiCAYAA
 class Scratch3ScientificModellingBlocks {
     constructor (runtime) {
         this.runtime = runtime;
+        this.extensionManager = new ExtensionManager(this.runtime);
         this.vel = 0;
         this.motion = new Motion(this.runtime);
         this.looks = new Looks(this.runtime);
@@ -34,6 +36,7 @@ class Scratch3ScientificModellingBlocks {
         this.control = new Control(this.runtime);
         this.temp = 'medium';
         this.runtime.on(Runtime.PROJECT_START, this._projectStart.bind(this));
+        this.runtime.on(Runtime.TARGETS_UPDATE, this._getTargetname.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_STOP, this._projectRunStop.bind(this));
         this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
@@ -74,6 +77,11 @@ class Scratch3ScientificModellingBlocks {
         }
         // this.vel = 0;
     }
+    
+    _getTargetname () {
+        this.extensionManager.refreshBlocks();
+    }
+    
 
     _temperatureVar () {
         const args = {VARIABLE: {id: 'temperatureSlider', name: 'temperature slider'}, VALUE: 50};
@@ -266,6 +274,7 @@ class Scratch3ScientificModellingBlocks {
                         id: 'scientificModelling.ifTouchingInvert',
                         default: 'if touching go to the oposite direction'
                     })
+                    
                 },
 
                 {
@@ -311,9 +320,17 @@ class Scratch3ScientificModellingBlocks {
                     blockType: BlockType.BOOLEAN,
                     text: formatMessage({
                         id: 'scientificModelling.touchingAnotherParticle',
-                        default: 'touching another particle'
+                        default: 'touching [TOUCHINGMENU]'
 
-                    })
+                    }),
+                    arguments: {
+                        TOUCHINGMENU : {
+                            type: ArgumentType.STRING,
+                            menu: 'touchingMenu',
+                            defaultValue: ''
+                            
+                        }
+                    }
                 },
 
                 {
@@ -412,10 +429,27 @@ class Scratch3ScientificModellingBlocks {
                 particlespeed: {
                     // acceptReporters: true,
                     items: this.particleSpeedMenu
+                },
+
+                touchingMenu: {
+                    items: this.touchingMenu1
                 }
 
             }
         };
+    }
+    get touchingMenu1 (){
+        let a = [];
+        for (let i = 0; i < this.runtime.targets.length; i++) {
+            if (this.runtime.targets[i].isStage === true) {
+                continue
+            }
+            if (this.runtime.targets[i].isOriginal === false) {
+                continue
+            }
+            a.push({text: this.runtime.targets[i].sprite.name, value: this.runtime.targets[i].sprite.name});
+        }
+        return a
     }
     get particleColors () {
         /*
@@ -560,6 +594,7 @@ class Scratch3ScientificModellingBlocks {
     }
     
     createParticles (args, util) {
+        console.log(util.target)
         if (!util.target) return;
         // number of clones requested
         let numberOfParticles = Cast.toNumber(args.PARTICLES);
@@ -568,6 +603,7 @@ class Scratch3ScientificModellingBlocks {
         // TODO: usar runtime.clonesAvailable()?
         this._createNParticlesRandomly(numberOfParticles, util, rm);
         // console.log(this._particles());
+        this._getTargetname();
         
     }
 
@@ -691,7 +727,8 @@ class Scratch3ScientificModellingBlocks {
     }
     */
     touchingAnotherParticle (args, util) {
-        return util.target.isTouchingSprite(util.target.sprite.name);
+        const name = Cast.toString(args.TOUCHINGMENU);
+        return util.target.isTouchingSprite(name);
     }
 
     temperatureReporter () {

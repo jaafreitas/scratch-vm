@@ -340,6 +340,7 @@ class Scratch3ScientificModellingBlocks {
                         id: 'scientificModelling.createParticlesOP',
                         default: 'create [NUMBERPARTICLE] [COLORMENUOP] particles [PARTICLEPOSITIONOP]'
                     }),
+                    filter: [TargetType.SPRITE],
                     arguments: {
                         NUMBERPARTICLE: {
                             type: ArgumentType.NUMBER,
@@ -349,7 +350,7 @@ class Scratch3ScientificModellingBlocks {
                         COLORMENUOP: {
                             type: ArgumentType.STRING,
                             menu: 'particlecolors',
-                            defaultValue: ''
+                            defaultValue: this.runtime.getEditingTarget().getCurrentCostume().name
                         },
                         PARTICLEPOSITIONOP: {
                             type: ArgumentType.STRING,
@@ -412,7 +413,7 @@ class Scratch3ScientificModellingBlocks {
                 */
                 particlecolors: {
                     // acceptReporters: true,
-                    items: this.particleColors
+                    items: 'getParticleColors'
                 },
                 particleposition: {
                     // acceptReporters: true,
@@ -450,21 +451,16 @@ class Scratch3ScientificModellingBlocks {
         return targetNames;
     }
 
-    get particleColors () {
-        /*
-        if ( ){
-            return [
-                {text: 'costume1', value: '1'},
-                {text: 'costume2', value: '2'},
-                {text: 'costume3', value: '3'}
-            ];
+    getParticleColors () {
+        const costumes = [];
+        const target = this.runtime.getEditingTarget();
+        if (target && !target.isStage) {
+            target.getCostumes().map(costume => costumes.push({text: costume.name}));
         }
-        */
-        return [
-            {text: 'costume1', value: '1'},
-            {text: 'costume2', value: '2'},
-            {text: 'costume3', value: '3'}
-        ];
+        if (costumes.length === 0) {
+            costumes.push({text: ''});
+        }
+        return costumes;
     }
 
     get particleTemperatureMenu () {

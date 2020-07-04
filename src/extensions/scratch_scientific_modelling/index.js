@@ -1,7 +1,7 @@
 /* eslint no-console: "warn" */
 const ArgumentType = require('../../extension-support/argument-type');
-const ExtensionManager = require('../../extension-support/extension-manager');
 const BlockType = require('../../extension-support/block-type');
+const TargetType = require('../../extension-support/target-type');
 const Cast = require('../../util/cast');
 const formatMessage = require('format-message');
 const Motion = require('../../blocks/scratch3_motion');
@@ -28,7 +28,6 @@ const menuIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKIAAACiCAYAA
 class Scratch3ScientificModellingBlocks {
     constructor (runtime) {
         this.runtime = runtime;
-        this.extensionManager = new ExtensionManager(this.runtime);
         this.vel = 0;
         this.motion = new Motion(this.runtime);
         this.looks = new Looks(this.runtime);
@@ -36,7 +35,6 @@ class Scratch3ScientificModellingBlocks {
         this.control = new Control(this.runtime);
         this.temp = 'medium';
         this.runtime.on(Runtime.PROJECT_START, this._projectStart.bind(this));
-        this.runtime.on(Runtime.TARGETS_UPDATE, this._getTargetname.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_STOP, this._projectRunStop.bind(this));
         this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
@@ -77,11 +75,6 @@ class Scratch3ScientificModellingBlocks {
         }
         // this.vel = 0;
     }
-    
-    _getTargetname () {
-        this.extensionManager.refreshBlocks();
-    }
-    
 
     _temperatureVar () {
         const args = {VARIABLE: {id: 'temperatureSlider', name: 'temperature slider'}, VALUE: 50};
@@ -168,7 +161,7 @@ class Scratch3ScientificModellingBlocks {
 
     getInfo () {
         this._setupTranslations();
-        
+
         return {
             id: 'scientificModelling',
             color1: '#666666',
@@ -272,9 +265,16 @@ class Scratch3ScientificModellingBlocks {
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'scientificModelling.ifTouchingInvert',
-                        default: 'if touching go to the oposite direction'
-                    })
-                    
+                        default: 'if touching [TOUCHINGMENU] go to the oposite direction'
+                    }),
+                    filter: [TargetType.SPRITE],
+                    arguments: {
+                        TOUCHINGMENU: {
+                            type: ArgumentType.STRING,
+                            menu: 'touchingMenu',
+                            defaultValue: this.runtime.getEditingTarget().sprite.name
+                        }
+                    }
                 },
 
                 {
@@ -323,12 +323,12 @@ class Scratch3ScientificModellingBlocks {
                         default: 'touching [TOUCHINGMENU]'
 
                     }),
+                    filter: [TargetType.SPRITE],
                     arguments: {
-                        TOUCHINGMENU : {
+                        TOUCHINGMENU: {
                             type: ArgumentType.STRING,
                             menu: 'touchingMenu',
-                            defaultValue: ''
-                            
+                            defaultValue: this.runtime.getEditingTarget().sprite.name
                         }
                     }
                 },
@@ -432,25 +432,24 @@ class Scratch3ScientificModellingBlocks {
                 },
 
                 touchingMenu: {
-                    items: this.touchingMenu1
+                    items: 'getTouchingMenu'
                 }
 
             }
         };
     }
-    get touchingMenu1 (){
-        let a = [];
-        for (let i = 0; i < this.runtime.targets.length; i++) {
-            if (this.runtime.targets[i].isStage === true) {
-                continue
-            }
-            if (this.runtime.targets[i].isOriginal === false) {
-                continue
-            }
-            a.push({text: this.runtime.targets[i].sprite.name, value: this.runtime.targets[i].sprite.name});
+
+    getTouchingMenu () {
+        const targetNames = [];
+        this.runtime.targets
+            .filter(target => !target.isStage && target.isOriginal)
+            .map(target => targetNames.push({text: target.sprite.name, value: target.sprite.name}));
+        if (targetNames.length === 0) {
+            targetNames.push({text: ''});
         }
-        return a
+        return targetNames;
     }
+
     get particleColors () {
         /*
         if ( ){
@@ -594,7 +593,6 @@ class Scratch3ScientificModellingBlocks {
     }
     
     createParticles (args, util) {
-        console.log(util.target)
         if (!util.target) return;
         // number of clones requested
         let numberOfParticles = Cast.toNumber(args.PARTICLES);
@@ -603,8 +601,6 @@ class Scratch3ScientificModellingBlocks {
         // TODO: usar runtime.clonesAvailable()?
         this._createNParticlesRandomly(numberOfParticles, util, rm);
         // console.log(this._particles());
-        this._getTargetname();
-        
     }
 
     createParticlesOP (args, util) {
@@ -660,7 +656,7 @@ class Scratch3ScientificModellingBlocks {
     }
 
     ifTouchingInvert (args, util) {
-        if (util.target.isTouchingSprite(util.target.sprite.name) === true) {
+        if (this.touchingAnotherParticle(args, util)) {
             this.opositeDirection(args, util);
         }
     }

@@ -320,7 +320,7 @@ class Scratch3ScientificModellingBlocks {
                     blockType: BlockType.BOOLEAN,
                     text: formatMessage({
                         id: 'scientificModelling.touchingAnotherParticle',
-                        default: 'touching [TOUCHINGMENU]'
+                        default: 'touching [TOUCHINGMENU]?'
 
                     }),
                     filter: [TargetType.SPRITE],

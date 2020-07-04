@@ -29,6 +29,7 @@ class Scratch3ScientificModellingBlocks {
     constructor (runtime) {
         this.runtime = runtime;
         this.vel = 0;
+        this.collisionCounter = 0;
         this.motion = new Motion(this.runtime);
         this.looks = new Looks(this.runtime);
         this.data = new Data(this.runtime);
@@ -129,21 +130,15 @@ class Scratch3ScientificModellingBlocks {
                 this.temp = 'low';
             }
         }
-        this.isTouchingList = [];
-        // this.isTouchingList = this.runtime.targets.filter(this.runtime.targets.isTouchingSprite);
+        
+        this.collisionCounter = 0;
         for (let i = 0; i < this.runtime.targets.length; i++) {
             const util = {target: this.runtime.targets[i]};
-            // this.isTouchingList = this.runtime.targets.filter(util.target.isTouchingSprite);
             if (util.target.speed) {
                 this.motion.moveSteps({STEPS: util.target.speed}, util);
                 this.motion.ifOnEdgeBounce({}, util);
-                if (util.target.isTouchingSprite(util.target.sprite.name) === true) {
-                    this.isTouchingList.push(util.target);
-                }
-                // console.log(util.target.isTouchingSprite(util.target.sprite.name))
-                // console.log(util.target)
             }
-            if (util.target.limiter === true && this.limiter === true) {
+            if (this.limiter === true) {
                 util.target.limiter = false;
             }
         }
@@ -720,7 +715,11 @@ class Scratch3ScientificModellingBlocks {
     */
     touchingAnotherParticle (args, util) {
         const name = Cast.toString(args.TOUCHINGMENU);
-        return util.target.isTouchingSprite(name);
+        if (util.target.isTouchingSprite(name)) {
+            this.collisionCounter++;
+            return true;
+        }
+        return false;        
     }
 
     temperatureReporter () {
@@ -745,9 +744,7 @@ class Scratch3ScientificModellingBlocks {
 
     collisionReporter () {
         // 1 collision has 2 particles so we divide it by 2 to know the collision number
-        let collisionCounter = this.isTouchingList.length / 2;
-        collisionCounter = Math.round(collisionCounter);
-        return collisionCounter;
+        return Math.round(this.collisionCounter / 2);
     }
 
     numberParticleReporter () {

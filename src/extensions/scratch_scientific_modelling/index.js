@@ -267,7 +267,7 @@ class Scratch3ScientificModellingBlocks {
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'scientificModelling.createParticlesOP',
-                        default: 'create [NUMBERPARTICLE] [COLORMENUOP] particles [PARTICLEPOSITIONOP]'
+                        default: 'create [NUMBERPARTICLE] particles [PARTICLEPOSITIONOP]'
                     }),
                     filter: [TargetType.SPRITE],
                     arguments: {
@@ -275,12 +275,13 @@ class Scratch3ScientificModellingBlocks {
                             type: ArgumentType.NUMBER,
                             defaultValue: '10'
                         },
-                        
+                        /*
                         COLORMENUOP: {
                             type: ArgumentType.STRING,
                             menu: 'particlecolors',
                             defaultValue: this.runtime.getEditingTarget().getCurrentCostume().name
                         },
+                        */
                         PARTICLEPOSITIONOP: {
                             type: ArgumentType.STRING,
                             menu: 'particleposition',
@@ -289,7 +290,7 @@ class Scratch3ScientificModellingBlocks {
                         
                     }
                 },
-
+                /*
                 {
                     opcode: 'speedReporter',
                     blockType: BlockType.REPORTER,
@@ -298,7 +299,7 @@ class Scratch3ScientificModellingBlocks {
                         default: 'speed'
                     })
                 },
-
+                */
                 {
                     opcode: 'numberParticleReporter',
                     blockType: BlockType.REPORTER,
@@ -485,7 +486,7 @@ class Scratch3ScientificModellingBlocks {
         if (!util.target) return;
         // number of clones requested
         let numberOfParticles = Cast.toNumber(args.PARTICLES);
-        const rm = 300;
+        const rm = 150;
         numberOfParticles = this._checkNumberOfParticles(numberOfParticles);
         // TODO: usar runtime.clonesAvailable()?
         this._createNParticlesRandomly(numberOfParticles, util, rm);
@@ -498,10 +499,10 @@ class Scratch3ScientificModellingBlocks {
         // where the particles will be created
         const chosenPosition = Cast.toString(args.PARTICLEPOSITIONOP);
         // const currentCostume = util.target.currentCostume;
-        const requestedCostume = args.COLORMENUOP;
+        // const requestedCostume = args.COLORMENUOP;
         this._checkNumberOfParticles(numberOfParticles);
         //  switch costumes of the original sprite
-        this.looks.switchCostume({COSTUME: requestedCostume}, {target: util.target});
+        // this.looks.switchCostume({COSTUME: requestedCostume}, {target: util.target});
         // loop for creating particles ramdomly
         if (chosenPosition === 'randomly') {
             const rm = 300;
@@ -559,7 +560,7 @@ class Scratch3ScientificModellingBlocks {
     temperatureReporter () {
         return this.temp;
     }
-
+    /*
     speedReporter () {
         if (this.vel === 'undefined') {
             return 'undefined';
@@ -574,7 +575,7 @@ class Scratch3ScientificModellingBlocks {
             return formatMessage({id: 'scientificModelling.speedMenuLow'});
         }
     }
-
+    */
     collisionReporter () {
         // 1 collision has 2 particles so we divide it by 2 to know the collision number
         return Math.round(this.collisionCounter / 2);

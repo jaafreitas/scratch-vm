@@ -64,7 +64,7 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _temperatureVar () {
-        const args = {VARIABLE: {id: 'temperatureSlider', name: 'temperature slider'}, VALUE: 50};
+        const args = {VARIABLE: {id: 'temperatureSlider', name: 'temperature'}, VALUE: 50};
         const stage = this.runtime.getTargetForStage();
         if (stage) {
             this.data.setVariableTo(args, {target: stage});

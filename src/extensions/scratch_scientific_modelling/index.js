@@ -106,14 +106,17 @@ class Scratch3ScientificModellingBlocks {
                     util.target.temperature = tsValue;
                 }
             }
-            if (tsValue > 70) {
+            if (tsValue >= 60) {
                 this.temp = 'high';
             }
-            if (tsValue < 70 && tsValue > 40) {
+            if (tsValue < 60 && tsValue > 20) {
                 this.temp = 'medium';
             }
-            if (tsValue < 40) {
+            if (tsValue <= 20 && tsValue > 0) {
                 this.temp = 'low';
+            }
+            if (tsValue === 0) {
+                this.temp = 'zero';
             }
         }
         
@@ -401,7 +404,12 @@ class Scratch3ScientificModellingBlocks {
                 id: 'scientificModelling.temperatureMenuLow',
                 default: 'low'
             }),
-            value: 'low'}
+            value: 'low'},
+            {text: formatMessage({
+                id: 'scientificModelling.temperatureMenuZero',
+                default: 'zero'
+            }),
+            value: 'zero'}
         ];
     }
 

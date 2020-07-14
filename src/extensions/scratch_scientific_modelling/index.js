@@ -77,8 +77,8 @@ class Scratch3ScientificModellingBlocks {
                 opcode: 'data_variable',
                 value: args.VALUE,
                 mode: 'slider',
-                sliderMin: -20,
-                sliderMax: 120,
+                sliderMin: 0,
+                sliderMax: 100,
                 isDiscrete: true,
                 visible: true,
                 params: {VARIABLE: args.VARIABLE.name}

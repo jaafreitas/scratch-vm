@@ -419,15 +419,20 @@ class Scratch3ScientificModellingBlocks {
                 id: 'scientificModelling.speedMenuHigh',
                 default: 'high'
             }),
-            value: '5'},
+            value: '4'},
             {text: formatMessage({
                 id: 'scientificModelling.speedMenuMedium',
                 default: 'medium'
             }),
-            value: '2.5'},
+            value: '2'},
             {text: formatMessage({
                 id: 'scientificModelling.speedMenuLow',
                 default: 'low'
+            }),
+            value: '1'},
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuZero',
+                default: 'zero'
             }),
             value: '0'}
         ];

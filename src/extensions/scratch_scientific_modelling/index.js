@@ -125,9 +125,13 @@ class Scratch3ScientificModellingBlocks {
             const util = {target: target};
             this.motion.moveSteps({STEPS: target.speed}, util);
             this.motion.ifOnEdgeBounce({}, util);
-            if (this.limiter) {
+            // it's easier to switch target limiter with "go" block
+            /*
+            if (util.target.limiter) {
                 util.target.limiter = false;
+                // this.limiter = false;
             }
+            */
         });
     }
     _setupTranslations () {
@@ -556,6 +560,7 @@ class Scratch3ScientificModellingBlocks {
     go (args, util) {
         if (util.target.limiter) {
             this.limiter = true;
+            util.target.limiter = false;
             return true;
         }
         return false;

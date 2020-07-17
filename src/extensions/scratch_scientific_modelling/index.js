@@ -6,6 +6,7 @@ const Cast = require('../../util/cast');
 const formatMessage = require('format-message');
 const Motion = require('../../blocks/scratch3_motion');
 const Looks = require('../../blocks/scratch3_looks');
+const Sensing = require('../../blocks/scratch3_sensing');
 const Data = require('../../blocks/scratch3_data');
 const Control = require('../../blocks/scratch3_control');
 const Runtime = require('../../engine/runtime');
@@ -32,6 +33,7 @@ class Scratch3ScientificModellingBlocks {
         this.collisionCounter = 0;
         this.motion = new Motion(this.runtime);
         this.looks = new Looks(this.runtime);
+        this.sensing = new Sensing(this.runtime);
         this.data = new Data(this.runtime);
         this.control = new Control(this.runtime);
         this.temp = 'medium';
@@ -40,7 +42,7 @@ class Scratch3ScientificModellingBlocks {
         this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
         this._steppingInterval = null;
         this._temperatureVar();
-        this.limiter = false;
+        this.clonesList = [];
     }
 
     _particles () {
@@ -125,13 +127,6 @@ class Scratch3ScientificModellingBlocks {
             const util = {target: target};
             this.motion.moveSteps({STEPS: target.speed}, util);
             this.motion.ifOnEdgeBounce({}, util);
-            // it's easier to switch target limiter with "go" block
-            /*
-            if (util.target.limiter) {
-                util.target.limiter = false;
-                // this.limiter = false;
-            }
-            */
         });
     }
     _setupTranslations () {
@@ -297,16 +292,7 @@ class Scratch3ScientificModellingBlocks {
                         
                     }
                 },
-                /*
-                {
-                    opcode: 'speedReporter',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'scientificModelling.speedReporter',
-                        default: 'speed'
-                    })
-                },
-                */
+            
                 {
                     opcode: 'numberParticleReporter',
                     blockType: BlockType.REPORTER,
@@ -494,16 +480,59 @@ class Scratch3ScientificModellingBlocks {
                 newClone.speed = this.vel;
                 newClone.temperature = this.temp;
                 newClone.limiter = true;
+                this.clonesList.push(newClone);
             }
         }
         this.looks.hide({}, {target: util.target});
+    }
+
+    _checkCollision (util) {
+        let x = util.target.x;
+        let y = util.target.y;
+        let distanceArray = [];
+        for (let i = 0; i < this.clonesList.length; i++) {
+            let element = this.clonesList[i];
+            let elementX = element.x;
+            let elementY = element.y;
+            let dx = x - elementX;
+            let dy = y - elementY;
+            let r = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2));
+            if (r === 0 ) {
+                r = 1000;
+            }
+            distanceArray.push(r);
+        }
+        let min = Math.min.apply(null,distanceArray);
+        let touchingIndex = distanceArray.indexOf(min);
+        return this.clonesList[touchingIndex]
+    }
+
+    _momentumUpdate (util, body2) {
+        let body1 = util.target;
+        let direct = body1.direction;
+        body1.direction = body2.direction;
+        body2.direction = direct;
+        this.motion.moveSteps({STEPS: body1.speed}, {target: body1});
+        this.motion.moveSteps({STEPS: body2.speed}, {target: body2});
+        /*
+        // mass and speed of first target
+        let m1 = 1;
+        let v0x1 = this.vel * Math.cos(body1.direction);
+        let v0y1 = this.vel * Math.sin(body1.direction);
+        // mas and speed of second target
+        let m2 = 1;
+        let v0x2 = this.vel * Math.cos(body2.direction);
+        let v0y2 = this.vel * Math.sin(body2.direction);
+        let vfx1 = (m1 - m2)*v0x1/(m1 + m2) + 2*m2*v0x2/(m1+m2);
+        let vfy1 = (m1 - m2)*v0y1/(m1 + m2) + 2*m2*v0y2/(m1+m2);
+        */
     }
     
     createParticles (args, util) {
         if (!util.target) return;
         // number of clones requested
         let numberOfParticles = Cast.toNumber(args.PARTICLES);
-        const rm = 150;
+        const rm = 300;
         numberOfParticles = this._checkNumberOfParticles(numberOfParticles);
         // TODO: usar runtime.clonesAvailable()?
         this._createNParticlesRandomly(numberOfParticles, util, rm);
@@ -527,15 +556,14 @@ class Scratch3ScientificModellingBlocks {
         }
         // loop for creating clones at the center
         if (chosenPosition === 'center') {
-            const rm = 80;
+            const rm = 100;
             this._createNParticlesRandomly(numberOfParticles, util, rm);
         }
     }
     
     opositeDirection (args, util) {
-        util.target.setDirection(util.target.direction - 180);
-        this.motion.moveSteps({STEPS: util.target.speed}, {target: util.target});
-    
+        body2 = this._checkCollision(util);
+        this._momentumUpdate(util, body2);
     }
 
     ifTouchingInvert (args, util) {
@@ -559,7 +587,6 @@ class Scratch3ScientificModellingBlocks {
 
     go (args, util) {
         if (util.target.limiter) {
-            this.limiter = true;
             util.target.limiter = false;
             return true;
         }
@@ -578,22 +605,7 @@ class Scratch3ScientificModellingBlocks {
     temperatureReporter () {
         return this.temp;
     }
-    /*
-    speedReporter () {
-        if (this.vel === 'undefined') {
-            return 'undefined';
-        }
-        if (this.vel === 5) {
-            return formatMessage({id: 'scientificModelling.speedMenuHigh'});
-        }
-        if (this.vel === 2.5) {
-            return formatMessage({id: 'scientificModelling.speedMenuMedium'});
-        }
-        if (this.vel === 0) {
-            return formatMessage({id: 'scientificModelling.speedMenuLow'});
-        }
-    }
-    */
+
     collisionReporter () {
         // 1 collision has 2 particles so we divide it by 2 to know the collision number
         return Math.round(this.collisionCounter / 2);

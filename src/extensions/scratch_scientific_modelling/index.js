@@ -242,7 +242,7 @@ class Scratch3ScientificModellingBlocks {
                     shouldRestartExistingThreads: false,
                     text: formatMessage({
                         id: 'scientificModelling.go',
-                        default: 'go'
+                        default: 'behavior'
                     })
                 },
 
@@ -455,6 +455,9 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _createNParticlesRandomly (numberOfParticles, util, rm) {
+        if (util.target.isOriginal === false) {
+            return
+        }
         this.looks.show({}, {target: util.target});
         let c = 0;
         for (let i = 0; i < numberOfParticles; i++) {

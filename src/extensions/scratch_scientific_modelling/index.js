@@ -43,10 +43,11 @@ class Scratch3ScientificModellingBlocks {
         this._steppingInterval = null;
         this._temperatureVar();
         this.clonesList = [];
+        this.compTemp = 0;
     }
 
     _particles () {
-        return this.runtime.targets.filter(target => target.hasOwnProperty('speed'));
+        return this.clonesList
     }
 
     _projectStart () {
@@ -61,7 +62,7 @@ class Scratch3ScientificModellingBlocks {
         if (this._steppingInterval) {
             clearInterval(this._steppingInterval);
             this._steppingInterval = null;
-            this.limiter = false;
+            this.clonesList = [];
         }
     }
 
@@ -102,26 +103,26 @@ class Scratch3ScientificModellingBlocks {
         // TODO: getVariable?
         if (this.runtime.targets[0].variables.hasOwnProperty('temperatureSlider')) {
             const tsValue = this.runtime.targets[0].variables.temperatureSlider.value;
-            for (let i = 0; i < this.runtime.targets.length; i++) {
-                const util = {target: this.runtime.targets[i]};
-                if (util.target.hasOwnProperty('temperature')) {
+            if (tsValue != this.compTemp) {
+                for (let i = 0; i < this.clonesList.length; i++) {
+                    const util = {target: this.clonesList[i]};
                     util.target.temperature = tsValue;
                 }
-            }
-            if (tsValue >= 60) {
-                this.temp = 'high';
-            }
-            if (tsValue < 60 && tsValue > 20) {
-                this.temp = 'medium';
-            }
-            if (tsValue <= 20 && tsValue > 0) {
-                this.temp = 'low';
-            }
-            if (tsValue === 0) {
-                this.temp = 'zero';
+                if (tsValue >= 60) {
+                    this.temp = 'high';
+                }
+                if (tsValue < 60 && tsValue > 20) {
+                    this.temp = 'medium';
+                }
+                if (tsValue <= 20 && tsValue > 0) {
+                    this.temp = 'low';
+                }
+                if (tsValue === 0) {
+                    this.temp = 'zero';
+                }
+                this.compTemp = tsValue;
             }
         }
-        
         this.collisionCounter = 0;
         this._particles().forEach(target => {
             const util = {target: target};
@@ -448,8 +449,8 @@ class Scratch3ScientificModellingBlocks {
         // we want to create
         const totalParticles = this.runtime._cloneCounter + numberOfParticles;
         // verifies if after the creation there will be more clones than the amount allowed
-        if (totalParticles >= 300) {
-            numberOfParticles = 300 - this.runtime._cloneCounter;
+        if (totalParticles >= 100) {
+            numberOfParticles = 98 - this.runtime._cloneCounter;
         }
         return numberOfParticles;
     }
@@ -614,7 +615,7 @@ class Scratch3ScientificModellingBlocks {
         return Math.round(this.collisionCounter / 2);
     }
 
-    numberParticleReporter () {
+    numberParticleReporter () { 
         return this._particles().length;
     }
 }

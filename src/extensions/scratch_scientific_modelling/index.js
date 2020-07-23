@@ -44,6 +44,8 @@ class Scratch3ScientificModellingBlocks {
         this._temperatureVar();
         this.clonesList = [];
         this.compTemp = 0;
+        this.counter = 0;
+        this.stepsPerSecond = 30;
     }
 
     _particles () {
@@ -63,6 +65,8 @@ class Scratch3ScientificModellingBlocks {
             clearInterval(this._steppingInterval);
             this._steppingInterval = null;
             this.clonesList = [];
+            this.collisionCounter = 0;
+            this.counter = this.stepsPerSecond;
         }
     }
 
@@ -101,6 +105,12 @@ class Scratch3ScientificModellingBlocks {
     _step () {
         // TODO: runtime.getTargetForStage() ao invés de targets[0]?
         // TODO: getVariable?
+        if (this.runtime.currentStepTime === 33.333333333333336) {
+            this.stepsPerSecond = 30;
+        } else {
+            this.stepsPerSecond = 60;
+        }
+        console.log(this.runtime.currentStepTime)
         if (this.runtime.targets[0].variables.hasOwnProperty('temperatureSlider')) {
             const tsValue = this.runtime.targets[0].variables.temperatureSlider.value;
             if (tsValue != this.compTemp) {
@@ -123,7 +133,11 @@ class Scratch3ScientificModellingBlocks {
                 this.compTemp = tsValue;
             }
         }
-        this.collisionCounter = 0;
+        if (this.counter === this.stepsPerSecond) {
+            this.collisionCounter = 0;
+            this.counter = 0;
+        }
+        this.counter++;
         this._particles().forEach(target => {
             const util = {target: target};
             this.motion.moveSteps({STEPS: target.speed}, util);
@@ -308,7 +322,7 @@ class Scratch3ScientificModellingBlocks {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'scientificModelling.collisionReporter',
-                        default: 'collisions per time'
+                        default: 'collisions per second'
                     })
                 }
                
@@ -514,8 +528,8 @@ class Scratch3ScientificModellingBlocks {
     _momentumUpdate (util, body2) {
         let body1 = util.target;
         let direct = body1.direction;
-        body1.direction = body2.direction;
-        body2.direction = direct;
+        body1.setDirection(body2.direction);
+        body2.setDirection(direct);
         this.motion.moveSteps({STEPS: body1.speed}, {target: body1});
         this.motion.moveSteps({STEPS: body2.speed}, {target: body2});
         /*
@@ -612,7 +626,9 @@ class Scratch3ScientificModellingBlocks {
 
     collisionReporter () {
         // 1 collision has 2 particles so we divide it by 2 to know the collision number
-        return Math.round(this.collisionCounter / 2);
+        if (this.counter === this.stepsPerSecond) {
+            return Math.round(this.collisionCounter / 2);
+        }
     }
 
     numberParticleReporter () { 

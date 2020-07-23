@@ -110,7 +110,6 @@ class Scratch3ScientificModellingBlocks {
         } else {
             this.stepsPerSecond = 60;
         }
-        console.log(this.runtime.currentStepTime)
         if (this.runtime.targets[0].variables.hasOwnProperty('temperatureSlider')) {
             const tsValue = this.runtime.targets[0].variables.temperatureSlider.value;
             if (tsValue != this.compTemp) {
@@ -503,6 +502,51 @@ class Scratch3ScientificModellingBlocks {
         }
         this.looks.hide({}, {target: util.target});
     }
+    
+    _polarToCartesian(r,theta) {
+        let x = r * Math.cos(theta);
+        let y = r * Math.sin(theta);
+        return [x,y]
+    }
+
+    _createNParticlesCenter(numberOfParticles, util) {
+        let  boundLeft = util.target.getBounds().left;
+        let  boundRight = util.target.getBounds().right;
+        let  boundTop = util.target.getBounds().top;
+        let  boundBottom = util.target.getBounds().bottom;
+        let dt = Math.round((Math.abs(boundLeft) + Math.abs(boundRight))/10);
+        let dr = Math.round((Math.abs(boundTop) + Math.abs(boundBottom))/10);
+        if (util.target.isOriginal === false) {
+            return
+        }
+        this.looks.show({}, {target: util.target});
+        let r = 0;
+        let theta = 0;
+        for (let i = 0; i < numberOfParticles; i++) {
+            const newClone = util.target.makeClone();
+            if (newClone) {
+                this.runtime.addTarget(newClone);
+                this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
+                while (newClone.isTouchingSprite(util.target.sprite.name)) {
+                    let x = this._polarToCartesian(r,theta)[0];
+                    let y = this._polarToCartesian(r,theta)[1];
+                    newClone.setXY(x,y);
+                    theta+= dt;
+                    if (theta === 360) {
+                        theta = 0;
+                        if (r <= 200) {
+                            r+= dr;
+                        }
+                    }
+                }
+                newClone.speed = this.vel;
+                newClone.temperature = this.temp;
+                newClone.limiter = true;
+                this.clonesList.push(newClone);
+            }
+        }
+        this.looks.hide({}, {target: util.target});
+    }
 
     _checkCollision (util) {
         let x = util.target.x;
@@ -559,12 +603,12 @@ class Scratch3ScientificModellingBlocks {
     createParticlesOP (args, util) {
         if (!util.target) return;
         //  number of particles requested to create
-        const numberOfParticles = Cast.toNumber(args.NUMBERPARTICLE);
+        let numberOfParticles = Cast.toNumber(args.NUMBERPARTICLE);
         // where the particles will be created
         const chosenPosition = Cast.toString(args.PARTICLEPOSITIONOP);
         // const currentCostume = util.target.currentCostume;
         // const requestedCostume = args.COLORMENUOP;
-        this._checkNumberOfParticles(numberOfParticles);
+        numberOfParticles = this._checkNumberOfParticles(numberOfParticles);
         //  switch costumes of the original sprite
         // this.looks.switchCostume({COSTUME: requestedCostume}, {target: util.target});
         // loop for creating particles ramdomly
@@ -574,8 +618,7 @@ class Scratch3ScientificModellingBlocks {
         }
         // loop for creating clones at the center
         if (chosenPosition === 'center') {
-            const rm = 100;
-            this._createNParticlesRandomly(numberOfParticles, util, rm);
+            this._createNParticlesCenter(numberOfParticles, util)
         }
     }
     

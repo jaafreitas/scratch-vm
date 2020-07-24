@@ -120,10 +120,10 @@ class Scratch3ScientificModellingBlocks {
                 if (tsValue >= 60) {
                     this.temp = 'high';
                 }
-                if (tsValue < 60 && tsValue > 20) {
+                if (tsValue < 60 && tsValue >= 20) {
                     this.temp = 'medium';
                 }
-                if (tsValue <= 20 && tsValue > 0) {
+                if (tsValue < 20 && tsValue > 0) {
                     this.temp = 'low';
                 }
                 if (tsValue === 0) {
@@ -470,8 +470,8 @@ class Scratch3ScientificModellingBlocks {
         // we want to create
         const totalParticles = this.runtime._cloneCounter + numberOfParticles;
         // verifies if after the creation there will be more clones than the amount allowed
-        if (totalParticles >= 100) {
-            numberOfParticles = 98 - this.runtime._cloneCounter;
+        if (totalParticles > 100) {
+            numberOfParticles = 100 - this.runtime._cloneCounter;
         }
         return numberOfParticles;
     }

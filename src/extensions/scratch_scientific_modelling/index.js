@@ -136,6 +136,14 @@ class Scratch3ScientificModellingBlocks {
             this.collisionCounter = 0;
             this.counter = 0;
         }
+        if (this.counter % 3 === 0) {
+            for (let i = 0; i< this.clonesList.length; i++) {
+                if(this.clonesList[i].collide) {
+                    this.clonesList[i].collide = false;
+                }
+               
+            }
+        }
         this.counter++;
         this._particles().forEach(target => {
             const util = {target: target};
@@ -497,6 +505,7 @@ class Scratch3ScientificModellingBlocks {
                 newClone.speed = this.vel;
                 newClone.temperature = this.temp;
                 newClone.limiter = true;
+                newClone.Collide = false;
                 this.clonesList.push(newClone);
             }
         }
@@ -504,30 +513,44 @@ class Scratch3ScientificModellingBlocks {
     }
     
     _polarToCartesian(r,theta) {
+        theta = (theta * Math.PI) / 180;
         let x = r * Math.cos(theta);
         let y = r * Math.sin(theta);
         return [x,y]
     }
 
     _createNParticlesCenter(numberOfParticles, util) {
+        /*
         let  boundLeft = util.target.getBounds().left;
         let  boundRight = util.target.getBounds().right;
         let  boundTop = util.target.getBounds().top;
         let  boundBottom = util.target.getBounds().bottom;
-        let dt = Math.round((Math.abs(boundLeft) + Math.abs(boundRight))/10);
-        let dr = Math.round((Math.abs(boundTop) + Math.abs(boundBottom))/10);
+        // let dt = 3 * (Math.round((Math.abs(boundLeft) + Math.abs(boundRight)) / 5));
+        // let dr = 3 * (Math.round((Math.abs(boundTop) + Math.abs(boundBottom)) / 5));
+        // dr = Cast.toNumber(dr);
+        // dt = Cast.toNumber(dt);
+        */
         if (util.target.isOriginal === false) {
             return
         }
-        this.looks.show({}, {target: util.target});
         let r = 0;
         let theta = 0;
+        let c = 0;
+        let dt = 20;
+        let dr = 15;
         for (let i = 0; i < numberOfParticles; i++) {
+            this.looks.show({}, {target: util.target});
             const newClone = util.target.makeClone();
+            this.looks.hide({}, {target: util.target});
             if (newClone) {
                 this.runtime.addTarget(newClone);
                 this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
+                c = 0;
                 while (newClone.isTouchingSprite(util.target.sprite.name)) {
+                    if (c === 100000) {
+                        this.looks.hide({}, {target: util.target});
+                        return
+                    }
                     let x = this._polarToCartesian(r,theta)[0];
                     let y = this._polarToCartesian(r,theta)[1];
                     newClone.setXY(x,y);
@@ -538,14 +561,15 @@ class Scratch3ScientificModellingBlocks {
                             r+= dr;
                         }
                     }
+                    c++
                 }
                 newClone.speed = this.vel;
                 newClone.temperature = this.temp;
                 newClone.limiter = true;
+                newClone.Collide = false;
                 this.clonesList.push(newClone);
             }
         }
-        this.looks.hide({}, {target: util.target});
     }
 
     _checkCollision (util) {
@@ -570,12 +594,17 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _momentumUpdate (util, body2) {
+        if(util.target.collide) {
+            return
+        }
         let body1 = util.target;
         let direct = body1.direction;
         body1.setDirection(body2.direction);
         body2.setDirection(direct);
         this.motion.moveSteps({STEPS: body1.speed}, {target: body1});
         this.motion.moveSteps({STEPS: body2.speed}, {target: body2});
+        body1.collide = true;
+        body2.collide = true;
         /*
         // mass and speed of first target
         let m1 = 1;

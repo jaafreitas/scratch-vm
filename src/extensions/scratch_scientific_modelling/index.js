@@ -179,21 +179,6 @@ class Scratch3ScientificModellingBlocks {
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [
-                {
-                    opcode: 'createParticles',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'scientificModelling.createParticles',
-                        default: 'create [PARTICLES] particles',
-                        description: 'create a given number [PARTICLES] of particles'
-                    }),
-                    arguments: {
-                        PARTICLES: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 10
-                        }
-                    }
-                },
 
                 {
                     opcode: 'setParticleSpeed',
@@ -617,16 +602,6 @@ class Scratch3ScientificModellingBlocks {
         let vfx1 = (m1 - m2)*v0x1/(m1 + m2) + 2*m2*v0x2/(m1+m2);
         let vfy1 = (m1 - m2)*v0y1/(m1 + m2) + 2*m2*v0y2/(m1+m2);
         */
-    }
-    
-    createParticles (args, util) {
-        if (!util.target) return;
-        // number of clones requested
-        let numberOfParticles = Cast.toNumber(args.PARTICLES);
-        const rm = 300;
-        numberOfParticles = this._checkNumberOfParticles(numberOfParticles);
-        // TODO: usar runtime.clonesAvailable()?
-        this._createNParticlesRandomly(numberOfParticles, util, rm);
     }
 
     createParticlesOP (args, util) {

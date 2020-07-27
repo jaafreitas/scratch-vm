@@ -468,10 +468,10 @@ class Scratch3ScientificModellingBlocks {
         // this.runtime._cloneCounter gives us the total of existing clones
         // total particles is the sum of the total of existing clones with the number of clones
         // we want to create
-        const totalParticles = this.runtime._cloneCounter + numberOfParticles;
+        const totalParticles = this._particles().length + numberOfParticles;
         // verifies if after the creation there will be more clones than the amount allowed
         if (totalParticles > 100) {
-            numberOfParticles = 100 - this.runtime._cloneCounter;
+            numberOfParticles = 100 - this._particles().length;
         }
         return numberOfParticles;
     }

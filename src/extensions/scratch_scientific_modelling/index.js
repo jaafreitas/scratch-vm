@@ -181,97 +181,6 @@ class Scratch3ScientificModellingBlocks {
             blocks: [
 
                 {
-                    opcode: 'setParticleSpeed',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'scientificModelling.setParticleSpeed',
-                        default: 'set particles speed to [PARTICLESPEED]',
-                        description: 'sets particles speed to [PARTICLESPEED]'
-                    }),
-                    arguments: {
-                        PARTICLESPEED: {
-                            type: ArgumentType.STRING,
-                            menu: 'particlespeed',
-                            defaultValue: ''
-                        }
-                    }
-                },
-                
-                {
-                    opcode: 'opositeDirection',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'scientificModelling.opositeDirection',
-                        default: 'go to the oposite direction',
-                        description: 'reverse sprites direction'
-                    })
-                },
-                
-                {
-                    opcode: 'ifTouchingInvert',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'scientificModelling.ifTouchingInvert',
-                        default: 'if touching [TOUCHINGMENU] go to the oposite direction'
-                    }),
-                    filter: [TargetType.SPRITE],
-                    arguments: {
-                        TOUCHINGMENU: {
-                            type: ArgumentType.STRING,
-                            menu: 'touchingMenu',
-                            defaultValue: this.runtime.getEditingTarget().sprite.name
-                        }
-                    }
-                },
-
-                {
-                    opcode: 'whenTemperatureIs',
-                    blockType: BlockType.HAT,
-                    shouldRestartExistingThreads: false,
-                    text: formatMessage({
-                        id: 'scientificModelling.whenTemperatureIs',
-                        default: 'when temperature is [WHENTEMPMENU]',
-                        description: 'checks if the temperature is equal to [WHENTEMPMENU]'
-                    }),
-                    arguments: {
-                        WHENTEMPMENU: {
-                            type: ArgumentType.STRING,
-                            menu: 'whenparticletemperature',
-                            defaultValue: ''
-                            
-                        }
-                    }
-                },
-
-                {
-                    opcode: 'go',
-                    blockType: BlockType.HAT,
-                    shouldRestartExistingThreads: false,
-                    text: formatMessage({
-                        id: 'scientificModelling.go',
-                        default: 'behavior'
-                    })
-                },
-
-                {
-                    opcode: 'touchingAnotherParticle',
-                    blockType: BlockType.BOOLEAN,
-                    text: formatMessage({
-                        id: 'scientificModelling.touchingAnotherParticle',
-                        default: 'touching [TOUCHINGMENU]?'
-
-                    }),
-                    filter: [TargetType.SPRITE],
-                    arguments: {
-                        TOUCHINGMENU: {
-                            type: ArgumentType.STRING,
-                            menu: 'touchingMenu',
-                            defaultValue: this.runtime.getEditingTarget().sprite.name
-                        }
-                    }
-                },
-
-                {
                     opcode: 'createParticlesOP',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
@@ -298,6 +207,97 @@ class Scratch3ScientificModellingBlocks {
                         }
                         
                     }
+                },
+
+                {
+                    opcode: 'whenTemperatureIs',
+                    blockType: BlockType.HAT,
+                    shouldRestartExistingThreads: false,
+                    text: formatMessage({
+                        id: 'scientificModelling.whenTemperatureIs',
+                        default: 'when temperature is [WHENTEMPMENU]',
+                        description: 'checks if the temperature is equal to [WHENTEMPMENU]'
+                    }),
+                    arguments: {
+                        WHENTEMPMENU: {
+                            type: ArgumentType.STRING,
+                            menu: 'whenparticletemperature',
+                            defaultValue: ''
+                            
+                        }
+                    }
+                },
+
+                {
+                    opcode: 'setParticleSpeed',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.setParticleSpeed',
+                        default: 'set particles speed to [PARTICLESPEED]',
+                        description: 'sets particles speed to [PARTICLESPEED]'
+                    }),
+                    arguments: {
+                        PARTICLESPEED: {
+                            type: ArgumentType.STRING,
+                            menu: 'particlespeed',
+                            defaultValue: ''
+                        }
+                    }
+                },
+
+                {
+                    opcode: 'go',
+                    blockType: BlockType.HAT,
+                    shouldRestartExistingThreads: false,
+                    text: formatMessage({
+                        id: 'scientificModelling.go',
+                        default: 'behavior'
+                    })
+                },
+
+                {
+                    opcode: 'ifTouchingInvert',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.ifTouchingInvert',
+                        default: 'if touching [TOUCHINGMENU] go to the oposite direction'
+                    }),
+                    filter: [TargetType.SPRITE],
+                    arguments: {
+                        TOUCHINGMENU: {
+                            type: ArgumentType.STRING,
+                            menu: 'touchingMenu',
+                            defaultValue: this.runtime.getEditingTarget().sprite.name
+                        }
+                    }
+                },
+
+                {
+                    opcode: 'touchingAnotherParticle',
+                    blockType: BlockType.BOOLEAN,
+                    text: formatMessage({
+                        id: 'scientificModelling.touchingAnotherParticle',
+                        default: 'touching [TOUCHINGMENU]?'
+
+                    }),
+                    filter: [TargetType.SPRITE],
+                    arguments: {
+                        TOUCHINGMENU: {
+                            type: ArgumentType.STRING,
+                            menu: 'touchingMenu',
+                            defaultValue: this.runtime.getEditingTarget().sprite.name
+                        }
+                    }
+                },
+                
+                {
+                    opcode: 'opositeDirection',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.opositeDirection',
+                        default: 'go to the oposite direction',
+                        description: 'reverse sprites direction'
+                    })
                 },
             
                 {

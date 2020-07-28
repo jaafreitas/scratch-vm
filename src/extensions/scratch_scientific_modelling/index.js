@@ -444,7 +444,11 @@ class Scratch3ScientificModellingBlocks {
             {text: formatMessage({
                 id: 'scientificModelling.positionMenuCenter',
                 default: 'center'}),
-            value: 'center'}
+            value: 'center'},
+            {text: formatMessage({
+                id: 'scientificModelling.positionMenuMouse',
+                default: 'mouse position'}),
+            value: 'mouse'}
            
         ];
     }
@@ -497,30 +501,34 @@ class Scratch3ScientificModellingBlocks {
         this.looks.hide({}, {target: util.target});
     }
     
-    _polarToCartesian(r,theta) {
+    _polarToCartesian (r,theta) {
         theta = (theta * Math.PI) / 180;
         let x = r * Math.cos(theta);
         let y = r * Math.sin(theta);
         return [x,y]
     }
 
-    _createNParticlesCenter(numberOfParticles, util) {
-        /*
-        let  boundLeft = util.target.getBounds().left;
-        let  boundRight = util.target.getBounds().right;
-        let  boundTop = util.target.getBounds().top;
-        let  boundBottom = util.target.getBounds().bottom;
-        // let dt = 3 * (Math.round((Math.abs(boundLeft) + Math.abs(boundRight)) / 5));
-        // let dr = 3 * (Math.round((Math.abs(boundTop) + Math.abs(boundBottom)) / 5));
-        // dr = Cast.toNumber(dr);
-        // dt = Cast.toNumber(dt);
-        */
+    _createNParticlesMouse (numberOfParticles, mousePosition, util) {
+        let mouseX = 0;
+        let mouseY = 0;
+        if (mousePosition) {
+            mouseX =  util.ioQuery('mouse', 'getScratchX');
+            mouseY = util.ioQuery('mouse', 'getScratchY');
+        }
+        // check if mouse is inside canvas
+        if (mouseX > 220 || mouseY > 160) {
+            return
+        }
+        if (mouseX < -220 || mouseY < -160) {
+            return
+        }
         if (util.target.isOriginal === false) {
             return
         }
         let r = 0;
         let theta = 0;
         let c = 0;
+        let ifc = 0;
         let dt = 20;
         let dr = 15;
         for (let i = 0; i < numberOfParticles; i++) {
@@ -531,13 +539,44 @@ class Scratch3ScientificModellingBlocks {
                 this.runtime.addTarget(newClone);
                 this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
                 c = 0;
-                while (newClone.isTouchingSprite(util.target.sprite.name)) {
-                    if (c === 100000) {
+                if (newClone.isTouchingSprite(util.target.sprite.name) === false) {
+                    if (ifc === 600) {
+                        this.control.deleteClone({}, {target: newClone});
                         this.looks.hide({}, {target: util.target});
                         return
                     }
-                    let x = this._polarToCartesian(r,theta)[0];
-                    let y = this._polarToCartesian(r,theta)[1];
+                    let x = mouseX + this._polarToCartesian(r,theta)[0];
+                    let y = mouseY + this._polarToCartesian(r,theta)[1];
+                    if (x > 220 || y > 160) {
+                        this.control.deleteClone({}, {target: newClone});
+                        i = i - 1;
+                        ifc++;
+                        continue
+                    }
+                    if (x < -220 || y < -160) {
+                        this.control.deleteClone({}, {target: newClone});
+                        i = i - 1;
+                        ifc++;
+                        continue
+                    }
+                    newClone.setXY(x,y);
+                }
+                while (newClone.isTouchingSprite(util.target.sprite.name)) {
+                    if (c === 1000) {
+                        this.looks.hide({}, {target: util.target});
+                        this.control.deleteClone({}, {target: newClone});
+                        return
+                    }
+                    let x = mouseX + this._polarToCartesian(r,theta)[0];
+                    let y = mouseY + this._polarToCartesian(r,theta)[1];
+                    if (x > 220 || y > 160) {
+                        c++
+                        continue
+                    }
+                    if (x < -220 || y < -160) {
+                        C++
+                        continue
+                    }
                     newClone.setXY(x,y);
                     theta+= dt;
                     if (theta === 360) {
@@ -622,7 +661,10 @@ class Scratch3ScientificModellingBlocks {
         }
         // loop for creating clones at the center
         if (chosenPosition === 'center') {
-            this._createNParticlesCenter(numberOfParticles, util)
+            this._createNParticlesMouse(numberOfParticles, false, util);
+        }
+        if (chosenPosition === 'mouse') {
+            this._createNParticlesMouse(numberOfParticles, true, util);
         }
     }
     

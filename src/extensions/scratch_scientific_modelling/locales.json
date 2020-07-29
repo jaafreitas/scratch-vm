@@ -24,6 +24,7 @@
         "scientificModelling.opositeDirection": "vá para a direção oposta",
         "scientificModelling.positionMenuRandom": "aleatoriamente",
         "scientificModelling.positionMenuCenter": "no centro",
+        "scientificModelling.positionMenuMouse": "na posição do mouse",
         "scientificModelling.whenTouchingAnotherParticle": "quando tocando outra partícula",
         "scientificModelling.numberParticleReporter": "número de partículas",
         "scientificModelling.collisionReporter": "colisões por segundo",

@@ -447,7 +447,7 @@ class Scratch3ScientificModellingBlocks {
             value: 'center'},
             {text: formatMessage({
                 id: 'scientificModelling.positionMenuMouse',
-                default: 'mouse position'}),
+                default: 'on mouse position'}),
             value: 'mouse'}
            
         ];
@@ -511,15 +511,14 @@ class Scratch3ScientificModellingBlocks {
     _createNParticlesMouse (numberOfParticles, mousePosition, util) {
         let mouseX = 0;
         let mouseY = 0;
+        const stageWidth = this.runtime.constructor.STAGE_WIDTH;
+        const stageHeight = this.runtime.constructor.STAGE_HEIGHT;
         if (mousePosition) {
             mouseX =  util.ioQuery('mouse', 'getScratchX');
             mouseY = util.ioQuery('mouse', 'getScratchY');
         }
         // check if mouse is inside canvas
-        if (mouseX > 220 || mouseY > 160) {
-            return
-        }
-        if (mouseX < -220 || mouseY < -160) {
+        if (Math.abs(mouseX) > stageWidth * 0.5 || Math.abs(mouseY) > stageHeight * 0.5) {
             return
         }
         if (util.target.isOriginal === false) {
@@ -547,13 +546,7 @@ class Scratch3ScientificModellingBlocks {
                     }
                     let x = mouseX + this._polarToCartesian(r,theta)[0];
                     let y = mouseY + this._polarToCartesian(r,theta)[1];
-                    if (x > 220 || y > 160) {
-                        this.control.deleteClone({}, {target: newClone});
-                        i = i - 1;
-                        ifc++;
-                        continue
-                    }
-                    if (x < -220 || y < -160) {
+                    if (Math.abs(x) > stageWidth * 0.5 || Math.abs(y) > stageHeight * 0.5) {
                         this.control.deleteClone({}, {target: newClone});
                         i = i - 1;
                         ifc++;
@@ -569,12 +562,8 @@ class Scratch3ScientificModellingBlocks {
                     }
                     let x = mouseX + this._polarToCartesian(r,theta)[0];
                     let y = mouseY + this._polarToCartesian(r,theta)[1];
-                    if (x > 220 || y > 160) {
+                    if (Math.abs(x) > stageWidth * 0.5 || Math.abs(y) > stageHeight * 0.5) {
                         c++
-                        continue
-                    }
-                    if (x < -220 || y < -160) {
-                        C++
                         continue
                     }
                     newClone.setXY(x,y);

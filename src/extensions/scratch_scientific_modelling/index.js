@@ -11,6 +11,7 @@ const Data = require('../../blocks/scratch3_data');
 const Control = require('../../blocks/scratch3_control');
 const Runtime = require('../../engine/runtime');
 const MonitorRecord = require('../../engine/monitor-record');
+const Box2D = require('./box2d_es6.js');
 
 /**
  * Icon png to be displayed at the left edge of each extension block, encoded as a data URI.
@@ -24,34 +25,79 @@ const blockIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYA
  */
 // eslint-disable-next-line max-len
 const menuIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAUHSURBVFhHrZlnyB1FFIY/FVtsUTH2lh8BCxZiwYqIqGAhYokVFEtM7OWfiv4RsSFiQRSNFVQURVEsYDeixGAS6w977w0rij7Pzs7HZO/O7ny594WHe+7e3ZmzU845u3esUDvCIvgTXoeTYVko1XLgNQvANmxrBxiJVoUv4SLYHubA+/AKbAp98hzP/QBmw7ZgW5/DyjC0joBngzkuG74RvoGdPJCRv3nODTDJA4meB9seWlfChcEc0FnwE+xSfVtSu8HPcGb1bVCXwOXBHE5z4dRgtuoU+B62rL4Faf8A/paTS+W2YOY1kYWe081wDTwG69Y8DleDv3VpmfozqxIHHZ3Vg5nVpfASPAgP1LbHurQG/BLMvEoc/Bg2CmZW/4HTuSFsAIaUPrm7PwtmXiUOvgdbB7NTO8PasA507eyoreDtYA4n15TT3HUzq8GHMKtG2/iZk4HbHd43M8UyMKe7tKlr4Qlw0cuT9bGctoFPgjka3QpnBHNApkFHI80q2sbH6dW3QZ0DdwazW73bvNaRcCwcCO6+zcHpcfpPh5XAEUy1H5h3zSJfg6nNdOfNOMJ3w13QqT4HVwBHaAaYEb4CHfsDPgU3xV/wXP2pbNM1tjzsVX8atL3OFKmj68F18BC8Bn9DsdwM3r139yOYS++Ft+AysCOdcNR08gDI6SDwHB3zGsOQ6e0duA++BZeCfe0PnVHFBo4Cw8oXYA529OIonwiPBLPSedAsItrk6J4fzEpmnJg6bds+rgD7tG99iH2OyyG3s4/geHBamnLt/Qqeuwq4rtqKhKY8x5HyGoP4b7AmNGWf9m1ieAbsp/J0CrwMpqfT4HfIyYW9GP6FfWuinHI3klnlHnCDRJmbHUnXpvWgmy4nb8SNtTvs6gGrFRscGNYW7QkGYadDO5VO6Jxop7Izi15HZ28P9Ehf9EnfqkU6VaNQb8K8YI7LuBedi2wGqZwlU1vJQKgqlpbk4lQ27jU6kKr5fRQav5HbwbVVcmdOj9PkdDltqR6FOHru1FRLM8X6NFfDTeKUvQBmha5NYjxcCP/APmC8jHKTHBPMoTaJzy7Xg2u82iQqhhnv8ARoCzOGBkOEoWIiYcZOJhpm9GV9WEKO5tFgsHQ6rgJrvDj1llHp7jwXfDLrU1ugti1l29aOJgUjw7vQGqhT+WOa6rz7+8GLjfhpqvNuD4acLC4sq5qpzrZMdaZRo4jrzT4HHOv0FMVi4RCwWHBk02JhLXA9Okom/LibbddrXUcrggXvxqCjXudUWyw8DK9CtljoczDKDHEceJfNcsvs42haQqUy+btRXPCuV58/LLd8UHoKrAcduZHoDrDIbJNFqdOUBmZt677c+xfXb1HBWirX0XbBbJXPxU+DMyIWr10lv6FmZCW/U+loGMNyMoT43GIZ5eOntg9SOY30ocmC9MVgdmoPcH3ZsZV0nwxR7vJOleTiaWA13af5YEgyNLkz+2TRsUUw8ypxcBMoWS++hzHYGhtvgb4IYbjpneISByeD09alC8ApPhQOB1+95V7ZRVmd973zKXJQdZVTpi3DhmvVzCCurbMhprSlVomDdmjF0yZfYJr+fHpL16m2TprWPKdNZqHvgjmcDoNmUVD6Ctg06Tk3gdekMj3ODOZwsj7zYftiMFinL9FNeX2ydLfeNM15rW34Et28bvwciUxZb4C1nOHkJChdv8rA7DtD/8KwDdsq+BtibOx/114gI1bkSeoAAAAASUVORK5CYII=';
+// box2d
+const b2World = Box2D.Dynamics.b2World;
+const b2Vec2 = Box2D.Common.Math.b2Vec2;
+const b2AABB = Box2D.Collision.b2AABB;
+const b2BodyDef = Box2D.Dynamics.b2BodyDef;
+const b2Body = Box2D.Dynamics.b2Body;
+const b2FixtureDef = Box2D.Dynamics.b2FixtureDef;
+// const b2Fixture = Box2D.Dynamics.b2Fixture;
+// const b2Fixture = Box2D.Dynamics.b2Fixture;
+const b2Contact = Box2D.Dynamics.Contacts.b2Contact;
+// const b2MassData = Box2D.Collision.Shapes.b2MassData;
+const b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
+const b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
+// const b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+const b2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef;
+
+const b2Math = Box2D.Common.Math.b2Math;
 class Scratch3ScientificModellingBlocks {
     constructor (runtime) {
         this.runtime = runtime;
-        this.vel = 0;
-        this.collisionCounter = 0;
+        this.vel = 90;
         this.motion = new Motion(this.runtime);
         this.looks = new Looks(this.runtime);
         this.sensing = new Sensing(this.runtime);
         this.data = new Data(this.runtime);
         this.control = new Control(this.runtime);
-        this.temp = 'medium';
         this.runtime.on(Runtime.PROJECT_START, this._projectStart.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
         this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
         this._steppingInterval = null;
-        this._temperatureVar();
         this.clonesList = [];
-        this.compTemp = 0;
-        this.counter = 0;
         this.stepsPerSecond = 30;
+        this.particleId = 0;
+        this.scale = 30;
+        this.bodies = [];
+        this._temperatureVar();
+        this.compTemp = 0;
     }
 
+    _createStageBody (bodyDef,fixDef) {
+        const body = this.world.CreateBody(bodyDef);
+        body.CreateFixture(fixDef);
+        //stageBodies.push(body);
+    };
     _particles () {
         return this.clonesList
     }
 
     _projectStart () {
+        const stageWidth = this.runtime.constructor.STAGE_WIDTH / 2;
+        const stageHeight = this.runtime.constructor.STAGE_HEIGHT / 2;
         this._createStepInterval();
+        this.gravity = new b2Vec2(0,0);
+        this.world = new b2World(this.gravity);
+        let fixDef = new b2FixtureDef();
+        let bodyDef = new b2BodyDef();
+        bodyDef.linearDamping = 0.0;
+        bodyDef.angularDamping = 0.0;
+        fixDef.friction = 0.0;
+        fixDef.restitution = 1.0;
+        fixDef.shape = new b2PolygonShape();
+        fixDef.shape.SetAsBox(stageWidth * 20  / this.scale, 0 / this.scale);
+        bodyDef.position.Set(0, -stageHeight / this.scale);
+        console.log(bodyDef)
+        this._createStageBody(bodyDef,fixDef);
+        bodyDef.position.Set(0, stageHeight / this.scale);
+        this._createStageBody(bodyDef,fixDef);
+        fixDef.shape.SetAsBox(0 / this.scale, stageHeight * 20 / this.scale);
+        bodyDef.position.Set(-stageWidth / this.scale,stageHeight / this.scale);
+        this._createStageBody(bodyDef,fixDef);
+        bodyDef.position.Set(stageWidth / this.scale, stageHeight / this.scale);
+        this._createStageBody(bodyDef,fixDef);
+        bodyDef.type = b2Body.b2_dynamicBody;
     }
     
     _projectRunStart () {
@@ -63,8 +109,16 @@ class Scratch3ScientificModellingBlocks {
             clearInterval(this._steppingInterval);
             this._steppingInterval = null;
             this.clonesList = [];
-            this.collisionCounter = 0;
-            this.counter = this.stepsPerSecond;
+            this.bodies = [];
+            this.particleId = 0;
+        }
+    }
+
+    _createStepInterval () {
+        if (!this._steppingInterval) {
+            this._steppingInterval = setInterval(() => {
+                this._step();
+            }, this.runtime.currentStepTime);
         }
     }
 
@@ -92,21 +146,7 @@ class Scratch3ScientificModellingBlocks {
         }
     }
 
-    _createStepInterval () {
-        if (!this._steppingInterval) {
-            this._steppingInterval = setInterval(() => {
-                this._step();
-            }, this.runtime.currentStepTime);
-        }
-    }
     _step () {
-        // TODO: runtime.getTargetForStage() ao invés de targets[0]?
-        // TODO: getVariable?
-        if (this.runtime.currentStepTime === 33.333333333333336) {
-            this.stepsPerSecond = 30;
-        } else {
-            this.stepsPerSecond = 60;
-        }
         if (this.runtime.targets[0].variables.hasOwnProperty('temperatureSlider')) {
             const tsValue = this.runtime.targets[0].variables.temperatureSlider.value;
             if (tsValue != this.compTemp) {
@@ -129,23 +169,20 @@ class Scratch3ScientificModellingBlocks {
                 this.compTemp = tsValue;
             }
         }
-        if (this.counter === this.stepsPerSecond) {
-            this.collisionCounter = 0;
-            this.counter = 0;
+        if (this._particles().length === 0){
+            return
         }
-        if (this.counter % 3 === 0) {
-            for (let i = 0; i< this.clonesList.length; i++) {
-                if(this.clonesList[i].collide) {
-                    this.clonesList[i].collide = false;
-                }
-               
-            }
-        }
-        this.counter++;
+        // body.SetLinearVelocity(force);
+        console.log(this.bodies.length)
+        this.world.Step(1 / 30, 100, 100);
+        this.world.ClearForces();
         this._particles().forEach(target => {
             const util = {target: target};
-            this.motion.moveSteps({STEPS: target.speed}, util);
-            this.motion.ifOnEdgeBounce({}, util);
+            // this.motion.ifOnEdgeBounce({}, util);
+            let id = util.target.boxId;
+            let newPosX = this.bodies[id].m_xf.position.x * this.scale;
+            let newPosY = this.bodies[id].m_xf.position.y * this.scale;
+            target.setXY(newPosX,newPosY);
         });
     }
     _setupTranslations () {
@@ -206,25 +243,6 @@ class Scratch3ScientificModellingBlocks {
                 },
 
                 {
-                    opcode: 'whenTemperatureIs',
-                    blockType: BlockType.HAT,
-                    shouldRestartExistingThreads: false,
-                    text: formatMessage({
-                        id: 'scientificModelling.whenTemperatureIs',
-                        default: 'when temperature is [WHENTEMPMENU]',
-                        description: 'checks if the temperature is equal to [WHENTEMPMENU]'
-                    }),
-                    arguments: {
-                        WHENTEMPMENU: {
-                            type: ArgumentType.STRING,
-                            menu: 'whenparticletemperature',
-                            defaultValue: ''
-                            
-                        }
-                    }
-                },
-
-                {
                     opcode: 'setParticleSpeed',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
@@ -252,50 +270,24 @@ class Scratch3ScientificModellingBlocks {
                 },
 
                 {
-                    opcode: 'ifTouchingInvert',
-                    blockType: BlockType.COMMAND,
+                    opcode: 'whenTemperatureIs',
+                    blockType: BlockType.HAT,
+                    shouldRestartExistingThreads: false,
                     text: formatMessage({
-                        id: 'scientificModelling.ifTouchingInvert',
-                        default: 'if touching [TOUCHINGMENU] go to the oposite direction'
+                        id: 'scientificModelling.whenTemperatureIs',
+                        default: 'when temperature is [WHENTEMPMENU]',
+                        description: 'checks if the temperature is equal to [WHENTEMPMENU]'
                     }),
-                    filter: [TargetType.SPRITE],
                     arguments: {
-                        TOUCHINGMENU: {
+                        WHENTEMPMENU: {
                             type: ArgumentType.STRING,
-                            menu: 'touchingMenu',
-                            defaultValue: this.runtime.getEditingTarget().sprite.name
+                            menu: 'whenparticletemperature',
+                            defaultValue: ''
+                            
                         }
                     }
                 },
 
-                {
-                    opcode: 'touchingAnotherParticle',
-                    blockType: BlockType.BOOLEAN,
-                    text: formatMessage({
-                        id: 'scientificModelling.touchingAnotherParticle',
-                        default: 'touching [TOUCHINGMENU]?'
-
-                    }),
-                    filter: [TargetType.SPRITE],
-                    arguments: {
-                        TOUCHINGMENU: {
-                            type: ArgumentType.STRING,
-                            menu: 'touchingMenu',
-                            defaultValue: this.runtime.getEditingTarget().sprite.name
-                        }
-                    }
-                },
-                
-                {
-                    opcode: 'opositeDirection',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'scientificModelling.opositeDirection',
-                        default: 'go to the oposite direction',
-                        description: 'reverse sprites direction'
-                    })
-                },
-            
                 {
                     opcode: 'numberParticleReporter',
                     blockType: BlockType.REPORTER,
@@ -304,15 +296,6 @@ class Scratch3ScientificModellingBlocks {
                         default: 'number of particles'
                     })
                 },
-
-                {
-                    opcode: 'collisionReporter',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'scientificModelling.collisionReporter',
-                        default: 'collisions per second'
-                    })
-                }
                
             ],
             menus: {
@@ -324,19 +307,14 @@ class Scratch3ScientificModellingBlocks {
                     // acceptReporters: true,
                     items: this.particlePosition
                 },
-                particletemperature: {
+                particlespeed: {
                     // acceptReporters: true,
-                    items: this.particleTemperatureMenu
+                    items: this.particleSpeedMenu
                 },
                 whenparticletemperature: {
                     // acceptReporters: true,
                     items: this.whenParticleTemperatureMenu
                 },
-                particlespeed: {
-                    // acceptReporters: true,
-                    items: this.particleSpeedMenu
-                },
-
                 touchingMenu: {
                     items: 'getTouchingMenu'
                 }
@@ -364,19 +342,27 @@ class Scratch3ScientificModellingBlocks {
         return costumes;
     }
 
-    get particleTemperatureMenu () {
+    get particleSpeedMenu () {
         return [
             {text: formatMessage({
-                id: 'scientificModelling.temperatureMenuHigh',
-                default: 'high'}),
-            value: '100'},
+                id: 'scientificModelling.speedMenuHigh',
+                default: 'high'
+            }),
+            value: '90'},
             {text: formatMessage({
-                id: 'scientificModelling.temperatureMenuMedium',
-                default: 'medium'}),
-            value: '50'},
+                id: 'scientificModelling.speedMenuMedium',
+                default: 'medium'
+            }),
+            value: '60'},
             {text: formatMessage({
-                id: 'scientificModelling.temperatureMenuLow',
-                default: 'low'}),
+                id: 'scientificModelling.speedMenuLow',
+                default: 'low'
+            }),
+            value: 30},
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuZero',
+                default: 'zero'
+            }),
             value: '0'}
         ];
     }
@@ -406,31 +392,6 @@ class Scratch3ScientificModellingBlocks {
         ];
     }
 
-    get particleSpeedMenu () {
-        return [
-            {text: formatMessage({
-                id: 'scientificModelling.speedMenuHigh',
-                default: 'high'
-            }),
-            value: '4'},
-            {text: formatMessage({
-                id: 'scientificModelling.speedMenuMedium',
-                default: 'medium'
-            }),
-            value: '2'},
-            {text: formatMessage({
-                id: 'scientificModelling.speedMenuLow',
-                default: 'low'
-            }),
-            value: '1'},
-            {text: formatMessage({
-                id: 'scientificModelling.speedMenuZero',
-                default: 'zero'
-            }),
-            value: '0'}
-        ];
-    }
-
     get particlePosition () {
         return [
             {text: formatMessage({
@@ -454,7 +415,7 @@ class Scratch3ScientificModellingBlocks {
         // total particles is the sum of the total of existing clones with the number of clones
         // we want to create
         const totalParticles = this._particles().length + numberOfParticles;
-        let maxParticles = 100;
+        let maxParticles = 9000;
         // verifies if after the creation there will be more clones than the amount allowed
         if (totalParticles > maxParticles) {
             numberOfParticles = maxParticles - this._particles().length;
@@ -463,6 +424,7 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _createNParticlesRandomly (numberOfParticles, util, rm) {
+        let radius = this._circlesBounds(util);
         if (util.target.isOriginal === false) {
             return
         }
@@ -492,7 +454,10 @@ class Scratch3ScientificModellingBlocks {
                 newClone.temperature = this.temp;
                 newClone.limiter = true;
                 newClone.Collide = false;
+                newClone.boxId = this.particleId;
                 this.clonesList.push(newClone);
+                this._b2dCreateCircles(radius,newClone,this.particleId);
+                this.particleId++
             }
         }
         this.looks.hide({}, {target: util.target});
@@ -505,7 +470,44 @@ class Scratch3ScientificModellingBlocks {
         return [x,y]
     }
 
+    _circlesBounds (util) {
+        let a = util.target.getBounds().left;
+        let b = util.target.getBounds().right;
+        let radius = (b - a)/2 ;
+        return radius / this.scale
+    }
+
+    _definePositionAndSpeed (circBodyDef, target, speed) {
+        let utilX = target.x;
+        let utilY = target.y;
+        let direct = target.direction;
+        let vx = speed * Math.cos(direct);
+        let vy = speed * Math.sin(direct);
+        circBodyDef.position.x = utilX / this.scale;
+        circBodyDef.position.y = utilY / this.scale;
+        circBodyDef.linearVelocity.x = vx / this.scale;
+        circBodyDef.linearVelocity.y = vy / this.scale;
+    }
+    
+    _b2dCreateCircles (radius, target, id) {
+        let circFixDef = new b2FixtureDef();
+        circFixDef.shape = new b2CircleShape();
+        circFixDef.shape.SetRadius(radius);
+        circFixDef.density = 1.0;
+        circFixDef.friction = 0.0;
+        circFixDef.restitution = 1.0;
+        var circBodyDef = new b2BodyDef();
+        circBodyDef.linearDamping = 0.0;
+        circBodyDef.angularDamping = 0.0;
+        circBodyDef.fixedRotation = true;
+        circBodyDef.type = b2Body.b2_dynamicBody;
+        this._definePositionAndSpeed(circBodyDef, target,this.vel)
+        let body = this.world.CreateBody(circBodyDef);
+        body.CreateFixture(circFixDef);
+        this.bodies[id] = body;
+    }
     _createNParticlesMouse (numberOfParticles, mousePosition, util) {
+        let radius = this._circlesBounds(util);
         let mouseX = 0;
         let mouseY = 0;
         const stageWidth = this.runtime.constructor.STAGE_WIDTH;
@@ -577,56 +579,12 @@ class Scratch3ScientificModellingBlocks {
                 newClone.temperature = this.temp;
                 newClone.limiter = true;
                 newClone.Collide = false;
+                newClone.boxId = this.particleId;
                 this.clonesList.push(newClone);
+                this._b2dCreateCircles(radius,newClone,this.particleId);
+                this.particleId++
             }
         }
-    }
-
-    _checkCollision (util) {
-        let x = util.target.x;
-        let y = util.target.y;
-        let distanceArray = [];
-        for (let i = 0; i < this.clonesList.length; i++) {
-            let element = this.clonesList[i];
-            let elementX = element.x;
-            let elementY = element.y;
-            let dx = x - elementX;
-            let dy = y - elementY;
-            let r = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2));
-            if (r === 0 ) {
-                r = 1000;
-            }
-            distanceArray.push(r);
-        }
-        let min = Math.min.apply(null,distanceArray);
-        let touchingIndex = distanceArray.indexOf(min);
-        return this.clonesList[touchingIndex]
-    }
-
-    _momentumUpdate (util, body2) {
-        if(util.target.collide) {
-            return
-        }
-        let body1 = util.target;
-        let direct = body1.direction;
-        body1.setDirection(body2.direction);
-        body2.setDirection(direct);
-        this.motion.moveSteps({STEPS: body1.speed}, {target: body1});
-        this.motion.moveSteps({STEPS: body2.speed}, {target: body2});
-        body1.collide = true;
-        body2.collide = true;
-        /*
-        // mass and speed of first target
-        let m1 = 1;
-        let v0x1 = this.vel * Math.cos(body1.direction);
-        let v0y1 = this.vel * Math.sin(body1.direction);
-        // mas and speed of second target
-        let m2 = 1;
-        let v0x2 = this.vel * Math.cos(body2.direction);
-        let v0y2 = this.vel * Math.sin(body2.direction);
-        let vfx1 = (m1 - m2)*v0x1/(m1 + m2) + 2*m2*v0x2/(m1+m2);
-        let vfy1 = (m1 - m2)*v0y1/(m1 + m2) + 2*m2*v0y2/(m1+m2);
-        */
     }
 
     createParticlesOP (args, util) {
@@ -654,22 +612,17 @@ class Scratch3ScientificModellingBlocks {
         }
     }
 
-    opositeDirection (args, util) {
-        body2 = this._checkCollision(util);
-        this._momentumUpdate(util, body2);
-    }
-
-    ifTouchingInvert (args, util) {
-        if (this.touchingAnotherParticle(args, util)) {
-            this.opositeDirection(args, util);
-        }
-    }
-
     setParticleSpeed (args) {
         const velocity = Cast.toString(args.PARTICLESPEED);
         this.vel = velocity;
+        if (this.bodies.length === 0) return
         this._particles().forEach(target => {
-            target.speed = velocity;
+            id = target.boxId;
+            direct = target.direction;
+            vx = this.vel * Math.cos(direct) / this.scale;
+            vy = this.vel * Math.sin(direct) / this.scale;
+            let newVel  = new b2Vec2(vx,vy);
+            this.bodies[id].SetLinearVelocity(newVel);
         });
     }
 
@@ -684,26 +637,6 @@ class Scratch3ScientificModellingBlocks {
             return true;
         }
         return false;
-    }
-
-    touchingAnotherParticle (args, util) {
-        const name = Cast.toString(args.TOUCHINGMENU);
-        if (util.target.isTouchingSprite(name)) {
-            this.collisionCounter++;
-            return true;
-        }
-        return false;
-    }
-
-    temperatureReporter () {
-        return this.temp;
-    }
-
-    collisionReporter () {
-        // 1 collision has 2 particles so we divide it by 2 to know the collision number
-        if (this.counter === this.stepsPerSecond) {
-            return Math.round(this.collisionCounter / 2);
-        }
     }
 
     numberParticleReporter () { 

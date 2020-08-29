@@ -4,6 +4,31 @@
         "gui.extension.scientificmodelling.description": "Faça experimentações científicas",
 
         "scientificModelling.categoryName": "Modelagem científica",
-        "scientificModelling.createParticles": "crie [PARTICLES] partículas"
-    }
+        "scientificModelling.createParticles": "crie [PARTICLES] partículas",
+        "scientificModelling.setCostume": "mude a fantasia para [PARTICLECOSTUME]",
+        "scientificModelling.setParticleSpeed": "mude a velocidade das partículas para [PARTICLESPEED]",
+        "scientificModelling.setParticleTemperature": "mude a temperatura das partículas para [PARTICLETEMPERATURE]",
+        "scientificModelling.whenTemperatureIs": "quando a temperatura é [WHENTEMPMENU]",
+        "scientificModelling.go": "comportamento",
+        "scientificModelling.createParticlesOP": "crie [NUMBERPARTICLE] partículas [PARTICLEPOSITIONOP]",
+        "scientificModelling.temperatureReporter": "temperatura", 
+        "scientificModelling.speedReporter": "velocidade",
+        "scientificModelling.speedMenuHigh": "alta",
+        "scientificModelling.speedMenuMedium": "média",
+        "scientificModelling.speedMenuLow": "baixa",
+        "scientificModelling.speedMenuZero": "zero",
+        "scientificModelling.temperatureMenuHigh": "alta",
+        "scientificModelling.temperatureMenuMedium": "média",
+        "scientificModelling.temperatureMenuLow": "baixa",
+        "scientificModelling.temperatureMenuZero": "zero",
+        "scientificModelling.opositeDirection": "vá para a direção oposta",
+        "scientificModelling.positionMenuRandom": "aleatoriamente",
+        "scientificModelling.positionMenuCenter": "no centro",
+        "scientificModelling.positionMenuMouse": "na posição do mouse",
+        "scientificModelling.whenTouchingAnotherParticle": "quando tocando outra partícula",
+        "scientificModelling.numberParticleReporter": "número de partículas",
+        "scientificModelling.collisionReporter": "colisões por segundo",
+        "scientificModelling.ifTouchingInvert": "se tocar [TOUCHINGMENU] vá para a direção oposta",
+        "scientificModelling.touchingAnotherParticle": "tocando em [TOUCHINGMENU]?"
+    }   
 }

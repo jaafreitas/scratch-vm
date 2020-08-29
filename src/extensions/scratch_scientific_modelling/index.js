@@ -1,58 +1,153 @@
+/* eslint no-console: "warn" */
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
+const TargetType = require('../../extension-support/target-type');
 const Cast = require('../../util/cast');
 const formatMessage = require('format-message');
 const Motion = require('../../blocks/scratch3_motion');
+const Looks = require('../../blocks/scratch3_looks');
+const Sensing = require('../../blocks/scratch3_sensing');
+const Data = require('../../blocks/scratch3_data');
+const Control = require('../../blocks/scratch3_control');
+const Runtime = require('../../engine/runtime');
+const MonitorRecord = require('../../engine/monitor-record');
 
 /**
  * Icon png to be displayed at the left edge of each extension block, encoded as a data URI.
  * @type {string}
  */
 // eslint-disable-next-line max-len
-const blockIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAMenpUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHja7ZlZdiQ7jkT/uYpeAsEJ5HI4gOf0Dmr5feERUiqnN1TXXz1FhiJEdyfhgNHM4BnsX/97w//wk0duoVTtbbQW+SmjjDT50uPrZzy/JZbn9/NT34f4+7vx8HkgMZT5zK8/db7Pn4zXbxd8rCHr+/HQ30dSf0/0PvAxYfaVE1/O1yAZT69xKe+Jhr2+tNH1a6grvT73+8QnlPc76zP15yT+d/g6UJQsncpZOSXLkuPzu7wiyK/35F34LXlwHhE/Iy08Q+kdCQn57vY+PmP8mqDvkvzxLfyY/c9vPyQ/zfd4/iGX7Z0jvvzygNRfJ/9J8ZeF82dE6fsDaUT76Xbe73tPv9dedzdLI6PtjagYPrLj13DiIuX5uazxUt6V7/q8Bq8eZ9wU58QdF68tQxJVuUGKHJlyxZ7PLZsQS7KkfKa0U37GetY00n6qVPwlNylb4+ROLXeykDPD6TMWedYdz3pbOisf4dQkTEZ1f/8Kf3Tw77zCvdtTJLF/5oq4kiOLMLxy/puzKIjcd93qk+CP17v88Qt+HKqF0zzNnRuccb2mWFW+YSs/dc6cV/l87QoJet4TkCLWrgQjmQrEJrlKk6gpqQh57BRoEnnKJS0qILWmQ5Cp5NxS0NSTr801Ks+5qaaWfBhuohA1t6zUZuRJsUqp4EdLB0Oz5lpqra1q7aGOOltupdXWmjYnualZi1Ztqtp16Oy5l15769p7H32ONDIcWEcbOvoYY84UJgtN5pqcPxlZaeVVVl1t6eprrLmBzy677rZ19z32POnkA02cdvT0M840CQZTWLFqzdS6DZsXrN18y623Xb39jjs/q/au6k+vv1E1eVctPZXy8/SzaowG1Y8pxOmkes2oWCpCxdUrAKCT1yx2KSV55bxmcSQ2RU0EWb024YhXjBIWk1SvfNbuW+X+Ut1C7X+pbunPKhe8dP+JygVK93PdflG14zq3n4q9dqHnNGZ2H8etz5D6dFGb/9/Pfyb6Z6J/JvpvmQg+wkuWNSBVW9rCneWMtcvI+y6YrGyIUFYtEDNWeFiPt81bYl8W0+2ztb7zPHCQISt1zIr3ylDtrn3srXHBuZqOjtnXzWkUFPcMsbpoDibUBq8hAVeq3oMDKu3edQ+O6Lp9RyCv4cBYarFIkpk579rQe/s5mv20Zq2eC2sOqbYn1HoTDL0Oc35cHH68Gtd3sAZuYGbUXQkcR3GEZfjmMtesXzt7L4b0Ju68ZttBR62sQzz380o3Jh/X8n09t+XX+zI1Zkvc6YxICnHqfbIUXHfuO3Yn8xF1pXFb3hNJuT7v57Ue5Otqmp7n+hjJc9399jBxbCiQ9hKRxV5uU5xoqSx/5FDQkdbqStinV4qKum6hJHflySDOCLubTiXZ4wEHqXPL/W8jMvwwsBSvuwwMYR7unGUhwFfWWrOkhjOQU4vR3nSbZytgaLXia0oYehSRPji5aHdsITsacwYhy3q9SLwBxnZI5ukZ0LHkmEYyEn9YQbY3hiLsY/iDrcVrV0xljMJEXTWvuzZia8tKG3iMvfctnQXK7lrmqg3ktCEYgL3CSFZovXYkmfFy+PiUF5c/i5XLDljj0DRU/pW+f5ekSb/WbeFEJ/ff1iE1LvItX+wPLaXlFfMxbAUYzvPS8XjRR/fuhkI/yOdWbwAf/YileKitXaFxIGVLZ8KQ6BJwbsx6IpuOLWmaqubDndupVn0r0KuvqGyRyia6SRLGo5J5/qZ3WUKa+iE3S/04HVLe0AWgEjvnSrKbdx6WfA2bNVCIOIZdGlrZ/Guzg2mCjmTubCpXrnJLeZ0uDRN0TGqCarZWWwd8aipwUmjYqincxNwTa5T3cuTPbWM2HVYzFx3yvebYDUQs0sX0tctU2wsgePbWDkP2zePmvIjkhfCa/j1kY/F2vvR8l5QvCg+LHiOnpffdy5744832UUzzaRhFSlmweZq0lS5pDRv3us/uumldCmwUiRycg88EMd7EFOBprBxbYgxfOwD/UcCWBVvJu80yAEgLbjvzkXT4WFlh7dZHg0jpImEEbc1KJ9W+ZSpoou+EN+HyvCSSU5KnU28JoD4N6lhrf93wpfbxyRZ99W8+0zx2Olx+5LHI+3mkcUfptjUbI85ZfbEZ73VUPpSrTvBwEQxc524ITGe71T7xyY6wwqjeYPrQwXE+hsg7MCm+ZfrNDUjbiwjnOWSZ4udKOQDRxDVL3m3QLwyFeQLw0MZGo70/ntkCJ9AgWh2d5HtmID6fzUhQz02OJxBgFRajtmv3Kdxv6FZGKt6AYNgLCO7Wt66q2+rsJGLNVm8ZTTPNdEHoMotCQKinEz97ataRWmjcCHuwnHV1tGcv6x0DNUkChOZ6CARBaO3FJf6U6Bef4ctAHf6QgqhpnhpYWLmvfVYfwL7CKXUj0km5gYiQ04LIYe+vTaPYelgTCNVLMj007jPuJdzBGEJp483gkMw3VMQWit1hJxq7U+b1fCXwPw47IoC+lMAeG+8iwY0kXRexGY3GZ3pgbIQk9SyZBgmz1yv04UmocBmbpW9UKyjDU5fCQiTqnjxdJ5DIM1s5rwTtIif9YYaqP9H64UArl6zUvXzroSOaJ7y0OzaHZvfwFSBuNxZxHYFpZlu7Lvp+OrI8N55n7isGcYIaNzvQkFXHhqTeGvgHARd0gETQhTTtplPwOUl7neEqrSKdnhZEGCxlQe5HPYgHWHFiFplIgkynkINrqrSV49AXJwh9grKBAehBLvsMWJFocAxBOtzyJmVVlc09D0yYgXetj9JN2EVB7BXUrVdEE1fRswUv92Nb4HX3Y7imDrFvEL0PbDNQEojHabSmDS+MODPEXoXWNumMt8K2mU0rkHvv2U1TLtvt3EqP4RKY/O40XKP4cq2N8TI01MMNDXuS/jceeL3vkDGm1iFsMiNICtuXAaXw7GysAwCiY7eHgQ2OQ9e1Y1jjRvWlIw1mLlVBKBggRUb7BohVVMveY67oaJBa4m8BVNvcsPeCeE0DRoAJIJ9SKzukWVy7sZlYGMeGUzgkLJUV+61uaQ90ncADlAPYI1HhKnsG2Uj1WDiKy/16cdnoQI8LOnjKpXJH+aSEa0G7cRyZ2yOh6bHg6qCjbL771R8Q4/D88UJdCyE4b/YmBc/tlRj//DP88oAYIJYGhUK1W3szIItRRLMSSGYREJ4REcQdhx/HNm4N23UxEtja2g9SvWCcOitMbtU3DURC5nBgcB6ZkxPhXsSrRm80IAUKak5sFA1F9Tr2gtPAbEHv7odpOoA1nkQrOQT0EgXRq9XV0Z+xjuJkK0y7LCAFG69p0qo1CBj/4B1JV7iot5cbwOez13+rdS5A7DXDsOG10sUT7cjOM5ezIQl/lsuEDrYQX+mggIShsyf5A6Q9mh3ON9fWmwI9ygILx5/cAU0syWoCMAnHUEQKjETgv4A6JpUOBOZr/myNrO2DzF7SjnoGAQ7vKvf/QAe5TDf3R0iKU/CH6fvcNvpK7OZDuukJXcJwXzbc9uBntgNj2/busJAj2iuYLdMYlXuUfhLxbKLW50PwzTXfn/vR46TYOy4cND+IqYJUdx1gZFg40jYmdx9gjFVleUOlHltCUkHdnxiTfAiBaIKbZ2zshLPEDQa7pND55px3MeSDNY19ttFIwqVb3W0fSCoimUO999igbsTgXUZzQsG60gTTnxCLKPKAN18YWCP2ti88Sl9MJ7YoPl7g1eNi+h4Df0+IpT1ftys2UOnuhU42ue9GD0XGZWPm3IYjhegcDArB0HHYVfT3YkhuaJg5806Ay8XEfnH5q8NdWOd8vMOFSJ8Rae3V+96xsDW02Qcdg4p1eS3MNxyb87yY+48m8AadTrajKRZ6ovLXIDxwQFuUsQvlp9DxnDSu80X6nxd/vdZVxLWCFtp903ml7CNhy5q7+McwoHvsJLvr6NNBKxvLc/6+Nvx08dD76zWfeEnkE+/o0cnu26wobZkfIZFpZp3ycxX9P4ReZRglf1dFbz2h+xkwRN6kfJdlB8mT4/V6mJC65/2V428ZVg+4xvsKOPxJxB7wRx5MPwL+Eq4/m/CAcf73Ha//X9hnxPUd8a8CXt9gMRwWT8DhKy4g6EGPj4qXAl3TarL5DrqNTS/nZHkWMTgOfxhXozd09TdySwtxHdsrPepTMEC6qwgioRLPoGW4Mqdkf8hCqw+nHKcnWU97f5GOjBfiFQ48VVvBL65m9m7H8el/Yhl/+gx/94K/PBF5uwctDP8H4WD+C+SOg4gAAAGEaUNDUElDQyBwcm9maWxlAAB4nH2RPUjDQBzFX9NqRSoO7SDikKE6WRAVcZQqFsFCaSu06mBy6Rc0aUhSXBwF14KDH4tVBxdnXR1cBUHwA8TJ0UnRRUr8X1JoEePBcT/e3XvcvQOEZpWpZmACUDXLSCfiYi6/KgZfEUAYfvQiIDFTT2YWs/AcX/fw8fUuxrO8z/05BpSCyQCfSDzHdMMi3iCe2bR0zvvEEVaWFOJz4nGDLkj8yHXZ5TfOJYcFnhkxsul54gixWOpiuYtZ2VCJp4mjiqpRvpBzWeG8xVmt1ln7nvyFoYK2kuE6zREksIQkUhAho44KqrAQo1UjxUSa9uMe/mHHnyKXTK4KGDkWUIMKyfGD/8Hvbs3i1KSbFIoDPS+2/TEKBHeBVsO2v49tu3UC+J+BK63jrzWB2U/SGx0tegQMbgMX1x1N3gMud4ChJ10yJEfy0xSKReD9jL4pD4Rvgf41t7f2Pk4fgCx1tXwDHBwCYyXKXvd4d193b/+eaff3A+Rfcm5tWcR/AAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5AQTBAYOQMaP2AAABgZJREFUeNrtnF1sFFUUx3+zQD9EoBYEJYSPqFip0YgQPxJiJSQkYEokgRINLwYTeBI1YEjDhwJKQhNjDMiDhCBBgpqKTyaEGB+EpCKIhtCSUIQiLdYWbFpaSnf2+rAzcOfubruzOzszOzP/5KYztztn5vznnnvOuR8DESJEiBAhQpFgNHAMuAsMAfEMRc9QEmmKUEo38FpQCVyaRuFClD/dUijmMoHNRgsrNM64pZDmQStcBnwv3fsO8CnQY5wLm/JeAZZI56eBGqA/yH3hZsXk1uYoZxRwVpJzE5gVBmdSDrRKiv9ikGEXTyovYluYPPJHkuI6MDYHGWslGXFgpttKxDwk8KTU38WAGTnImCMd/wdcCROB1xSHMSUHGQ9Jxx1eKOElgXcUAstzkFEmHQ95lRkUAzTgCYWwBPCA4pEjAjNgE7DTj7rEfETScAH0G1lcPyZsBAobz3IkixSwJGwmLNJkFZmwE/gBeFC5/l2gzjgvDRuBCZvWcD5N3V/S8diwm3AuXnTIaxOO+agF5kLggBLqhIrAuAMEDoaZQN0BAuMKgaPCRqDI06Gprdh1T+wnLzzSs8wAKpW6R7wOpkf7yISHs4b3gYYs8uXSMJmwnTjwrSxlloSNQJGlFz3qV4vy2oS1LF/mduDbNH3gfJIzevl48qIlcK5CWmyErKV5BJONGTJbCQHKgD+wzqjNz0HOo0Y6Z8q4inWYP7D4UCFvXx6ZRL0ia69XWYlbeNYIgE2Fr+TZasqAcwqJC4JK3miSw1KysksdkPuC8lIuY50/CQw+Ucg74KDsBkX2Z0Ejbz73pzIF8DfWEWYnWneLJH8QeDkoYUyp4ShKpbDkbaAvx+D/PawrstKFNSWGQ3nReHFFjS0Omu7z2FtsuTkIXleXFGoHJuQpzw6BcaC6UMoVOl4qAX41lDaxBPgxz2deA9RmSN0SwCXgHanutNEfxout9W1TWsOXLt77oHLvDcVG3jOGJzQVaHM5zXqY5Iot8/59wOPFFDCfVfohL7YevIl1K8RPxRLGbAGeM0/27qVn3ToWAYu4vyI1Lv0193zoksK6UgeZ94jI18t7TXo3buTy7t08Zlz/KrAO+MLPrW+uHDAvX44YHEQI4U7RdWvp6UHMm2fpC3uA6X5tgWVKwMyuXVDi0kD78eNw7BgMKUstS60zJeOBz4HXSZ1W8BybZM936JB7La+72/ZuplV+I2+OPCJSV4fo73ePwNu3EdOm2SLwphNRgeZgV/CbHDA3N0NVlbtv8No1OHMGdD2Nohr098Pq1Zbq74AVvguYDx50r+XZKYkEYutWSytMAMv9kOsOmA+1ahViYMCfBAqB6OpCVFVZSGwjdbbPNYwBmsyHqahAXLjgX/LMcuJESn/oWVxomdDZv9//5AmBiMcRGzakkFjjRa57L2CurfW36aqlvR1RWWkh8Cq5bfbJeZiqSX6DFy/6l6zGxqxDG9fmUT4oBq8rBKK311ZseNcNU54pD1PV1SWDWL8SqOuIFStskdhmpHsFC6SPmGnQ+PFw6hRUV+Nr9PXB+fMQj6cPsFtaYM0aS/U+Y9TGcUyX07WGhuJxGiN55fXrEZpm2QD+VKHG+e419xs3gkGgEIjr11NM+atCEHhvlLm+PpkaBYXARAKxZ4+FwH+BSSMRYmeF6mR5ILKmJtl/BAWaBosXW6omkcWSOzsETgEqzJNZAfy4yNSpsGyZpeolJwkcizQPO25c8AgsL4fZs1NCNscItAx/JxIEEsr0Q7mTBPYgLdLp7AweeboO3d2Wqm4nCbwKdJknJ0+CEMEisLMTDh+2VP3u9D0OyLFSa2twwpihIcSOHZYwZoDkl0IcRbURpQtNQyxYgDh3rvjJ6+hAbN+eEkh/U6hc+GNj+hKAigpYuRIWLoSJE9Obdbbxovy7TNc49Rtdh1u3oKkJGhvh0iXLv7uAp4F/CtFVxICvcedLlF6UDmOwuKAYZYwJ9gaMvKPANFsZTJ5ETib5UZwlRpOfQPrlEtowddowv9McOk53vzjJyfUW4GdjmO4i9r+gGSFChAgRIuSG/wHcFFjfLyaf6gAAAABJRU5ErkJggg==';
-
+const blockIconURI = 'data:image/png;base64,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';
 /**
  * Url of icon to be displayed in the toolbox menu for the extension category.
  * @type {string}
  */
 // eslint-disable-next-line max-len
-const menuIconURI = 'data:image/png;base64,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';
-
+const menuIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAUHSURBVFhHrZlnyB1FFIY/FVtsUTH2lh8BCxZiwYqIqGAhYokVFEtM7OWfiv4RsSFiQRSNFVQURVEsYDeixGAS6w977w0rij7Pzs7HZO/O7ny594WHe+7e3ZmzU845u3esUDvCIvgTXoeTYVko1XLgNQvANmxrBxiJVoUv4SLYHubA+/AKbAp98hzP/QBmw7ZgW5/DyjC0joBngzkuG74RvoGdPJCRv3nODTDJA4meB9seWlfChcEc0FnwE+xSfVtSu8HPcGb1bVCXwOXBHE5z4dRgtuoU+B62rL4Faf8A/paTS+W2YOY1kYWe081wDTwG69Y8DleDv3VpmfozqxIHHZ3Vg5nVpfASPAgP1LbHurQG/BLMvEoc/Bg2CmZW/4HTuSFsAIaUPrm7PwtmXiUOvgdbB7NTO8PasA507eyoreDtYA4n15TT3HUzq8GHMKtG2/iZk4HbHd43M8UyMKe7tKlr4Qlw0cuT9bGctoFPgjka3QpnBHNApkFHI80q2sbH6dW3QZ0DdwazW73bvNaRcCwcCO6+zcHpcfpPh5XAEUy1H5h3zSJfg6nNdOfNOMJ3w13QqT4HVwBHaAaYEb4CHfsDPgU3xV/wXP2pbNM1tjzsVX8atL3OFKmj68F18BC8Bn9DsdwM3r139yOYS++Ft+AysCOdcNR08gDI6SDwHB3zGsOQ6e0duA++BZeCfe0PnVHFBo4Cw8oXYA529OIonwiPBLPSedAsItrk6J4fzEpmnJg6bds+rgD7tG99iH2OyyG3s4/geHBamnLt/Qqeuwq4rtqKhKY8x5HyGoP4b7AmNGWf9m1ieAbsp/J0CrwMpqfT4HfIyYW9GP6FfWuinHI3klnlHnCDRJmbHUnXpvWgmy4nb8SNtTvs6gGrFRscGNYW7QkGYadDO5VO6Jxop7Izi15HZ28P9Ehf9EnfqkU6VaNQb8K8YI7LuBedi2wGqZwlU1vJQKgqlpbk4lQ27jU6kKr5fRQav5HbwbVVcmdOj9PkdDltqR6FOHru1FRLM8X6NFfDTeKUvQBmha5NYjxcCP/APmC8jHKTHBPMoTaJzy7Xg2u82iQqhhnv8ARoCzOGBkOEoWIiYcZOJhpm9GV9WEKO5tFgsHQ6rgJrvDj1llHp7jwXfDLrU1ugti1l29aOJgUjw7vQGqhT+WOa6rz7+8GLjfhpqvNuD4acLC4sq5qpzrZMdaZRo4jrzT4HHOv0FMVi4RCwWHBk02JhLXA9Okom/LibbddrXUcrggXvxqCjXudUWyw8DK9CtljoczDKDHEceJfNcsvs42haQqUy+btRXPCuV58/LLd8UHoKrAcduZHoDrDIbJNFqdOUBmZt677c+xfXb1HBWirX0XbBbJXPxU+DMyIWr10lv6FmZCW/U+loGMNyMoT43GIZ5eOntg9SOY30ocmC9MVgdmoPcH3ZsZV0nwxR7vJOleTiaWA13af5YEgyNLkz+2TRsUUw8ypxcBMoWS++hzHYGhtvgb4IYbjpneISByeD09alC8ApPhQOB1+95V7ZRVmd973zKXJQdZVTpi3DhmvVzCCurbMhprSlVomDdmjF0yZfYJr+fHpL16m2TprWPKdNZqHvgjmcDoNmUVD6Ctg06Tk3gdekMj3ODOZwsj7zYftiMFinL9FNeX2ydLfeNM15rW34Et28bvwciUxZb4C1nOHkJChdv8rA7DtD/8KwDdsq+BtibOx/114gI1bkSeoAAAAASUVORK5CYII=';
 class Scratch3ScientificModellingBlocks {
-    constructor(runtime) {
+    constructor (runtime) {
         this.runtime = runtime;
-
+        this.vel = 0;
+        this.collisionCounter = 0;
         this.motion = new Motion(this.runtime);
-
-        this._lastUpdate = Date.now();
-        this._loop();
+        this.looks = new Looks(this.runtime);
+        this.sensing = new Sensing(this.runtime);
+        this.data = new Data(this.runtime);
+        this.control = new Control(this.runtime);
+        this.temp = 'medium';
+        this.runtime.on(Runtime.PROJECT_START, this._projectStart.bind(this));
+        this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
+        this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
+        this._steppingInterval = null;
+        this._temperatureVar();
+        this.clonesList = [];
+        this.compTemp = 0;
+        this.counter = 0;
+        this.stepsPerSecond = 30;
     }
 
-    static get DEFAULT_SPEED() {
-        return 5;
+    _particles () {
+        return this.clonesList
     }
 
-    static get INTERVAL() {
-        return 33;
+    _projectStart () {
+        this._createStepInterval();
+    }
+    
+    _projectRunStart () {
+        this._createStepInterval();
     }
 
-    _loop() {
-        setTimeout(this._loop.bind(this), Math.max(this.runtime.currentStepTime, Scratch3ScientificModellingBlocks.INTERVAL));
-
-        const time = Date.now();
-        const offset = time - this._lastUpdate;
-        if (offset > Scratch3ScientificModellingBlocks.INTERVAL) {
-            this._lastUpdate = time;
-            for (let i = 0; i < this.runtime.targets.length; i++) {
-                const util = { target: this.runtime.targets[i] };
-                if (util.target.speed) {
-                    this.motion.moveSteps({ STEPS: util.target.speed }, util);
-                    this.motion.ifOnEdgeBounce({}, util);
-                }
-            }
+    _projectStopAll () {
+        if (this._steppingInterval) {
+            clearInterval(this._steppingInterval);
+            this._steppingInterval = null;
+            this.clonesList = [];
+            this.collisionCounter = 0;
+            this.counter = this.stepsPerSecond;
         }
     }
 
+    _temperatureVar () {
+        const args = {VARIABLE: {id: 'temperatureSlider', name: 'temperature'}, VALUE: 50};
+        const stage = this.runtime.getTargetForStage();
+        if (stage) {
+            this.data.setVariableTo(args, {target: stage});
+            // Show the new variable on toolbox
+            this.runtime.requestBlocksUpdate();
+
+            // Show the new variable on monitor
+            const monitor = MonitorRecord({
+                id: args.VARIABLE.id,
+                opcode: 'data_variable',
+                value: args.VALUE,
+                mode: 'slider',
+                sliderMin: 0,
+                sliderMax: 100,
+                isDiscrete: true,
+                visible: true,
+                params: {VARIABLE: args.VARIABLE.name}
+            });
+            this.runtime.requestAddMonitor(monitor);
+        }
+    }
+
+    _createStepInterval () {
+        if (!this._steppingInterval) {
+            this._steppingInterval = setInterval(() => {
+                this._step();
+            }, this.runtime.currentStepTime);
+        }
+    }
+    _step () {
+        // TODO: runtime.getTargetForStage() ao invés de targets[0]?
+        // TODO: getVariable?
+        if (this.runtime.currentStepTime === 33.333333333333336) {
+            this.stepsPerSecond = 30;
+        } else {
+            this.stepsPerSecond = 60;
+        }
+        if (this.runtime.targets[0].variables.hasOwnProperty('temperatureSlider')) {
+            const tsValue = this.runtime.targets[0].variables.temperatureSlider.value;
+            if (tsValue != this.compTemp) {
+                for (let i = 0; i < this.clonesList.length; i++) {
+                    const util = {target: this.clonesList[i]};
+                    util.target.temperature = tsValue;
+                }
+                if (tsValue >= 60) {
+                    this.temp = 'high';
+                }
+                if (tsValue < 60 && tsValue >= 20) {
+                    this.temp = 'medium';
+                }
+                if (tsValue < 20 && tsValue > 0) {
+                    this.temp = 'low';
+                }
+                if (tsValue === 0) {
+                    this.temp = 'zero';
+                }
+                this.compTemp = tsValue;
+            }
+        }
+        if (this.counter === this.stepsPerSecond) {
+            this.collisionCounter = 0;
+            this.counter = 0;
+        }
+        if (this.counter % 3 === 0) {
+            for (let i = 0; i< this.clonesList.length; i++) {
+                if(this.clonesList[i].collide) {
+                    this.clonesList[i].collide = false;
+                }
+               
+            }
+        }
+        this.counter++;
+        this._particles().forEach(target => {
+            const util = {target: target};
+            this.motion.moveSteps({STEPS: target.speed}, util);
+            this.motion.ifOnEdgeBounce({}, util);
+        });
+    }
     _setupTranslations () {
         const localeSetup = formatMessage.setup();
         const extTranslations = require('./locales.json');
@@ -62,16 +157,15 @@ class Scratch3ScientificModellingBlocks {
             }
             Object.assign(localeSetup.translations[locale], extTranslations[locale]);
         }
-    }    
-
+    }
     getInfo () {
         this._setupTranslations();
-        
+
         return {
             id: 'scientificModelling',
-            color1: '#666666',
-            color2: '#000000',
-            color3: '#BBBBBB',
+            color1: '#7bc7bc',
+            color2: '#67827e',
+            color3: '#67827e',
             name: formatMessage({
                 id: 'scientificModelling.categoryName',
                 default: 'Scientific Modelling',
@@ -81,47 +175,539 @@ class Scratch3ScientificModellingBlocks {
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [
+
                 {
-                    opcode: 'createParticles',
+                    opcode: 'createParticlesOP',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: 'scientificModelling.createParticles',
-                        default: 'create [PARTICLES] particles',
-                        description: 'create a given number [PARTICLES] of particles'
+                        id: 'scientificModelling.createParticlesOP',
+                        default: 'create [NUMBERPARTICLE] particles [PARTICLEPOSITIONOP]'
+                    }),
+                    filter: [TargetType.SPRITE],
+                    arguments: {
+                        NUMBERPARTICLE: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10'
+                        },
+                        /*
+                        COLORMENUOP: {
+                            type: ArgumentType.STRING,
+                            menu: 'particlecolors',
+                            defaultValue: this.runtime.getEditingTarget().getCurrentCostume().name
+                        },
+                        */
+                        PARTICLEPOSITIONOP: {
+                            type: ArgumentType.STRING,
+                            menu: 'particleposition',
+                            defaultValue: ''
+                        }
+                        
+                    }
+                },
+
+                {
+                    opcode: 'whenTemperatureIs',
+                    blockType: BlockType.HAT,
+                    shouldRestartExistingThreads: false,
+                    text: formatMessage({
+                        id: 'scientificModelling.whenTemperatureIs',
+                        default: 'when temperature is [WHENTEMPMENU]',
+                        description: 'checks if the temperature is equal to [WHENTEMPMENU]'
                     }),
                     arguments: {
-                        PARTICLES: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 10,
+                        WHENTEMPMENU: {
+                            type: ArgumentType.STRING,
+                            menu: 'whenparticletemperature',
+                            defaultValue: ''
+                            
                         }
                     }
+                },
+
+                {
+                    opcode: 'setParticleSpeed',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.setParticleSpeed',
+                        default: 'set particles speed to [PARTICLESPEED]',
+                        description: 'sets particles speed to [PARTICLESPEED]'
+                    }),
+                    arguments: {
+                        PARTICLESPEED: {
+                            type: ArgumentType.STRING,
+                            menu: 'particlespeed',
+                            defaultValue: ''
+                        }
+                    }
+                },
+
+                {
+                    opcode: 'go',
+                    blockType: BlockType.HAT,
+                    shouldRestartExistingThreads: false,
+                    text: formatMessage({
+                        id: 'scientificModelling.go',
+                        default: 'behavior'
+                    })
+                },
+
+                {
+                    opcode: 'ifTouchingInvert',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.ifTouchingInvert',
+                        default: 'if touching [TOUCHINGMENU] go to the oposite direction'
+                    }),
+                    filter: [TargetType.SPRITE],
+                    arguments: {
+                        TOUCHINGMENU: {
+                            type: ArgumentType.STRING,
+                            menu: 'touchingMenu',
+                            defaultValue: this.runtime.getEditingTarget().sprite.name
+                        }
+                    }
+                },
+
+                {
+                    opcode: 'touchingAnotherParticle',
+                    blockType: BlockType.BOOLEAN,
+                    text: formatMessage({
+                        id: 'scientificModelling.touchingAnotherParticle',
+                        default: 'touching [TOUCHINGMENU]?'
+
+                    }),
+                    filter: [TargetType.SPRITE],
+                    arguments: {
+                        TOUCHINGMENU: {
+                            type: ArgumentType.STRING,
+                            menu: 'touchingMenu',
+                            defaultValue: this.runtime.getEditingTarget().sprite.name
+                        }
+                    }
+                },
+                
+                {
+                    opcode: 'opositeDirection',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.opositeDirection',
+                        default: 'go to the oposite direction',
+                        description: 'reverse sprites direction'
+                    })
+                },
+            
+                {
+                    opcode: 'numberParticleReporter',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'scientificModelling.numberParticleReporter',
+                        default: 'number of particles'
+                    })
+                },
+
+                {
+                    opcode: 'collisionReporter',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'scientificModelling.collisionReporter',
+                        default: 'collisions per second'
+                    })
                 }
+               
             ],
             menus: {
+                particlecolors: {
+                    // acceptReporters: true,
+                    items: 'getParticleColors'
+                },
+                particleposition: {
+                    // acceptReporters: true,
+                    items: this.particlePosition
+                },
+                particletemperature: {
+                    // acceptReporters: true,
+                    items: this.particleTemperatureMenu
+                },
+                whenparticletemperature: {
+                    // acceptReporters: true,
+                    items: this.whenParticleTemperatureMenu
+                },
+                particlespeed: {
+                    // acceptReporters: true,
+                    items: this.particleSpeedMenu
+                },
+
+                touchingMenu: {
+                    items: 'getTouchingMenu'
+                }
+
             }
         };
     }
 
-    createParticles (args, util) {
-        if (!util.target) return;
+    getTouchingMenu () {
+        const targetNames = this.runtime.targets
+            .filter(target => !target.isStage && target.isOriginal)
+            .map(target => ({text: target.sprite.name, value: target.sprite.name}));
+        if (targetNames.length === 0) {
+            targetNames.push({text: ''});
+        }
+        return targetNames;
+    }
 
-        const mumberOfParticles = Cast.toString(args.PARTICLES);
-        for (let i = 0; i < mumberOfParticles; i++) {
+    getParticleColors () {
+        const costumes = this.runtime.getEditingTarget().getCostumes()
+            .map(costume => ({text: costume.name}));
+        if (costumes.length === 0) {
+            costumes.push({text: ''});
+        }
+        return costumes;
+    }
+
+    get particleTemperatureMenu () {
+        return [
+            {text: formatMessage({
+                id: 'scientificModelling.temperatureMenuHigh',
+                default: 'high'}),
+            value: '100'},
+            {text: formatMessage({
+                id: 'scientificModelling.temperatureMenuMedium',
+                default: 'medium'}),
+            value: '50'},
+            {text: formatMessage({
+                id: 'scientificModelling.temperatureMenuLow',
+                default: 'low'}),
+            value: '0'}
+        ];
+    }
+
+    get whenParticleTemperatureMenu () {
+        return [
+            {text: formatMessage({
+                id: 'scientificModelling.temperatureMenuHigh',
+                default: 'high'
+            }),
+            value: 'high'},
+            {text: formatMessage({
+                id: 'scientificModelling.temperatureMenuMedium',
+                default: 'medium'
+            }),
+            value: 'medium'},
+            {text: formatMessage({
+                id: 'scientificModelling.temperatureMenuLow',
+                default: 'low'
+            }),
+            value: 'low'},
+            {text: formatMessage({
+                id: 'scientificModelling.temperatureMenuZero',
+                default: 'zero'
+            }),
+            value: 'zero'}
+        ];
+    }
+
+    get particleSpeedMenu () {
+        return [
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuHigh',
+                default: 'high'
+            }),
+            value: '4'},
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuMedium',
+                default: 'medium'
+            }),
+            value: '2'},
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuLow',
+                default: 'low'
+            }),
+            value: '1'},
+            {text: formatMessage({
+                id: 'scientificModelling.speedMenuZero',
+                default: 'zero'
+            }),
+            value: '0'}
+        ];
+    }
+
+    get particlePosition () {
+        return [
+            {text: formatMessage({
+                id: 'scientificModelling.positionMenuRandom',
+                default: 'randomly'}),
+            value: 'randomly'},
+            {text: formatMessage({
+                id: 'scientificModelling.positionMenuCenter',
+                default: 'center'}),
+            value: 'center'},
+            {text: formatMessage({
+                id: 'scientificModelling.positionMenuMouse',
+                default: 'on mouse position'}),
+            value: 'mouse'}
+           
+        ];
+    }
+
+    _checkNumberOfParticles (numberOfParticles) {
+        // this.runtime._cloneCounter gives us the total of existing clones
+        // total particles is the sum of the total of existing clones with the number of clones
+        // we want to create
+        const totalParticles = this._particles().length + numberOfParticles;
+        let maxParticles = 100;
+        // verifies if after the creation there will be more clones than the amount allowed
+        if (totalParticles > maxParticles) {
+            numberOfParticles = maxParticles - this._particles().length;
+        }
+        return numberOfParticles;
+    }
+
+    _createNParticlesRandomly (numberOfParticles, util, rm) {
+        if (util.target.isOriginal === false) {
+            return
+        }
+        this.looks.show({}, {target: util.target});
+        let c = 0;
+        for (let i = 0; i < numberOfParticles; i++) {
+            // moves the sprite to a random position
             // Based on scratch3_control.createClone()
+            if (c > 600) {
+                this.looks.hide({}, {target: util.target});
+                return;
+            }
             const newClone = util.target.makeClone();
             if (newClone) {
                 this.runtime.addTarget(newClone);
-                // Place behind the original target.
-                newClone.goBehindOther(util.target);
-
-                newClone.speed = Scratch3ScientificModellingBlocks.DEFAULT_SPEED;
-
-                // Place in a ramdom position.
-                this.motion.goTo({ TO: '_random_' }, { target: newClone});
-                // Point in a ramdom direction.
-                this.motion.pointTowards({ TOWARDS: '_random_' }, { target: newClone });
+                this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
+                this.motion.goTo({TO: '_random_'}, {target: newClone});
+                const r = Math.sqrt(((newClone.x) * (newClone.x)) + ((newClone.y) * (newClone.y)));
+                // should be checking all targets, not only itself.
+                if (newClone.isTouchingSprite(util.target.sprite.name) || r > rm){
+                    this.control.deleteClone({}, {target: newClone});
+                    i = i - 1;
+                    c++;
+                    continue;
+                }
+                newClone.speed = this.vel;
+                newClone.temperature = this.temp;
+                newClone.limiter = true;
+                newClone.Collide = false;
+                this.clonesList.push(newClone);
             }
         }
+        this.looks.hide({}, {target: util.target});
+    }
+    
+    _polarToCartesian (r,theta) {
+        theta = (theta * Math.PI) / 180;
+        let x = r * Math.cos(theta);
+        let y = r * Math.sin(theta);
+        return [x,y]
+    }
+
+    _createNParticlesMouse (numberOfParticles, mousePosition, util) {
+        let mouseX = 0;
+        let mouseY = 0;
+        const stageWidth = this.runtime.constructor.STAGE_WIDTH;
+        const stageHeight = this.runtime.constructor.STAGE_HEIGHT;
+        if (mousePosition) {
+            mouseX =  util.ioQuery('mouse', 'getScratchX');
+            mouseY = util.ioQuery('mouse', 'getScratchY');
+        }
+        // check if mouse is inside canvas
+        if (Math.abs(mouseX) > stageWidth * 0.5 || Math.abs(mouseY) > stageHeight * 0.5) {
+            return
+        }
+        if (util.target.isOriginal === false) {
+            return
+        }
+        let r = 0;
+        let theta = 0;
+        let c = 0;
+        let ifc = 0;
+        let dt = 20;
+        let dr = 15;
+        for (let i = 0; i < numberOfParticles; i++) {
+            this.looks.show({}, {target: util.target});
+            const newClone = util.target.makeClone();
+            this.looks.hide({}, {target: util.target});
+            if (newClone) {
+                this.runtime.addTarget(newClone);
+                this.motion.pointTowards({TOWARDS: '_random_'}, {target: newClone});
+                c = 0;
+                if (newClone.isTouchingSprite(util.target.sprite.name) === false) {
+                    if (ifc === 600) {
+                        this.control.deleteClone({}, {target: newClone});
+                        this.looks.hide({}, {target: util.target});
+                        return
+                    }
+                    let x = mouseX + this._polarToCartesian(r,theta)[0];
+                    let y = mouseY + this._polarToCartesian(r,theta)[1];
+                    if (Math.abs(x) > stageWidth * 0.5 || Math.abs(y) > stageHeight * 0.5) {
+                        this.control.deleteClone({}, {target: newClone});
+                        i = i - 1;
+                        ifc++;
+                        continue
+                    }
+                    newClone.setXY(x,y);
+                }
+                while (newClone.isTouchingSprite(util.target.sprite.name)) {
+                    if (c === 1000) {
+                        this.looks.hide({}, {target: util.target});
+                        this.control.deleteClone({}, {target: newClone});
+                        return
+                    }
+                    let x = mouseX + this._polarToCartesian(r,theta)[0];
+                    let y = mouseY + this._polarToCartesian(r,theta)[1];
+                    if (Math.abs(x) > stageWidth * 0.5 || Math.abs(y) > stageHeight * 0.5) {
+                        c++
+                        continue
+                    }
+                    newClone.setXY(x,y);
+                    theta+= dt;
+                    if (theta === 360) {
+                        theta = 0;
+                        if (r <= 200) {
+                            r+= dr;
+                        }
+                    }
+                    c++
+                }
+                newClone.speed = this.vel;
+                newClone.temperature = this.temp;
+                newClone.limiter = true;
+                newClone.Collide = false;
+                this.clonesList.push(newClone);
+            }
+        }
+    }
+
+    _checkCollision (util) {
+        let x = util.target.x;
+        let y = util.target.y;
+        let distanceArray = [];
+        for (let i = 0; i < this.clonesList.length; i++) {
+            let element = this.clonesList[i];
+            let elementX = element.x;
+            let elementY = element.y;
+            let dx = x - elementX;
+            let dy = y - elementY;
+            let r = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2));
+            if (r === 0 ) {
+                r = 1000;
+            }
+            distanceArray.push(r);
+        }
+        let min = Math.min.apply(null,distanceArray);
+        let touchingIndex = distanceArray.indexOf(min);
+        return this.clonesList[touchingIndex]
+    }
+
+    _momentumUpdate (util, body2) {
+        if(util.target.collide) {
+            return
+        }
+        let body1 = util.target;
+        let direct = body1.direction;
+        body1.setDirection(body2.direction);
+        body2.setDirection(direct);
+        this.motion.moveSteps({STEPS: body1.speed}, {target: body1});
+        this.motion.moveSteps({STEPS: body2.speed}, {target: body2});
+        body1.collide = true;
+        body2.collide = true;
+        /*
+        // mass and speed of first target
+        let m1 = 1;
+        let v0x1 = this.vel * Math.cos(body1.direction);
+        let v0y1 = this.vel * Math.sin(body1.direction);
+        // mas and speed of second target
+        let m2 = 1;
+        let v0x2 = this.vel * Math.cos(body2.direction);
+        let v0y2 = this.vel * Math.sin(body2.direction);
+        let vfx1 = (m1 - m2)*v0x1/(m1 + m2) + 2*m2*v0x2/(m1+m2);
+        let vfy1 = (m1 - m2)*v0y1/(m1 + m2) + 2*m2*v0y2/(m1+m2);
+        */
+    }
+
+    createParticlesOP (args, util) {
+        if (!util.target) return;
+        //  number of particles requested to create
+        let numberOfParticles = Cast.toNumber(args.NUMBERPARTICLE);
+        // where the particles will be created
+        const chosenPosition = Cast.toString(args.PARTICLEPOSITIONOP);
+        // const currentCostume = util.target.currentCostume;
+        // const requestedCostume = args.COLORMENUOP;
+        numberOfParticles = this._checkNumberOfParticles(numberOfParticles);
+        //  switch costumes of the original sprite
+        // this.looks.switchCostume({COSTUME: requestedCostume}, {target: util.target});
+        // loop for creating particles ramdomly
+        if (chosenPosition === 'randomly') {
+            const rm = 300;
+            this._createNParticlesRandomly(numberOfParticles, util, rm);
+        }
+        // loop for creating clones at the center
+        if (chosenPosition === 'center') {
+            this._createNParticlesMouse(numberOfParticles, false, util);
+        }
+        if (chosenPosition === 'mouse') {
+            this._createNParticlesMouse(numberOfParticles, true, util);
+        }
+    }
+
+    opositeDirection (args, util) {
+        body2 = this._checkCollision(util);
+        this._momentumUpdate(util, body2);
+    }
+
+    ifTouchingInvert (args, util) {
+        if (this.touchingAnotherParticle(args, util)) {
+            this.opositeDirection(args, util);
+        }
+    }
+
+    setParticleSpeed (args) {
+        const velocity = Cast.toString(args.PARTICLESPEED);
+        this.vel = velocity;
+        this._particles().forEach(target => {
+            target.speed = velocity;
+        });
+    }
+
+    whenTemperatureIs (args) {
+        const checkTemperature = Cast.toString(args.WHENTEMPMENU);
+        return checkTemperature === this.temp;
+    }
+
+    go (args, util) {
+        if (util.target.limiter) {
+            util.target.limiter = false;
+            return true;
+        }
+        return false;
+    }
+
+    touchingAnotherParticle (args, util) {
+        const name = Cast.toString(args.TOUCHINGMENU);
+        if (util.target.isTouchingSprite(name)) {
+            this.collisionCounter++;
+            return true;
+        }
+        return false;
+    }
+
+    temperatureReporter () {
+        return this.temp;
+    }
+
+    collisionReporter () {
+        // 1 collision has 2 particles so we divide it by 2 to know the collision number
+        if (this.counter === this.stepsPerSecond) {
+            return Math.round(this.collisionCounter / 2);
+        }
+    }
+
+    numberParticleReporter () { 
+        return this._particles().length;
     }
 }
 

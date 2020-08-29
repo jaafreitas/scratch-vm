@@ -4,6 +4,8 @@ const log = require('../../util/log');
 const Cast = require('../../util/cast');
 const nets = require('nets');
 const formatMessage = require('format-message');
+const Runtime = require('../../engine/runtime'); //INCLUINDO
+
 
 // eslint-disable-next-line max-len
 const blockIconURI = 'data:image/png;base64,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';
@@ -17,7 +19,18 @@ class Scratch3DataViewerBlocks {
 
     constructor (runtime) {
         this._runtime = runtime;
+
+        this.scalex = 100;
+        this.scaley = 100;
+
+        this._runtime.on(Runtime.PROJECT_START, this.reset.bind(this));
     }
+
+    reset() {
+        this.scalex = 100;
+        this.scaley = 100;
+    }    
+
 
     _setupTranslations () {
         const localeSetup = formatMessage.setup();
@@ -51,13 +64,51 @@ class Scratch3DataViewerBlocks {
                     opcode: 'setData',
                     text: formatMessage({
                         id: 'dataviewer.setData',
-                        default: 'set data to [DATA]'
+                        default: 'set [DATA_ID] to [DATA]'
                     }),
                     blockType: BlockType.COMMAND,
                     arguments: {
+                    	DATA_ID: { 					//INCLUINDO
+                            type: ArgumentType.STRING,
+                            menu: 'dataId',
+                            defaultValue: 'data1'
+                        },
                         DATA: {
                             type: ArgumentType.STRING,
                             defaultValue: ' '
+                        }
+                    }
+                },
+                
+				{
+                    opcode: 'setScaleX',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.setSizeX',
+                        default: 'set SizeX to [SCALEX]'
+                    }),
+
+                    arguments: {
+                        SCALEX: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 100
+
+                        }
+                    }
+                },
+                {
+                    opcode: 'setScaleY',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'scientificModelling.setSizeY',
+                        default: 'set SizeY to [SCALEY]'
+                    }),
+
+                    arguments: {
+                        SCALEY: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 100
+
                         }
                     }
                 },
@@ -65,10 +116,15 @@ class Scratch3DataViewerBlocks {
                     opcode: 'addValueToData',
                     text: formatMessage({
                         id: 'dataviewer.addValueToData',
-                        default: 'add value [VALUE] to data'
+                        default: 'add value [VALUE] to [DATA_ID]'
                     }),
                     blockType: BlockType.COMMAND,
                     arguments: {
+                    	DATA_ID: {				//INCLUINDO 4
+                    		type: ArgumentType.STRING,
+                    		menu: 'dataId',
+                    		dafaultValue: 'data1'
+                    	},
                         VALUE: {
                             type: ArgumentType.NUMBER,
                             defaultValue: ' '
@@ -123,34 +179,61 @@ class Scratch3DataViewerBlocks {
                     opcode: 'dataLoop',
                     text: formatMessage({
                         id: 'dataviewer.dataLoop',
-                        default: 'read all values from data'
+                        default: 'read all values from [DATA_ID]'
                     }),
                     blockType: BlockType.LOOP,
+                    arguments: {
+                    	DATA_ID: { 					//INCLUINDO 3
+                            type: ArgumentType.STRING,
+                            menu: 'dataId2',
+                            defaultValue: 'data1'
+                        	}
+                        }
                 },
+
                 {
-                    opcode: 'getValue',
+                    opcode: 'getValue', 
                     text: formatMessage({
                         id: 'dataviewer.getValue',
-                        default: 'data'
+                        default: 'value from [DATA_ID]' //ao incluir o parâmetro DATA_ID deixa de ser possível usar o chekbox para mostrar o valor no palco
                     }),
-                    blockType: BlockType.REPORTER
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                    	DATA_ID: { 					//INCLUINDO 5
+                            type: ArgumentType.STRING,
+                            menu: 'dataId',
+                            defaultValue: 'data1'
+                        	}
+                        }
                 },
                 {
                     opcode: 'getIndex',
                     text: formatMessage({
                         id: 'dataviewer.getIndex',
-                        default: 'index'
+                        default: 'index from [DATA_ID]'
                     }),
-                    blockType: BlockType.REPORTER
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                    	DATA_ID: { 					//INCLUINDO 5
+                            type: ArgumentType.STRING,
+                            menu: 'dataId',
+                            defaultValue: 'data1'
+                        	}
+                        }
                 },
                 {
                     opcode: 'getStatistic',
                     text: formatMessage({
                         id: 'dataviewer.getStatistic',
-                        default: '[FNC]'
+                        default: '[FNC] [DATA_ID]'
                     }),
                     blockType: BlockType.REPORTER,
                     arguments: {
+                    	DATA_ID: {
+                    		type: ArgumentType.STRING,
+                            menu: 'dataId',
+                            defaultValue: 'data1'
+                    	},
                         FNC: {
                             type: ArgumentType.STRING,
                             menu: 'statisticFunctions',
@@ -162,10 +245,15 @@ class Scratch3DataViewerBlocks {
                     opcode: 'changeDataScale',
                     text: formatMessage({
                         id: 'dataviewer.changeDataScale',
-                        default: 'change data scale to [NEW_MIN] [NEW_MAX]'
+                        default: 'change [DATA_ID] scale to [NEW_MIN] [NEW_MAX]'
                     }),
                     blockType: BlockType.COMMAND,
                     arguments: {
+						DATA_ID: {
+                    		type: ArgumentType.STRING,
+                            menu: 'dataId',
+                            defaultValue: 'data1'
+                    	},
                         NEW_MIN: {
                             type: ArgumentType.NUMBER,
                             defaultValue: 0
@@ -180,10 +268,15 @@ class Scratch3DataViewerBlocks {
                     opcode: 'mapData',
                     text: formatMessage({
                         id: 'dataviewer.mapData',
-                        default: 'map data [DATA_TYPE] to [NEW_MIN] [NEW_MAX]'
+                        default: 'map [DATA_ID] [DATA_TYPE] to [NEW_MIN] [NEW_MAX]'
                     }),
                     blockType: BlockType.REPORTER,
                     arguments: {
+                        DATA_ID: {
+                        	type: ArgumentType.STRING,
+                            menu: 'dataId',
+                            defaultValue: 'data1'
+                        },
                         DATA_TYPE: {
                             type: ArgumentType.STRING,
                             menu: 'dataType',
@@ -203,19 +296,31 @@ class Scratch3DataViewerBlocks {
                     opcode: 'getDataLength',
                     text: formatMessage({
                         id: 'dataviewer.getDataLength',
-                        default: 'data length'
-                    }),
-                    blockType: BlockType.REPORTER
-                },
-                {
-                    opcode: 'getDataIndex',
-                    text: formatMessage({
-                        id: 'dataviewer.getDataIndex',
-                        default: 'value in data index [INDEX]'
+                        default: 'data length of [DATA_ID]'
                     }),
                     blockType: BlockType.REPORTER,
                     arguments: {
-                        INDEX: {
+                        DATA_ID: {
+                            type: ArgumentType.STRING,
+                            menu: 'dataId',
+                            defaultValue: 'data1'
+                        }
+                    }
+                },
+                {
+                    opcode: 'getDataIndex', // ESTÁ COM ERRO NESSE BLOCO
+                    text: formatMessage({
+                        id: 'dataviewer.getDataIndex',
+                        default: 'value in [DATA_ID] index [INDEX]'
+                    }),
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        DATA_ID: {
+                            type: ArgumentType.STRING,
+                            menu: 'dataId',
+                            defaultValue: 'data1'
+                        },
+                        INDEX: { //AQUI ESSE INDEX TERIA QUE SER ESPECÍFICO PARA CADA DATASET?
                             type: ArgumentType.NUMBER,
                             defaultValue: 1
                         }
@@ -261,73 +366,369 @@ class Scratch3DataViewerBlocks {
                         }),
                         value: 'index'
                     }
+                ],
+                dataId: [ //INCLUINDO
+                    {
+                        text: formatMessage({
+                            id: 'dataviewer.menu.dataId.data1',
+                            default: 'data1'
+                        }),
+                        value: 'data1'
+                    },
+                    {
+                        text: formatMessage({
+                            id: 'dataviewer.menu.dataId.data2',
+                            default: 'data2'
+                        }),
+                        value: 'data2'
+                    },
+					{
+                        text: formatMessage({
+                            id: 'dataviewer.menu.dataId.data3',
+                            default: 'data3'
+                        }),
+                        value: 'data3'
+                    }
+                ], 
+
+				dataId2: [ //INCLUINDO
+                    {
+                        text: formatMessage({
+                            id: 'dataviewer.menu.dataId.data1',
+                            default: 'data1'
+                        }),
+                        value: 'data1'
+                    },
+                    {
+                        text: formatMessage({
+                            id: 'dataviewer.menu.dataId.data2',
+                            default: 'data2'
+                        }),
+                        value: 'data2'
+                    },
+					{
+                        text: formatMessage({
+                            id: 'dataviewer.menu.dataId.data3',
+                            default: 'data3'
+                        }),
+                        value: 'data3'
+                    },
+					{
+                        text: formatMessage({
+                            id: 'dataviewer.menu.dataId.data1and2',
+                            default: 'all data'
+                        }),
+                        value: 'data1and2'	//ARRUMAR
+                    }
                 ]
             }
         };
     }
 
-    getDataLength (args) {
-        if (this.data) {
-            return this.data.length;
+    getDataLength (args) { 
+    	switch(args.DATA_ID) {	//SE DEIXAR O SWITCH, FUNCIONA PARA O BLOCO DE TAMANHO, MAS NÃO PARA O DE LOOP - E VICE VERSA.
+    		case "data1":
+        		if (this.data1) {		//DÚVIDA: O QUE SIGNIFICA ISSO? - SE ESTÁ DEFINIDO
+            		return this.data1.length;
+        		} else {
+            		return 0;
+        		}
+        		break;
+        	case "data2":
+        		if (this.data2) {
+            		return this.data2.length;
+        		} else {
+            		return 0;
+        		}
+        		break;
+        	case "data3":
+        		if (this.data3) {
+            		return this.data3.length;
+        		} else {
+            		return 0;
+        		}
+        		break;
+        	case "data1and2":   // ADICIONANDO SÓ PARA TESTES - CORRIGIR DEPOIS
+        		if (this.data2) {
+            		return this.data2.length;
+        		} else {
+            		return 0;
+        		}
+        		break;
+        	default:
+        		return "error";
+        }
+    }
+
+
+ /*   getDataLength (args) {  //COM ESSA OPÇÃO, FUNCIONA O LOOP (ERRADO), MAS NÃO O REPORTER BLOCK
+        if (this.data1) {			//CHECA SE DEFINIU
+            return this.data1.length;
+        }
+        if (this.data2) {
+            return this.data2.length;
         } else {
             return 0;
         }
     }
 
-    getValue (args) {
+*/
+
+
+   /* getValue (args) { //OLD
         if (this.getDataLength() > 0 && this.dataIndex >= 0) {
             return this.data[this.dataIndex];
         } else {
             return '';
         }
+    } */
+
+
+    getValue (args) { // INCLUINDO 6
+    	switch(args.DATA_ID) {
+    	 	case "data1":
+        		if (this.getDataLength(args) > 0 && this.dataIndex1 >= 0) {
+            		return this.data1[this.dataIndex1];
+        		} 
+        		else {
+            		return '';
+         		}
+         		break;
+         	case "data2":
+        		if (this.getDataLength(args) > 0 && this.dataIndex2 >= 0) {
+            		return this.data2[this.dataIndex2];
+        		} 
+        		else {
+            		return '';
+         		}
+         		break;
+         	case "data3":
+        		if (this.getDataLength(args) > 0 && this.dataIndex3 >= 0) {
+            		return this.data3[this.dataIndex3];
+        		} 
+        		else {
+            		return '';
+         		}
+         		break;
+         	default:
+                return "error";
+
+        }
     }
 
-    _getInternalIndex (args) {
-        if (this.getDataLength() > 0 && this.dataIndex >= 0) {
-            return this.dataIndex;
-        }
+
+   _getInternalIndex (args) { //ISSO FAZ SENTIDO?
+   	   	//switch(args.DATA_ID) {
+    	// 	case "data1":
+    		if (this.data1) {
+        		if (this.getDataLength(args) > 0 && this.dataIndex1 >= 0) {
+            		return this.dataIndex1;
+        		}
+        	}
+        //		break;
+        //	case "data2":
+       		if (this.data2) {
+        		if (this.getDataLength(args) > 0 && this.dataIndex2 >= 0) {
+            		return this.dataIndex2;
+        		}
+        	}
+        	else {
+            		return 0;
+        		}
+        //		break;
+        //	default:
+        //	return "error";
+        //}
     }
 
     getIndex (args) {
-        const internalIndex = this._getInternalIndex();
-        if (internalIndex >= 0) {
-            return internalIndex + 1;
-        } else {
-            return '';
-        }
+		switch(args.DATA_ID) {
+			case "data1":
+        		const internalIndex1 = this._getInternalIndex(args);
+        		if (internalIndex1 >= 0) {
+            		return internalIndex1 + 1; //ARRUMAR TODOS INTERNALINDEX
+        		} else {
+            		return '';
+        		}
+        		break;
+        	case "data2":
+        		const internalIndex2 = this._getInternalIndex(args);
+        		if (internalIndex2 >= 0) {
+            		return internalIndex2 + 1; //ARRUMAR TODOS INTERNALINDEX
+        		} else {
+            		return '';
+        		}
+        		break;
+        	case "data3":
+        		const internalIndex3 = this._getInternalIndex(args);
+        		if (internalIndex3 >= 0) {
+            		return internalIndex3 + 1; //ARRUMAR TODOS INTERNALINDEX
+        		} else {
+            		return '';
+        		}
+        		break;
+        	default: 
+        		return "error";
+    	}    
     }
 
     _mapValue (value, old_min, old_max, new_min, new_max) {
         return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min);
     }
 
-    _getMean () {
-        if (this.getDataLength() > 0) {
+    _getMean (args) {
+        if (this.getDataLength(args) > 0) {
             var total = 0.0;
-            for (var i = 0; i < this.getDataLength(); i += 1) {
+            for (var i = 0; i < this.getDataLength(args); i += 1) {
                 total = total + this.data[i];
             }
             return total / this.getDataLength();
         }
     }
 
-    _getMin () {
-        if (this.getDataLength() > 0) {
-            return this.data.reduce(function(a, b) {
-                return Math.min(a, b);
-            });
-        }
+    _getMin (args) { 
+    	switch (args.DATA_ID) {
+    		case "data1":
+        		if (this.getDataLength(args) > 0) {
+            		return this.data1.reduce(function(a, b) {
+                		return Math.min(a, b);
+            		});            	
+        		}
+			break;
+			case "data2":
+        		if (this.getDataLength(args) > 0) {
+            		return this.data2.reduce(function(a, b) {
+                		return Math.min(a, b);
+            		});            	
+        		}
+        	break;
+			case "data3":
+        		if (this.getDataLength(args) > 0) {
+            		return this.data3.reduce(function(a, b) {
+                		return Math.min(a, b);
+            		});            	
+        		}
+        	break;
+        	default:
+        		return "error";
+    	}
     }
 
-    _getMax () {
-        if (this.getDataLength() > 0) {
-            return this.data.reduce(function(a, b) {
-                return Math.max(a, b);
-            });
-        }
+    _getMax (args) {
+		switch (args.DATA_ID) {
+    		case "data1":
+        		if (this.getDataLength(args) > 0) {
+            		return this.data1.reduce(function(a, b) {
+                		return Math.max(a, b);
+            		});
+        		}
+        	break;
+        	case "data2":
+        		if (this.getDataLength(args) > 0) {
+            		return this.data2.reduce(function(a, b) {
+                		return Math.max(a, b);
+            		});
+        		}
+        	break;
+        	case "data3":
+        		if (this.getDataLength(args) > 0) {
+            		return this.data3.reduce(function(a, b) {
+                		return Math.max(a, b);
+            		});
+        		}
+        	break;
+        	default:
+        		return "error";
+    	}
     }
 
-    setData (args) {
+    setData (args) { 				//ALTERADO PARA INCLUIR DATA1 E DATA2 - ARRUMAR IDENTAÇÃO
+
+      switch(args.DATA_ID) {
+
+		case "data1":
+		    if (args.DATA.trim()) {
+            	const data = [];
+            	var dataIndex1 = 0;
+            	const splitedComma = args.DATA.split(',');
+            	for (var i = 0; i < splitedComma.length; i += 1) {
+                	if (splitedComma[i].trim() && !isNaN(splitedComma[i])) {
+                    	data[dataIndex1] = Cast.toNumber(splitedComma[i]);
+                    	dataIndex1++;
+                	} else {
+                    	const splitedSpace = splitedComma[i].trim().split(' ');
+                    	for (var j = 0; j < splitedSpace.length; j += 1) {
+                        	if (splitedSpace[j].trim() && !isNaN(splitedSpace[j])) {
+                            	data[dataIndex1] = Cast.toNumber(splitedSpace[j]);
+                            	dataIndex1++;
+                        }
+                    }
+                }
+            }
+
+            this.data1 = data;				 
+            this.dataIndex1 = -1;
+        }
+        	break;
+        case "data2":
+		    if (args.DATA.trim()) {
+            	const data = [];
+            	var dataIndex2 = 0;
+            	const splitedComma = args.DATA.split(',');
+            	for (var i = 0; i < splitedComma.length; i += 1) {
+                	if (splitedComma[i].trim() && !isNaN(splitedComma[i])) {
+                    	data[dataIndex2] = Cast.toNumber(splitedComma[i]);
+                    	dataIndex2++;
+                	} else {
+                    	const splitedSpace = splitedComma[i].trim().split(' ');
+                    	for (var j = 0; j < splitedSpace.length; j += 1) {
+                        	if (splitedSpace[j].trim() && !isNaN(splitedSpace[j])) {
+                            	data[dataIndex2] = Cast.toNumber(splitedSpace[j]);
+                            	dataIndex2++;
+                        }
+                    }
+                }
+            }
+
+            this.data2 = data;				 
+            this.dataIndex2 = -1;		
+        }
+        	break;
+        case "data3":
+		    if (args.DATA.trim()) {
+            	const data = [];
+            	var dataIndex3 = 0;
+            	const splitedComma = args.DATA.split(',');
+            	for (var i = 0; i < splitedComma.length; i += 1) {
+                	if (splitedComma[i].trim() && !isNaN(splitedComma[i])) {
+                    	data[dataIndex3] = Cast.toNumber(splitedComma[i]);
+                    	dataIndex3++;
+                	} else {
+                    	const splitedSpace = splitedComma[i].trim().split(' ');
+                    	for (var j = 0; j < splitedSpace.length; j += 1) {
+                        	if (splitedSpace[j].trim() && !isNaN(splitedSpace[j])) {
+                            	data[dataIndex3] = Cast.toNumber(splitedSpace[j]);
+                            	dataIndex3++;
+                        }
+                    }
+                }
+            }
+
+            this.data3 = data;				 
+            this.dataIndex3 = -1;		
+        }
+        	break;
+
+
+
+        default:
+             return "error";
+    }
+    }
+
+
+	
+   /* setData (args) {  				ANTIGO - APAGAR
         if (args.DATA.trim()) {
 
             const data = [];
@@ -348,20 +749,50 @@ class Scratch3DataViewerBlocks {
                 }
             }
 
-            this.data = data;
+            this.data = data;				 //aqui define o this.data
             this.dataIndex = -1;
         }
     }
+*/
 
-    addValueToData (args) {
+
+
+
+    addValueToData (args) { //ALTERADO - ARRUMAR IDENTAÇÃO
+     switch(args.DATA_ID) {
+     	case "data1":
         if (args.VALUE) {
-            if (this.getDataLength() > 0) {
-                this.data.push(Cast.toNumber(args.VALUE));
+            if (this.getDataLength(args) > 0) {
+                this.data1.push(Cast.toNumber(args.VALUE));
             } else {
                 args.DATA = Cast.toString(args.VALUE);
                 this.setData(args);
             }
         }
+        break;
+        case "data2":
+        if (args.VALUE) {
+            if (this.getDataLength(args) > 0) {
+                this.data2.push(Cast.toNumber(args.VALUE));
+            } else {
+                args.DATA = Cast.toString(args.VALUE);
+                this.setData(args);
+            }
+        }
+        break;
+        case "data3":
+        if (args.VALUE) {
+            if (this.getDataLength(args) > 0) {
+                this.data3.push(Cast.toNumber(args.VALUE));
+            } else {
+                args.DATA = Cast.toString(args.VALUE);
+                this.setData(args);
+            }
+        }
+        break;
+        default:
+             return "error";
+     }
     }
 
     readCSVDataFromURL (args) {
@@ -435,28 +866,71 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    dataLoop (args, util) {
-        if (this.dataIndex < this.getDataLength()) {
-            this.dataIndex++;
-        }
-        if (this.dataIndex < this.getDataLength()) {
-            util.startBranch(1, true);
-        }
-        else {
-            this.dataIndex = -1;
-        }
+    dataLoop (args, util) {		
+    	switch(args.DATA_ID) { //ADICIONANDO, ARRUMAR IDENTAÇÃO --- PROBLEMA: DOIS BLOCOS IGUAIS RODANDO AO MESMO TEMPO. PODERIA TER UMA VARIÁVEL QUE CHECA SE ESTÁ RODANDO. SE SIM, NÃO DEIXA RODAR DE NOVO
+     	case "data1":
+        	if (this.dataIndex1 < this.getDataLength(args)) { //FARIA SENTIDO JÁ TER UMA VARIÁVEL CONSTANTE PARA CADA TAMANHO DE DADO?
+            	this.dataIndex1++;
+        	}
+        	if (this.dataIndex1 < this.getDataLength(args)) {
+            	util.startBranch(1, true);
+        	}
+        	else {
+            	this.dataIndex1 = -1;
+       		}
+       		break;
+      	case "data2":
+        	if (this.dataIndex2 < this.getDataLength(args)) { 
+            	this.dataIndex2++;
+        	}
+        	if (this.dataIndex2 < this.getDataLength(args)) {
+            	util.startBranch(1, true);
+        	}
+        	else {
+            	this.dataIndex2 = -1;
+       		}
+       		break;
+      	case "data3":
+        	if (this.dataIndex3 < this.getDataLength(args)) { 
+            	this.dataIndex3++;
+        	}
+        	if (this.dataIndex3 < this.getDataLength(args)) {
+            	util.startBranch(1, true);
+        	}
+        	else {
+            	this.dataIndex3 = -1;
+       		}
+       		break;
+      	case "data1and2":
+        	if (this.dataIndex2 < this.getDataLength(args)) { 
+            	this.dataIndex2++;
+            	this.dataIndex1++;
+        	}
+        	if (this.dataIndex2 < this.getDataLength(args)) {
+            	util.startBranch(1, true);
+        	}
+        	else {
+            	this.dataIndex2 = -1;
+            	this.dataIndex1 = -1;
+       		}
+       		break;
+       	default:
+            return "error";
+    	}
     }
+
+
 
     getStatistic (args) {
         switch(args.FNC) {
             case "mean":
-                return this._getMean();
+                return this._getMean(args);
                 break;
             case "min":
-                return this._getMin();
+                return this._getMin(args);
                 break;
             case "max":
-                return this._getMax();
+                return this._getMax(args);
                 break;
             default:
                 return "error";
@@ -464,15 +938,43 @@ class Scratch3DataViewerBlocks {
     }
 
     changeDataScale (args) {
-        const old_min = this._getMin();
-        const old_max = this._getMax();
-        for (var i = 0; i < this.getDataLength(); i += 1) {
-            this.data[i] = Cast.toNumber(this._mapValue(
-                this.data[i], old_min, old_max, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+    	switch(args.DATA_ID) {
+
+    		case "data1":
+        		const old_min1 = this._getMin(args);
+        		const old_max1 = this._getMax(args);
+        		for (var i = 0; i < this.getDataLength(args); i += 1) {
+            		this.data1[i] = Cast.toNumber(this._mapValue(
+                		this.data1[i], old_min1, old_max1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+        		}
+        		break;
+
+			case "data2":
+        		const old_min2 = this._getMin(args);
+        		const old_max2 = this._getMax(args);
+        		for (var i = 0; i < this.getDataLength(args); i += 1) {
+            		this.data2[i] = Cast.toNumber(this._mapValue(
+                		this.data2[i], old_min2, old_max2, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+        		}
+        		break;
+
+			case "data3":
+        		const old_min3 = this._getMin(args);
+        		const old_max3 = this._getMax(args);
+        		for (var i = 0; i < this.getDataLength(args); i += 1) {
+            		this.data3[i] = Cast.toNumber(this._mapValue(
+                		this.data3[i], old_min3, old_max3, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+        		}
+        		break;
+
+        	default:
+        		return "error";
         }
     }
 
-    mapData (args) {
+
+/* 
+ 	mapData (args) {	//OLD
         switch(args.DATA_TYPE) {
             case "index":
                 if (this.getDataLength() > 0) {
@@ -491,12 +993,123 @@ class Scratch3DataViewerBlocks {
         }
     }
 
+*/
+
+
+    mapData (args) { //TESTANDO
+    switch(args.DATA_ID) {
+
+    	case "data1":
+        switch(args.DATA_TYPE) {
+            case "index":
+                if (this.getDataLength(args) > 0) {
+                    return Cast.toNumber(this._mapValue(
+                        this._getInternalIndex(args), 0, this.getDataLength(args) - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                }
+                break;
+            case "value":
+                if (this.getDataLength(args) > 0) {
+                    return Cast.toNumber(this._mapValue(
+                        this.getValue(args), this._getMin(args), this._getMax(args), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                }
+                break;
+            default:
+                return "error";
+        	break;
+    		}
+
+        case "data2":
+            switch(args.DATA_TYPE) {
+            case "index":
+                if (this.getDataLength(args) > 0) {
+                    return Cast.toNumber(this._mapValue(
+                        this._getInternalIndex(args), 0, this.getDataLength(args) - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                }
+                break;
+            case "value":
+                if (this.getDataLength(args) > 0) {
+                    return Cast.toNumber(this._mapValue(
+                        this.getValue(args), this._getMin(args), this._getMax(args), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                }
+                break;
+            default:
+                return "error";
+        	break;
+		}
+
+       case "data3":
+            switch(args.DATA_TYPE) {
+            case "index":
+                if (this.getDataLength(args) > 0) {
+                    return Cast.toNumber(this._mapValue(
+                        this._getInternalIndex(args), 0, this.getDataLength(args) - 1, Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                }
+                break;
+            case "value":
+                if (this.getDataLength(args) > 0) {
+                    return Cast.toNumber(this._mapValue(
+                        this.getValue(args), this._getMin(args), this._getMax(args), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                }
+                break;
+            default:
+                return "error";
+        	break;
+        
+        //default:
+        //	return "error";
+		}
+
+    }
+	}
+
+    getDataIndex (args) {  
+    	switch(args.DATA_ID) {
+        	case "data1":
+        		if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
+            		return this.data1[args.INDEX - 1]; 
+        		}
+        		break;
+			case "data2":
+        		if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
+            		return this.data2[args.INDEX - 1]; 
+        		}
+        		break;
+			case "data3":
+        		if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
+            		return this.data3[args.INDEX - 1]; 
+        		}
+        		break;
+        	default:
+        		return "error";
+        }
+    }
+
+/* ORIGINAL
     getDataIndex (args) {
         if (args.INDEX > 0 && args.INDEX <= this.getDataLength()) {
             return this.data[args.INDEX - 1];
         }
     }
+*/
 
+    setScaleX(args, util) {
+        util.target.scalex = Cast.toString(args.SCALEX) / 100;
+        if (util.target.scaley === undefined) {
+            util.target.scaley = 1;
+        }
+        const finalScale = [util.target.size * util.target.scalex, util.target.size * util.target.scaley];
+        this._runtime.renderer.updateDrawableProperties(util.target.drawableID, { direction: util.target.direction, scale: finalScale });
+    }
+
+    setScaleY(args, util) {
+        util.target.scaley = Cast.toString(args.SCALEY) / 100;
+        console.log(util.target.scalex);
+        if (util.target.scalex === undefined) {
+            util.target.scalex = 1;
+        }
+        const finalScale = [util.target.size * util.target.scalex, util.target.size * util.target.scaley];
+        this._runtime.renderer.updateDrawableProperties(util.target.drawableID, { direction: util.target.direction, scale: finalScale })
+	}
 }
 
 module.exports = Scratch3DataViewerBlocks;

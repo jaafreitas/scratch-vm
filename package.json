@@ -12,7 +12,7 @@
   "main": "./dist/node/scratch-vm.js",
   "browser": "./src/index.js",
   "scripts": {
-    "lint:sm": "eslint --fix src/extensions/scratch_scientific_modelling/*.js test/unit/extension_scientific_modelling.js && format-message lint src/**/*.js",
+    "lint:sm": "eslint --fix src/extensions/scratch3_scientific_modelling/*.js test/unit/extension3_scientific_modelling.js && format-message lint src/**/*.js",
     "tap:sm": "tap ./test/unit/extension_scientific_modelling.js",
     "test:sm": "npm run lint:sm && npm run tap:sm",    
     "build": "npm run docs && webpack --progress --colors --bail",

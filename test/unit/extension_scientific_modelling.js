@@ -4,7 +4,7 @@ const Blocks = require('../../src/engine/blocks');
 const Sprite = require('../../src/sprites/sprite.js');
 const RenderedTarget = require('../../src/sprites/rendered-target');
 
-const SicentificModelling = require('../../src/extensions/scratch_scientific_modelling/index.js');
+const SicentificModelling = require('../../src/extensions/scratch3_scientific_modeling/index.js');
 
 const setupSicentificModelling = function () {
     const rt = new Runtime();

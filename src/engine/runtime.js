@@ -706,7 +706,7 @@ class Runtime extends EventEmitter {
      * @const {number}
      */
     static get MAX_CLONES () {
-        return 10000;
+        return 300;
     }
 
     // -----------------------------------------------------------------------------

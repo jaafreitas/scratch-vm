@@ -28,6 +28,8 @@ require('canvas-toBlob');
 const RESERVED_NAMES = ['_mouse_', '_stage_', '_edge_', '_myself_', '_random_'];
 
 const CORE_EXTENSIONS = [
+    // jaafreitas: This code shouldn't be merged into production branch
+    'scientificModelling',
     // 'motion',
     // 'looks',
     // 'sound',

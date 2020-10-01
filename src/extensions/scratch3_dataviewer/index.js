@@ -78,40 +78,7 @@ class Scratch3DataViewerBlocks {
                             defaultValue: ' '
                         }
                     }
-                },
-                
-				{
-                    opcode: 'setScaleX',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'scientificModelling.setSizeX',
-                        default: 'set SizeX to [SCALEX]'
-                    }),
-
-                    arguments: {
-                        SCALEX: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 100
-
-                        }
-                    }
-                },
-                {
-                    opcode: 'setScaleY',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'scientificModelling.setSizeY',
-                        default: 'set SizeY to [SCALEY]'
-                    }),
-
-                    arguments: {
-                        SCALEY: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 100
-
-                        }
-                    }
-                },
+                },                
                 {
                     opcode: 'addValueToData',
                     text: formatMessage({
@@ -185,7 +152,7 @@ class Scratch3DataViewerBlocks {
                     arguments: {
                     	DATA_ID: { 					//INCLUINDO 3
                             type: ArgumentType.STRING,
-                            menu: 'dataId2',
+                            menu: 'dataId',
                             defaultValue: 'data1'
                         	}
                         }
@@ -325,6 +292,39 @@ class Scratch3DataViewerBlocks {
                             defaultValue: 1
                         }
                     }
+                },
+                '---',
+                {
+                    opcode: 'setScaleX',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'dataviewer.setSizeX',
+                        default: 'set size X to [SCALEX] %'
+                    }),
+
+                    arguments: {
+                        SCALEX: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 100
+
+                        }
+                    }
+                },
+                {
+                    opcode: 'setScaleY',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'dataviewer.setSizeY',
+                        default: 'set size Y to [SCALEY] %'
+                    }),
+
+                    arguments: {
+                        SCALEY: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 100
+
+                        }
+                    }
                 }
             ],
             menus: {
@@ -389,38 +389,7 @@ class Scratch3DataViewerBlocks {
                         }),
                         value: 'data3'
                     }
-                ], 
-
-				dataId2: [ //INCLUINDO
-                    {
-                        text: formatMessage({
-                            id: 'dataviewer.menu.dataId.data1',
-                            default: 'data1'
-                        }),
-                        value: 'data1'
-                    },
-                    {
-                        text: formatMessage({
-                            id: 'dataviewer.menu.dataId.data2',
-                            default: 'data2'
-                        }),
-                        value: 'data2'
-                    },
-					{
-                        text: formatMessage({
-                            id: 'dataviewer.menu.dataId.data3',
-                            default: 'data3'
-                        }),
-                        value: 'data3'
-                    },
-					{
-                        text: formatMessage({
-                            id: 'dataviewer.menu.dataId.data1and2',
-                            default: 'all data'
-                        }),
-                        value: 'data1and2'	//ARRUMAR
-                    }
-                ]
+                ],
             }
         };
     }
@@ -901,19 +870,6 @@ class Scratch3DataViewerBlocks {
             	this.dataIndex3 = -1;
        		}
        		break;
-      	case "data1and2":
-        	if (this.dataIndex2 < this.getDataLength(args)) { 
-            	this.dataIndex2++;
-            	this.dataIndex1++;
-        	}
-        	if (this.dataIndex2 < this.getDataLength(args)) {
-            	util.startBranch(1, true);
-        	}
-        	else {
-            	this.dataIndex2 = -1;
-            	this.dataIndex1 = -1;
-       		}
-       		break;
        	default:
             return "error";
     	}
@@ -1103,7 +1059,6 @@ class Scratch3DataViewerBlocks {
 
     setScaleY(args, util) {
         util.target.scaley = Cast.toString(args.SCALEY) / 100;
-        console.log(util.target.scalex);
         if (util.target.scalex === undefined) {
             util.target.scalex = 1;
         }

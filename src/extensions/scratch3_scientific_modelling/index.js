@@ -263,7 +263,7 @@ class Scratch3ScientificModellingBlocks {
                         TOUCHINGMENU: {
                             type: ArgumentType.STRING,
                             menu: 'touchingMenu',
-                            defaultValue: this.runtime.getEditingTarget().sprite.name
+                            defaultValue: this.getEditingTargetSpriteName()
                         }
                     }
                 },
@@ -281,7 +281,7 @@ class Scratch3ScientificModellingBlocks {
                         TOUCHINGMENU: {
                             type: ArgumentType.STRING,
                             menu: 'touchingMenu',
-                            defaultValue: this.runtime.getEditingTarget().sprite.name
+                            defaultValue: this.getEditingTargetSpriteName()
                         }
                     }
                 },
@@ -363,6 +363,12 @@ class Scratch3ScientificModellingBlocks {
         }
         return costumes;
     }
+
+    getEditingTargetSpriteName() {
+        if (this.runtime.getEditingTarget()) {
+            return this.runtime.getEditingTarget().sprite.name;
+        }
+    }    
 
     get particleTemperatureMenu () {
         return [

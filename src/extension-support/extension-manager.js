@@ -14,7 +14,7 @@ const builtinExtensions = {
     coreExample: () => require('../blocks/scratch3_core_example'),
     // These are the non-core built-in extensions.
     dataviewer: () => require('../extensions/scratch3_dataviewer'),
-    scientificModelling: () => require('../extensions/scratch_scientific_modelling'),
+    scientificModelling: () => require('../extensions/scratch3_scientific_modelling'),
     pen: () => require('../extensions/scratch3_pen'),
     wedo2: () => require('../extensions/scratch3_wedo2'),
     music: () => require('../extensions/scratch3_music'),

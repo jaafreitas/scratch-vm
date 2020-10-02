@@ -87,7 +87,7 @@ class Scratch3ScientificModellingBlocks {
                 sliderMin: 0,
                 sliderMax: 100,
                 isDiscrete: true,
-                visible: true,
+                visible: false,
                 params: {VARIABLE: args.VARIABLE.name}
             });
             this.runtime.requestAddMonitor(monitor);

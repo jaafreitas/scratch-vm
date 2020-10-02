@@ -38,12 +38,14 @@ class Scratch3ScientificModellingBlocks {
         this.runtime.on(Runtime.PROJECT_START, this._projectStart.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
         this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
-        this._steppingInterval = null;
-        this._temperatureVar();
+        this.runtime.on(Runtime.BLOCKSINFO_UPDATE, this._blocksInfoUpdate.bind(this));
+        this._steppingInterval = null;        
         this.clonesList = [];
         this.compTemp = 0;
         this.counter = 0;
         this.stepsPerSecond = 30;
+        // Issue problems if  greater than 100.
+        this.maxParticles = 100;
     }
 
     _particles () {
@@ -68,10 +70,10 @@ class Scratch3ScientificModellingBlocks {
         }
     }
 
-    _temperatureVar () {
-        const args = {VARIABLE: {id: 'temperatureSlider', name: 'temperature'}, VALUE: 50};
+    _blocksInfoUpdate () {
         const stage = this.runtime.getTargetForStage();
         if (stage) {
+            const args = { VARIABLE: { id: 'temperatureSlider', name: 'temperature' }, VALUE: 50 };
             this.data.setVariableTo(args, {target: stage});
             // Show the new variable on toolbox
             this.runtime.requestBlocksUpdate();
@@ -459,11 +461,10 @@ class Scratch3ScientificModellingBlocks {
         // this.runtime._cloneCounter gives us the total of existing clones
         // total particles is the sum of the total of existing clones with the number of clones
         // we want to create
-        const totalParticles = this._particles().length + numberOfParticles;
-        let maxParticles = 100;
+        const totalParticles = this._particles().length + numberOfParticles;        
         // verifies if after the creation there will be more clones than the amount allowed
-        if (totalParticles > maxParticles) {
-            numberOfParticles = maxParticles - this._particles().length;
+        if (totalParticles > this.maxParticles) {
+            numberOfParticles = this.maxParticles - this._particles().length;
         }
         return numberOfParticles;
     }

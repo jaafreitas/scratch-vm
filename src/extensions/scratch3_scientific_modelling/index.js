@@ -25,6 +25,14 @@ const blockIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYA
 // eslint-disable-next-line max-len
 const menuIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAUHSURBVFhHrZlnyB1FFIY/FVtsUTH2lh8BCxZiwYqIqGAhYokVFEtM7OWfiv4RsSFiQRSNFVQURVEsYDeixGAS6w977w0rij7Pzs7HZO/O7ny594WHe+7e3ZmzU845u3esUDvCIvgTXoeTYVko1XLgNQvANmxrBxiJVoUv4SLYHubA+/AKbAp98hzP/QBmw7ZgW5/DyjC0joBngzkuG74RvoGdPJCRv3nODTDJA4meB9seWlfChcEc0FnwE+xSfVtSu8HPcGb1bVCXwOXBHE5z4dRgtuoU+B62rL4Faf8A/paTS+W2YOY1kYWe081wDTwG69Y8DleDv3VpmfozqxIHHZ3Vg5nVpfASPAgP1LbHurQG/BLMvEoc/Bg2CmZW/4HTuSFsAIaUPrm7PwtmXiUOvgdbB7NTO8PasA507eyoreDtYA4n15TT3HUzq8GHMKtG2/iZk4HbHd43M8UyMKe7tKlr4Qlw0cuT9bGctoFPgjka3QpnBHNApkFHI80q2sbH6dW3QZ0DdwazW73bvNaRcCwcCO6+zcHpcfpPh5XAEUy1H5h3zSJfg6nNdOfNOMJ3w13QqT4HVwBHaAaYEb4CHfsDPgU3xV/wXP2pbNM1tjzsVX8atL3OFKmj68F18BC8Bn9DsdwM3r139yOYS++Ft+AysCOdcNR08gDI6SDwHB3zGsOQ6e0duA++BZeCfe0PnVHFBo4Cw8oXYA529OIonwiPBLPSedAsItrk6J4fzEpmnJg6bds+rgD7tG99iH2OyyG3s4/geHBamnLt/Qqeuwq4rtqKhKY8x5HyGoP4b7AmNGWf9m1ieAbsp/J0CrwMpqfT4HfIyYW9GP6FfWuinHI3klnlHnCDRJmbHUnXpvWgmy4nb8SNtTvs6gGrFRscGNYW7QkGYadDO5VO6Jxop7Izi15HZ28P9Ehf9EnfqkU6VaNQb8K8YI7LuBedi2wGqZwlU1vJQKgqlpbk4lQ27jU6kKr5fRQav5HbwbVVcmdOj9PkdDltqR6FOHru1FRLM8X6NFfDTeKUvQBmha5NYjxcCP/APmC8jHKTHBPMoTaJzy7Xg2u82iQqhhnv8ARoCzOGBkOEoWIiYcZOJhpm9GV9WEKO5tFgsHQ6rgJrvDj1llHp7jwXfDLrU1ugti1l29aOJgUjw7vQGqhT+WOa6rz7+8GLjfhpqvNuD4acLC4sq5qpzrZMdaZRo4jrzT4HHOv0FMVi4RCwWHBk02JhLXA9Okom/LibbddrXUcrggXvxqCjXudUWyw8DK9CtljoczDKDHEceJfNcsvs42haQqUy+btRXPCuV58/LLd8UHoKrAcduZHoDrDIbJNFqdOUBmZt677c+xfXb1HBWirX0XbBbJXPxU+DMyIWr10lv6FmZCW/U+loGMNyMoT43GIZ5eOntg9SOY30ocmC9MVgdmoPcH3ZsZV0nwxR7vJOleTiaWA13af5YEgyNLkz+2TRsUUw8ypxcBMoWS++hzHYGhtvgb4IYbjpneISByeD09alC8ApPhQOB1+95V7ZRVmd973zKXJQdZVTpi3DhmvVzCCurbMhprSlVomDdmjF0yZfYJr+fHpL16m2TprWPKdNZqHvgjmcDoNmUVD6Ctg06Tk3gdekMj3ODOZwsj7zYftiMFinL9FNeX2ydLfeNM15rW34Et28bvwciUxZb4C1nOHkJChdv8rA7DtD/8KwDdsq+BtibOx/114gI1bkSeoAAAAASUVORK5CYII=';
 class Scratch3ScientificModellingBlocks {
+
+    /**
+     * @return {string} - the ID of this extension.
+     */
+    static get EXTENSION_ID () {
+        return 'scientificModelling';
+    }
+
     constructor (runtime) {
         this.runtime = runtime;
         this.vel = 0;
@@ -38,7 +46,15 @@ class Scratch3ScientificModellingBlocks {
         this.runtime.on(Runtime.PROJECT_START, this._projectStart.bind(this));
         this.runtime.on(Runtime.PROJECT_RUN_START, this._projectRunStart.bind(this));
         this.runtime.on(Runtime.PROJECT_STOP_ALL, this._projectStopAll.bind(this));
+
+        // When we are loading the extension automatically, there is no stage at this point.
+        // The work-around is to wait for the BLOCKSINFO_UPDATE event.
+        // But, if we are dynamically loading it, we won't get any BLOCKSINFO_UPDATE event soon,
+        // so it's better to call _blocksInfoUpdate right now.
         this.runtime.on(Runtime.BLOCKSINFO_UPDATE, this._blocksInfoUpdate.bind(this));
+        this.isTemperatureSliderLoaded = false;
+        this._blocksInfoUpdate();
+
         this._steppingInterval = null;        
         this.clonesList = [];
         this.compTemp = 0;
@@ -71,26 +87,29 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _blocksInfoUpdate () {
-        const stage = this.runtime.getTargetForStage();
-        if (stage) {
-            const args = { VARIABLE: { id: 'temperatureSlider', name: 'temperature' }, VALUE: 50 };
-            this.data.setVariableTo(args, {target: stage});
-            // Show the new variable on toolbox
-            this.runtime.requestBlocksUpdate();
+        if (!this.isTemperatureSliderLoaded) {
+            const stage = this.runtime.getTargetForStage();
+            if (stage) {
+                const args = { VARIABLE: { id: 'temperatureSlider', name: 'temperature' }, VALUE: 50 };
+                this.data.setVariableTo(args, {target: stage});
+                // Show the new variable on toolbox
+                this.runtime.requestBlocksUpdate();
 
-            // Show the new variable on monitor
-            const monitor = MonitorRecord({
-                id: args.VARIABLE.id,
-                opcode: 'data_variable',
-                value: args.VALUE,
-                mode: 'slider',
-                sliderMin: 0,
-                sliderMax: 100,
-                isDiscrete: true,
-                visible: true,
-                params: {VARIABLE: args.VARIABLE.name}
-            });
-            this.runtime.requestAddMonitor(monitor);
+                // Show the new variable on monitor
+                const monitor = MonitorRecord({
+                    id: args.VARIABLE.id,
+                    opcode: 'data_variable',
+                    value: args.VALUE,
+                    mode: 'slider',
+                    sliderMin: 0,
+                    sliderMax: 100,
+                    isDiscrete: true,
+                    visible: true,
+                    params: {VARIABLE: args.VARIABLE.name}
+                });
+                this.runtime.requestAddMonitor(monitor);
+                this.isTemperatureSliderLoaded = true;
+            }
         }
     }
 
@@ -164,7 +183,7 @@ class Scratch3ScientificModellingBlocks {
         this._setupTranslations();
 
         return {
-            id: 'scientificModelling',
+            id: Scratch3ScientificModellingBlocks.EXTENSION_ID,
             color1: '#7bc7bc',
             color2: '#67827e',
             color3: '#67827e',
@@ -250,7 +269,8 @@ class Scratch3ScientificModellingBlocks {
                     text: formatMessage({
                         id: 'scientificModelling.go',
                         default: 'behavior'
-                    })
+                    }),
+                    filter: [TargetType.SPRITE]
                 },
 
                 {
@@ -295,7 +315,8 @@ class Scratch3ScientificModellingBlocks {
                         id: 'scientificModelling.opositeDirection',
                         default: 'go to the oposite direction',
                         description: 'reverse sprites direction'
-                    })
+                    }),
+                    filter: [TargetType.SPRITE]
                 },
             
                 {

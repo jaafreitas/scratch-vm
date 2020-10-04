@@ -54,6 +54,11 @@ class Scratch3ScientificModellingBlocks {
         this.runtime.on(Runtime.BLOCKSINFO_UPDATE, this._blocksInfoUpdate.bind(this));
         this.isTemperatureSliderLoaded = false;
         this._blocksInfoUpdate();
+       
+        // When a new project is started and the extension is still loaded,
+        // the temperature slider can be missed. If the project already has one,
+        // there won't be any problem, but if it's a blank one, we need to recreate the slider.
+        this.runtime.on(Runtime.RUNTIME_DISPOSED, this._runtimeDisposed.bind(this));
 
         this._steppingInterval = null;        
         this.clonesList = [];
@@ -86,28 +91,37 @@ class Scratch3ScientificModellingBlocks {
         }
     }
 
+    _runtimeDisposed() {
+        this.isTemperatureSliderLoaded = false;
+    }
+
     _blocksInfoUpdate () {
         if (!this.isTemperatureSliderLoaded) {
             const stage = this.runtime.getTargetForStage();
             if (stage) {
                 const args = { VARIABLE: { id: 'temperatureSlider', name: 'temperature' }, VALUE: 50 };
-                this.data.setVariableTo(args, {target: stage});
-                // Show the new variable on toolbox
-                this.runtime.requestBlocksUpdate();
 
-                // Show the new variable on monitor
-                const monitor = MonitorRecord({
-                    id: args.VARIABLE.id,
-                    opcode: 'data_variable',
-                    value: args.VALUE,
-                    mode: 'slider',
-                    sliderMin: 0,
-                    sliderMax: 100,
-                    isDiscrete: true,
-                    visible: true,
-                    params: {VARIABLE: args.VARIABLE.name}
-                });
-                this.runtime.requestAddMonitor(monitor);
+                // If we are loading a project, maybe it already has one.
+                if (!stage.variables.hasOwnProperty(args.VARIABLE.id)) {
+                    this.data.setVariableTo(args, {target: stage});
+
+                    // Show the new variable on toolbox
+                    this.runtime.requestBlocksUpdate();
+
+                    // Show the new variable on monitor
+                    const monitor = MonitorRecord({
+                        id: args.VARIABLE.id,
+                        opcode: 'data_variable',
+                        value: args.VALUE,
+                        mode: 'slider',
+                        sliderMin: 0,
+                        sliderMax: 100,
+                        isDiscrete: true,
+                        visible: true,
+                        params: {VARIABLE: args.VARIABLE.name}
+                    });
+                    this.runtime.requestAddMonitor(monitor);
+                }
                 this.isTemperatureSliderLoaded = true;
             }
         }

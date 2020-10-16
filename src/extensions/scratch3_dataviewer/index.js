@@ -15,7 +15,31 @@ const menuIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABTCAYAA
 
 const serverTimeoutMs = 10000; // 10 seconds (chosen arbitrarily).
 
+const parentClassStageHeader = "stage-header_stage-size-row_1F3iv"
+
+const IDViewDataButton = "dataviewer-view-data-button";
+const IDTableWindows = "dataviewer-table-windows";
+
+function showData() {
+    if (!document.getElementById(IDTableWindows)) {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        div.id = IDTableWindows;   
+    }
+}
+
 class Scratch3DataViewerBlocks {
+    static get EXTENSION_INFO_COLOR1() {
+        return '#0FBD8C';
+    }
+
+    static get EXTENSION_INFO_COLOR2() {
+        return '#0DA57A';
+    }
+
+    static get EXTENSION_INFO_COLOR3() {
+        return '#0B8E69';
+    }
 
     constructor (runtime) {
         this._runtime = runtime;
@@ -24,6 +48,42 @@ class Scratch3DataViewerBlocks {
         this.scaley = 100;
 
         this._runtime.on(Runtime.PROJECT_START, this.reset.bind(this));
+
+        // When we are loading the extension automatically, there is no stage at this point.
+        // The work-around is to wait for the BLOCKSINFO_UPDATE event.
+        // But, if we are dynamically loading it, we won't get any BLOCKSINFO_UPDATE event soon,
+        // so it's better to call _blocksInfoUpdate right now.
+        this._runtime.on(Runtime.BLOCKSINFO_UPDATE, this._blocksInfoUpdate.bind(this));
+        this._blocksInfoUpdate();
+    }
+
+    _blocksInfoUpdate (initial = true) {
+        if (!document.getElementById(IDViewDataButton)) {            
+            // There should be only one element by this class.
+            const stageHeader = document.getElementsByClassName(parentClassStageHeader);
+            if (stageHeader && stageHeader[0]) {
+                const div = document.createElement("div");
+                stageHeader[0].prepend(div);
+                div.id = IDViewDataButton;
+                div.style.marginRight = ".3rem";
+                div.onclick = () => {
+                    showData();
+                }
+                div.innerHTML = `
+<div>
+    <span class="button_outlined-button_2f510 stage-header_stage-button_4qxON" style="width: 42px; background: ${Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR1}" role="button">
+        <div class="button_content_3y79K">
+            <img title="View Data" class="stage-header_stage-button-icon_1SHv0" draggable="false" src="${blockIconURI}">
+        </div>
+    </span>
+</div>
+`;
+                // Work-around: the icon will disapear when on full screen or language is changed.
+                if (initial) {
+                    setInterval(() => this._blocksInfoUpdate(false), 1000);
+                }
+            }
+        }
     }
 
     reset() {
@@ -48,6 +108,10 @@ class Scratch3DataViewerBlocks {
 
         return {
             id: 'dataviewer',
+            color1: Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR1,
+            color2: Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR2,
+            color3: Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR3,
+            // Default values from Runtime > defaultExtensionColors.
             // Colors should be synced with documentation.
             // color1: '#444444',
             // color2: '#000000',

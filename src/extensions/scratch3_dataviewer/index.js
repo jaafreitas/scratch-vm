@@ -22,9 +22,23 @@ const IDTableWindows = "dataviewer-table-windows";
 
 function showData() {
     if (!document.getElementById(IDTableWindows)) {
-        const div = document.createElement('div');
-        document.body.appendChild(div);
-        div.id = IDTableWindows;   
+        const modalDiv = document.createElement('div');
+        
+        modalDiv.id = IDTableWindows;   
+
+        // creates the header of the div
+        const header = document.createElement('div');
+        const title = document.createTextNode('Data Viewer');
+        const titleDiv = document.createElement('div');
+        // appends the text to the header
+        titleDiv.appendChild(title);
+        header.appendChild(titleDiv);
+
+
+        modalDiv.appendChild(header);
+        document.body.appendChild(modalDiv);
+
+
     }
 }
 

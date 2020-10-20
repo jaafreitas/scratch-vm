@@ -60,7 +60,6 @@ class Scratch3DataViewerBlocks {
     _showData() {
         if (!document.getElementById(IDTableWindows)) {
             const modalDiv = document.createElement('div');
-            
             modalDiv.id = IDTableWindows;   
     
             // creates the header of the div
@@ -180,9 +179,33 @@ class Scratch3DataViewerBlocks {
             modalDiv.appendChild(header);
             modalDiv.appendChild(body);
             document.body.appendChild(modalDiv);
-    
-    
+
+            // move window
+            modalDiv.addEventListener("mousedown",this._mousedown);
         }
+    }
+
+    _mousedown (e) {
+        window.addEventListener("mousemove",mousemove);
+        window.addEventListener("mouseup",mouseup);
+        let modalDiv = document.getElementById(IDTableWindows);
+        let prevX = e.clientX;
+        let prevY = e.clientY;
+
+        function mousemove (e) {
+            let newX = prevX - e.clientX;
+            let newY = prevY - e.clientY;
+            modalDiv.style.left = e.clientX + "px";
+            modalDiv.style.top = e.clientY + "px";
+            return
+        }
+
+        function mouseup () {
+            window.removeEventListener("mousemove",mousemove);
+            window.removeEventListener("mouseup",mouseup);
+            return
+        }
+        return
     }
 
     _blocksInfoUpdate (initial = true) {

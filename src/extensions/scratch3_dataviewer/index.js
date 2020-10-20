@@ -33,6 +33,18 @@ function showData() {
         // appends the text to the header
         titleDiv.appendChild(title);
         header.appendChild(titleDiv);
+        
+        // close button
+        const closeButtonDiv = document.createElement('div');
+        const closeButton =  document.createElement('button')
+        const closeButtonText = document.createTextNode('x');
+        // closes the modal when the button is clicked
+        closeButton.onclick = function(){document.body.removeChild(modalDiv)};
+        
+        //appends the button to the header
+        closeButton.appendChild(closeButtonText);
+        closeButtonDiv.appendChild(closeButton);
+        header.appendChild(closeButtonDiv);
 
 
         modalDiv.appendChild(header);

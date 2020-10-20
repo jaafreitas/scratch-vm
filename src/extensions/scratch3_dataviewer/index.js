@@ -20,40 +20,6 @@ const parentClassStageHeader = "stage-header_stage-size-row_1F3iv"
 const IDViewDataButton = "dataviewer-view-data-button";
 const IDTableWindows = "dataviewer-table-windows";
 
-function showData() {
-    if (!document.getElementById(IDTableWindows)) {
-        const modalDiv = document.createElement('div');
-        
-        modalDiv.id = IDTableWindows;   
-
-        // creates the header of the div
-        const header = document.createElement('div');
-        const title = document.createTextNode('Data Viewer');
-        const titleDiv = document.createElement('div');
-        // appends the text to the header
-        titleDiv.appendChild(title);
-        header.appendChild(titleDiv);
-        
-        // close button
-        const closeButtonDiv = document.createElement('div');
-        const closeButton =  document.createElement('button')
-        const closeButtonText = document.createTextNode('x');
-        // closes the modal when the button is clicked
-        closeButton.onclick = function(){document.body.removeChild(modalDiv)};
-        
-        //appends the button to the header
-        closeButton.appendChild(closeButtonText);
-        closeButtonDiv.appendChild(closeButton);
-        header.appendChild(closeButtonDiv);
-
-
-        modalDiv.appendChild(header);
-        document.body.appendChild(modalDiv);
-
-
-    }
-}
-
 class Scratch3DataViewerBlocks {
     static get EXTENSION_INFO_COLOR1() {
         return '#0FBD8C';
@@ -83,6 +49,100 @@ class Scratch3DataViewerBlocks {
         this._blocksInfoUpdate();
     }
 
+    _zeros (size) {
+        let zeros = []
+        for (let i = 0; i < size; i++) {
+            zeros.push(0)
+        }
+        return zeros
+    }
+
+    _showData() {
+        if (!document.getElementById(IDTableWindows)) {
+            const modalDiv = document.createElement('div');
+            
+            modalDiv.id = IDTableWindows;   
+    
+            // creates the header of the div
+            const header = document.createElement('div');
+            const title = document.createTextNode('Data Viewer');
+            const titleDiv = document.createElement('div');
+            // appends the text to the header
+            titleDiv.appendChild(title);
+            header.appendChild(titleDiv);
+            
+            // close button
+            const closeButtonDiv = document.createElement('div');
+            const closeButton =  document.createElement('button')
+            const closeButtonText = document.createTextNode('x');
+            // closes the modal when the button is clicked
+            closeButton.onclick = function(){document.body.removeChild(modalDiv)};
+    
+            //appends the button to the header
+            closeButton.appendChild(closeButtonText);
+            closeButtonDiv.appendChild(closeButton);
+            header.appendChild(closeButtonDiv);
+    
+            //creates the table with the lenght of data1
+            const rows  = 3;
+            const table = document.createElement('table')
+            let columns = 0;
+            if (this.data1 != undefined) {
+                columns = this.data1.length;
+            }
+            if (this.data2){
+                if (this.data2.length != columns) {
+                    this.data2 = this._zeros(columns);
+                }
+            }
+            else{
+                this.data2 = this._zeros(columns);
+            }
+            
+            if (this.data3){
+                if (this.data3.length != columns) {
+                    this.data3 = this._zeros(columns);
+                }
+            }
+            else{
+                this.data3 = this._zeros(columns);
+            }
+            
+            const dataset = [this.data1,this.data2,this.data3];
+            const dtString = ['data1','data2','data3'];
+    
+            for( let r = 0; r < rows; r++){
+                let tabr = document.createElement('td');
+                for(let c = 0; c < columns; c++){
+                    let tabDiv = document.createElement('div');
+    
+                    if (c == 0) {
+                        let tabc = document.createElement('tr');
+                        tabc.appendChild(document.createTextNode(dtString[r]));
+                        tabr.appendChild(tabc)
+                    }
+    
+                    tabc = document.createElement('tr');
+                    tabc.appendChild(document.createTextNode(dataset[r][c].toString()));
+                    tabDiv.appendChild(tabc)
+                    tabr.appendChild(tabDiv);
+    
+                }
+                table.appendChild(tabr);
+            }
+    
+            // creates a body for the div
+            const body = document.createElement('div');
+            body.appendChild(table);
+    
+            modalDiv.appendChild(header);
+            modalDiv.appendChild(body);
+            document.body.appendChild(modalDiv);
+    
+    
+        }
+    }
+
     _blocksInfoUpdate (initial = true) {
         if (!document.getElementById(IDViewDataButton)) {            
             // There should be only one element by this class.
@@ -93,7 +153,7 @@ class Scratch3DataViewerBlocks {
                 div.id = IDViewDataButton;
                 div.style.marginRight = ".3rem";
                 div.onclick = () => {
-                    showData();
+                    this._showData();
                 }
                 div.innerHTML = `
 <div>

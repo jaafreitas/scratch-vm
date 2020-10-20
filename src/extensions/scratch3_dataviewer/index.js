@@ -70,7 +70,8 @@ class Scratch3DataViewerBlocks {
             // appends the text to the header
             titleDiv.appendChild(title);
             header.appendChild(titleDiv);
-            
+            // creates the body 
+            const body = document.createElement('div');
             // close button
             const closeButtonDiv = document.createElement('div');
             const closeButton =  document.createElement('button')
@@ -130,11 +131,52 @@ class Scratch3DataViewerBlocks {
                 }
                 table.appendChild(tabr);
             }
-    
-            // creates a body for the div
-            const body = document.createElement('div');
             body.appendChild(table);
-    
+
+            // styles the header
+            header.style.padding = "10px 15px";
+            header.style.display = "flex";
+            header.style.justifyContent = "space-between";
+            header.style.alignItems = "center";
+            header.style.borderBottom = "1px solid black";
+            header.style.backgroundColor = " #2196f3";
+            header.style.borderTopLeftRadius = "2px";
+            header.style.borderTopRightRadius = "2px";
+            body.style.maxWidth = "300px";
+            body.style.height = "50px";
+
+            // titleDiv css
+            titleDiv.style.fontSize = "1.25rem";
+            //title.style.fontWeight = "bold";
+            titleDiv.style.color = "white";
+
+            // closeButton css
+            closeButton.style.fontSize = "1.25rem";
+            closeButton.style.fontWeight = "bold";
+            closeButton.style.cursor = "pointer";
+            closeButton.style.border = "none";
+            closeButton.style.outline = "none";
+            closeButton.style.background = "none";
+            closeButton.style.color = "white";
+
+            // modalBodyDiv css
+            body.style.padding = "10px 15px";
+            body.style.maxWidth = "300px";
+            body.style.height = "250px";
+            body.style.overflow = "auto";
+
+            // modal css
+            modalDiv.style.top = "50%";
+            modalDiv.style.left = "50%";
+            modalDiv.style.maxWidth = "300px";
+            modalDiv.style.height = "300px";
+            modalDiv.style.position = "absolute";
+            modalDiv.style.border = "1px solid black";
+            modalDiv.style.borderRadius = "4px";
+            modalDiv.style.zIndex = "10";
+            modalDiv.style.backgroundColor = "white";
+
+            // appends
             modalDiv.appendChild(header);
             modalDiv.appendChild(body);
             document.body.appendChild(modalDiv);

@@ -211,7 +211,7 @@ class Scratch3DataViewerBlocks {
     }
 
     _blocksInfoUpdate (initial = true) {
-        if (!document.getElementById(IDViewDataButton)) {            
+        if (!document.getElementById(IDViewDataButton)) {
             // There should be only one element by this class.
             const stageHeader = document.getElementsByClassName(parentClassStageHeader);
             if (stageHeader && stageHeader[0]) {
@@ -242,7 +242,7 @@ class Scratch3DataViewerBlocks {
     reset() {
         this.scalex = 100;
         this.scaley = 100;
-    }    
+    }
 
 
     _setupTranslations () {
@@ -295,7 +295,7 @@ class Scratch3DataViewerBlocks {
                             defaultValue: ' '
                         }
                     }
-                },                
+                },
                 {
                     opcode: 'addValueToData',
                     text: formatMessage({
@@ -378,7 +378,7 @@ class Scratch3DataViewerBlocks {
                 },
 
                 {
-                    opcode: 'getValue', 
+                    opcode: 'getValue',
                     text: formatMessage({
                         id: 'dataviewer.getValue',
                         default: 'value from [DATA_ID]' //ao incluir o parâmetro DATA_ID deixa de ser possível usar o chekbox para mostrar o valor no palco
@@ -616,7 +616,7 @@ class Scratch3DataViewerBlocks {
         };
     }
 
-    getDataLength (args) { 
+    getDataLength (args) {
     	switch(args.DATA_ID) {	//SE DEIXAR O SWITCH, FUNCIONA PARA O BLOCO DE TAMANHO, MAS NÃO PARA O DE LOOP - E VICE VERSA.
     		case "data1":
         		if (this.data1) {		//DÚVIDA: O QUE SIGNIFICA ISSO? - SE ESTÁ DEFINIDO
@@ -680,7 +680,7 @@ class Scratch3DataViewerBlocks {
     	 	case "data1":
         		if (this.getDataLength(args) > 0 && this.dataIndex1 >= 0) {
             		return this.data1[this.dataIndex1];
-        		} 
+        		}
         		else {
             		return '';
          		}
@@ -688,7 +688,7 @@ class Scratch3DataViewerBlocks {
          	case "data2":
         		if (this.getDataLength(args) > 0 && this.dataIndex2 >= 0) {
             		return this.data2[this.dataIndex2];
-        		} 
+        		}
         		else {
             		return '';
          		}
@@ -696,7 +696,7 @@ class Scratch3DataViewerBlocks {
          	case "data3":
         		if (this.getDataLength(args) > 0 && this.dataIndex3 >= 0) {
             		return this.data3[this.dataIndex3];
-        		} 
+        		}
         		else {
             		return '';
          		}
@@ -758,9 +758,9 @@ class Scratch3DataViewerBlocks {
             		return '';
         		}
         		break;
-        	default: 
+        	default:
         		return "error";
-    	}    
+    	}
     }
 
     _mapValue (value, old_min, old_max, new_min, new_max) {
@@ -777,27 +777,27 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    _getMin (args) { 
+    _getMin (args) {
     	switch (args.DATA_ID) {
     		case "data1":
         		if (this.getDataLength(args) > 0) {
             		return this.data1.reduce(function(a, b) {
                 		return Math.min(a, b);
-            		});            	
+            		});
         		}
 			break;
 			case "data2":
         		if (this.getDataLength(args) > 0) {
             		return this.data2.reduce(function(a, b) {
                 		return Math.min(a, b);
-            		});            	
+            		});
         		}
         	break;
 			case "data3":
         		if (this.getDataLength(args) > 0) {
             		return this.data3.reduce(function(a, b) {
                 		return Math.min(a, b);
-            		});            	
+            		});
         		}
         	break;
         	default:
@@ -857,7 +857,7 @@ class Scratch3DataViewerBlocks {
                 }
             }
 
-            this.data1 = data;				 
+            this.data1 = data;
             this.dataIndex1 = -1;
         }
         	break;
@@ -881,8 +881,8 @@ class Scratch3DataViewerBlocks {
                 }
             }
 
-            this.data2 = data;				 
-            this.dataIndex2 = -1;		
+            this.data2 = data;
+            this.dataIndex2 = -1;
         }
         	break;
         case "data3":
@@ -905,8 +905,8 @@ class Scratch3DataViewerBlocks {
                 }
             }
 
-            this.data3 = data;				 
-            this.dataIndex3 = -1;		
+            this.data3 = data;
+            this.dataIndex3 = -1;
         }
         	break;
 
@@ -918,7 +918,7 @@ class Scratch3DataViewerBlocks {
     }
 
 
-	
+
    /* setData (args) {  				ANTIGO - APAGAR
         if (args.DATA.trim()) {
 
@@ -1057,7 +1057,7 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    dataLoop (args, util) {		
+    dataLoop (args, util) {
     	switch(args.DATA_ID) { //ADICIONANDO, ARRUMAR IDENTAÇÃO --- PROBLEMA: DOIS BLOCOS IGUAIS RODANDO AO MESMO TEMPO. PODERIA TER UMA VARIÁVEL QUE CHECA SE ESTÁ RODANDO. SE SIM, NÃO DEIXA RODAR DE NOVO
      	case "data1":
         	if (this.dataIndex1 < this.getDataLength(args)) { //FARIA SENTIDO JÁ TER UMA VARIÁVEL CONSTANTE PARA CADA TAMANHO DE DADO?
@@ -1071,7 +1071,7 @@ class Scratch3DataViewerBlocks {
        		}
        		break;
       	case "data2":
-        	if (this.dataIndex2 < this.getDataLength(args)) { 
+        	if (this.dataIndex2 < this.getDataLength(args)) {
             	this.dataIndex2++;
         	}
         	if (this.dataIndex2 < this.getDataLength(args)) {
@@ -1082,7 +1082,7 @@ class Scratch3DataViewerBlocks {
        		}
        		break;
       	case "data3":
-        	if (this.dataIndex3 < this.getDataLength(args)) { 
+        	if (this.dataIndex3 < this.getDataLength(args)) {
             	this.dataIndex3++;
         	}
         	if (this.dataIndex3 < this.getDataLength(args)) {
@@ -1151,7 +1151,7 @@ class Scratch3DataViewerBlocks {
     }
 
 
-/* 
+/*
  	mapData (args) {	//OLD
         switch(args.DATA_TYPE) {
             case "index":
@@ -1232,7 +1232,7 @@ class Scratch3DataViewerBlocks {
             default:
                 return "error";
         	break;
-        
+
         //default:
         //	return "error";
 		}
@@ -1240,21 +1240,21 @@ class Scratch3DataViewerBlocks {
     }
 	}
 
-    getDataIndex (args) {  
+    getDataIndex (args) {
     	switch(args.DATA_ID) {
         	case "data1":
         		if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
-            		return this.data1[args.INDEX - 1]; 
+            		return this.data1[args.INDEX - 1];
         		}
         		break;
 			case "data2":
         		if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
-            		return this.data2[args.INDEX - 1]; 
+            		return this.data2[args.INDEX - 1];
         		}
         		break;
 			case "data3":
         		if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
-            		return this.data3[args.INDEX - 1]; 
+            		return this.data3[args.INDEX - 1];
         		}
         		break;
         	default:

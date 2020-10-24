@@ -276,343 +276,351 @@ class Scratch3DataViewerBlocks {
             }),
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
-            blocks: [
-                {
-                    opcode: 'setData',
-                    text: formatMessage({
-                        id: 'dataviewer.setData',
-                        default: 'set [DATA_ID] to [DATA]'
-                    }),
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                    	DATA_ID: { 					//INCLUINDO
-                            type: ArgumentType.STRING,
-                            menu: 'dataId',
-                            defaultValue: 'data1'
-                        },
-                        DATA: {
-                            type: ArgumentType.STRING,
-                            defaultValue: ' '
-                        }
-                    }
-                },
-                {
-                    opcode: 'addValueToData',
-                    text: formatMessage({
-                        id: 'dataviewer.addValueToData',
-                        default: 'add value [VALUE] to [DATA_ID]'
-                    }),
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                    	DATA_ID: {				//INCLUINDO 4
-                    		type: ArgumentType.STRING,
-                    		menu: 'dataId',
-                    		dafaultValue: 'data1'
-                    	},
-                        VALUE: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: ' '
-                        }
-                    }
-                },
-                {
-                    opcode: 'readCSVDataFromURL',
-                    text: formatMessage({
-                        id: 'dataviewer.readCSVDataFromURL',
-                        default: 'read .csv file [URL] column: [COLUMN] starting from line: [LINE]'
-                    }),
-                    blockType: BlockType.REPORTER,
-                    hideFromPalette: minimalBlocks,
-                    arguments: {
-                        COLUMN: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: ' '
-                        },
-                        URL: {
-                            type: ArgumentType.STRING,
-                            defaultValue: formatMessage({
-                                id: 'dataviewer.readCSVDataFromURL.default',
-                                default: 'spreadsheet link'
-                            })
-                        },
-                        LINE: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 2
-                        }
-                    }
-                },
-                {
-                    opcode: 'readThingSpeakData',
-                    text: formatMessage({
-                        id: 'dataviewer.readThingSpeakData',
-                        default: 'read ThingSpeak channel: [CHANNEL] field: [FIELD]'
-                    }),
-                    blockType: BlockType.REPORTER,
-                    hideFromPalette: minimalBlocks,
-                    arguments: {
-                        FIELD: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: ' '
-                        },
-                        CHANNEL: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: ' '
-                        }
-                    }
-                },
-                '---',
-                {
-                    opcode: 'dataLoop',
-                    text: formatMessage({
-                        id: 'dataviewer.dataLoop',
-                        default: 'read all values from [DATA_ID]'
-                    }),
-                    blockType: BlockType.LOOP,
-                    arguments: {
-                    	DATA_ID: { 					//INCLUINDO 3
-                            type: ArgumentType.STRING,
-                            menu: 'dataId',
-                            defaultValue: 'data1'
-                        	}
-                        }
-                },
+            blocks: this.getBlocks(),
+            menus: this.getMenus()
+        };
+    }
 
-                {
-                    opcode: 'getValue',
-                    text: formatMessage({
-                        id: 'dataviewer.getValue',
-                        default: 'value from [DATA_ID]' //ao incluir o parâmetro DATA_ID deixa de ser possível usar o chekbox para mostrar o valor no palco
-                    }),
-                    blockType: BlockType.REPORTER,
-                    arguments: {
-                    	DATA_ID: { 					//INCLUINDO 5
-                            type: ArgumentType.STRING,
-                            menu: 'dataId',
-                            defaultValue: 'data1'
-                        	}
-                        }
-                },
-                {
-                    opcode: 'getIndex',
-                    text: formatMessage({
-                        id: 'dataviewer.getIndex',
-                        default: 'index from [DATA_ID]'
-                    }),
-                    blockType: BlockType.REPORTER,
-                    arguments: {
-                    	DATA_ID: { 					//INCLUINDO 5
-                            type: ArgumentType.STRING,
-                            menu: 'dataId',
-                            defaultValue: 'data1'
-                        	}
-                        }
-                },
-                {
-                    opcode: 'getStatistic',
-                    text: formatMessage({
-                        id: 'dataviewer.getStatistic',
-                        default: '[FNC] [DATA_ID]'
-                    }),
-                    blockType: BlockType.REPORTER,
-                    arguments: {
-                    	DATA_ID: {
-                    		type: ArgumentType.STRING,
-                            menu: 'dataId',
-                            defaultValue: 'data1'
-                    	},
-                        FNC: {
-                            type: ArgumentType.STRING,
-                            menu: 'statisticFunctions',
-                            defaultValue: 'mean'
-                        }
-                    }
-                },
-                {
-                    opcode: 'changeDataScale',
-                    text: formatMessage({
-                        id: 'dataviewer.changeDataScale',
-                        default: 'change [DATA_ID] scale to [NEW_MIN] [NEW_MAX]'
-                    }),
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-						DATA_ID: {
-                    		type: ArgumentType.STRING,
-                            menu: 'dataId',
-                            defaultValue: 'data1'
-                    	},
-                        NEW_MIN: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0
-                        },
-                        NEW_MAX: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 100
-                        }
-                    }
-                },
-                {
-                    opcode: 'mapData',
-                    text: formatMessage({
-                        id: 'dataviewer.mapData',
-                        default: 'map [DATA_ID] [DATA_TYPE] to [NEW_MIN] [NEW_MAX]'
-                    }),
-                    blockType: BlockType.REPORTER,
-                    hideFromPalette: minimalBlocks,
-                    arguments: {
-                        DATA_ID: {
-                        	type: ArgumentType.STRING,
-                            menu: 'dataId',
-                            defaultValue: 'data1'
-                        },
-                        DATA_TYPE: {
-                            type: ArgumentType.STRING,
-                            menu: 'dataType',
-                            defaultValue: 'value'
-                        },
-                        NEW_MIN: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0
-                        },
-                        NEW_MAX: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 100
-                        }
-                    }
-                },
-                {
-                    opcode: 'getDataLength',
-                    text: formatMessage({
-                        id: 'dataviewer.getDataLength',
-                        default: 'data length of [DATA_ID]'
-                    }),
-                    blockType: BlockType.REPORTER,
-                    hideFromPalette: minimalBlocks,
-                    arguments: {
-                        DATA_ID: {
-                            type: ArgumentType.STRING,
-                            menu: 'dataId',
-                            defaultValue: 'data1'
-                        }
-                    }
-                },
-                {
-                    opcode: 'getDataIndex', // ESTÁ COM ERRO NESSE BLOCO
-                    text: formatMessage({
-                        id: 'dataviewer.getDataIndex',
-                        default: 'value in [DATA_ID] index [INDEX]'
-                    }),
-                    blockType: BlockType.REPORTER,
-                    hideFromPalette: minimalBlocks,
-                    arguments: {
-                        DATA_ID: {
-                            type: ArgumentType.STRING,
-                            menu: 'dataId',
-                            defaultValue: 'data1'
-                        },
-                        INDEX: { //AQUI ESSE INDEX TERIA QUE SER ESPECÍFICO PARA CADA DATASET?
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 1
-                        }
-                    }
-                },
-                '---',
-                {
-                    opcode: 'setScaleX',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'dataviewer.setSizeX',
-                        default: 'set size X to [SCALEX] %'
-                    }),
-
-                    arguments: {
-                        SCALEX: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 100
-
-                        }
-                    }
-                },
-                {
-                    opcode: 'setScaleY',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'dataviewer.setSizeY',
-                        default: 'set size Y to [SCALEY] %'
-                    }),
-
-                    arguments: {
-                        SCALEY: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 100
-
-                        }
+    getBlocks () {
+        return [
+            {
+                opcode: 'setData',
+                text: formatMessage({
+                    id: 'dataviewer.setData',
+                    default: 'set [DATA_ID] to [DATA]'
+                }),
+                blockType: BlockType.COMMAND,
+                arguments: {
+                    DATA_ID: { 					//INCLUINDO
+                        type: ArgumentType.STRING,
+                        menu: 'dataId',
+                        defaultValue: 'data1'
+                    },
+                    DATA: {
+                        type: ArgumentType.STRING,
+                        defaultValue: ' '
                     }
                 }
-            ],
-            menus: {
-                statisticFunctions: [
-                    {
-                        text: formatMessage({
-                            id: 'dataviewer.menu.statisticFunctions.mean',
-                            default: 'mean'
-                        }),
-                        value: 'mean'
+            },
+            {
+                opcode: 'addValueToData',
+                text: formatMessage({
+                    id: 'dataviewer.addValueToData',
+                    default: 'add value [VALUE] to [DATA_ID]'
+                }),
+                blockType: BlockType.COMMAND,
+                arguments: {
+                    DATA_ID: {				//INCLUINDO 4
+                        type: ArgumentType.STRING,
+                        menu: 'dataId',
+                        dafaultValue: 'data1'
                     },
-                    {
-                        text: formatMessage({
-                            id: 'dataviewer.menu.statisticFunctions.min',
-                            default: 'min'
-                        }),
-                        value: 'min'
-                    },
-                    {
-                        text: formatMessage({
-                            id: 'dataviewer.menu.statisticFunctions.max',
-                            default: 'max'
-                        }),
-                        value: 'max'
+                    VALUE: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: ' '
                     }
-                ],
-                dataType: [
-                    {
-                        text: formatMessage({
-                            id: 'dataviewer.menu.dataType.value',
-                            default: 'value'
-                        }),
-                        value: 'value'
+                }
+            },
+            {
+                opcode: 'readCSVDataFromURL',
+                text: formatMessage({
+                    id: 'dataviewer.readCSVDataFromURL',
+                    default: 'read .csv file [URL] column: [COLUMN] starting from line: [LINE]'
+                }),
+                blockType: BlockType.REPORTER,
+                hideFromPalette: minimalBlocks,
+                arguments: {
+                    COLUMN: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: ' '
                     },
-                    {
-                        text: formatMessage({
-                            id: 'dataviewer.menu.dataType.index',
-                            default: 'index'
-                        }),
-                        value: 'index'
+                    URL: {
+                        type: ArgumentType.STRING,
+                        defaultValue: formatMessage({
+                            id: 'dataviewer.readCSVDataFromURL.default',
+                            default: 'spreadsheet link'
+                        })
+                    },
+                    LINE: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 2
                     }
-                ],
-                dataId: [ //INCLUINDO
-                    {
-                        text: formatMessage({
-                            id: 'dataviewer.menu.dataId.data1',
-                            default: 'data1'
-                        }),
-                        value: 'data1'
+                }
+            },
+            {
+                opcode: 'readThingSpeakData',
+                text: formatMessage({
+                    id: 'dataviewer.readThingSpeakData',
+                    default: 'read ThingSpeak channel: [CHANNEL] field: [FIELD]'
+                }),
+                blockType: BlockType.REPORTER,
+                hideFromPalette: minimalBlocks,
+                arguments: {
+                    FIELD: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: ' '
                     },
-                    {
-                        text: formatMessage({
-                            id: 'dataviewer.menu.dataId.data2',
-                            default: 'data2'
-                        }),
-                        value: 'data2'
-                    },
-					{
-                        text: formatMessage({
-                            id: 'dataviewer.menu.dataId.data3',
-                            default: 'data3'
-                        }),
-                        value: 'data3'
+                    CHANNEL: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: ' '
                     }
-                ],
+                }
+            },
+            '---',
+            {
+                opcode: 'dataLoop',
+                text: formatMessage({
+                    id: 'dataviewer.dataLoop',
+                    default: 'read all values from [DATA_ID]'
+                }),
+                blockType: BlockType.LOOP,
+                arguments: {
+                    DATA_ID: { 					//INCLUINDO 3
+                        type: ArgumentType.STRING,
+                        menu: 'dataId',
+                        defaultValue: 'data1'
+                        }
+                    }
+            },
+
+            {
+                opcode: 'getValue',
+                text: formatMessage({
+                    id: 'dataviewer.getValue',
+                    default: 'value from [DATA_ID]' //ao incluir o parâmetro DATA_ID deixa de ser possível usar o chekbox para mostrar o valor no palco
+                }),
+                blockType: BlockType.REPORTER,
+                arguments: {
+                    DATA_ID: { 					//INCLUINDO 5
+                        type: ArgumentType.STRING,
+                        menu: 'dataId',
+                        defaultValue: 'data1'
+                        }
+                    }
+            },
+            {
+                opcode: 'getIndex',
+                text: formatMessage({
+                    id: 'dataviewer.getIndex',
+                    default: 'index from [DATA_ID]'
+                }),
+                blockType: BlockType.REPORTER,
+                arguments: {
+                    DATA_ID: { 					//INCLUINDO 5
+                        type: ArgumentType.STRING,
+                        menu: 'dataId',
+                        defaultValue: 'data1'
+                        }
+                    }
+            },
+            {
+                opcode: 'getStatistic',
+                text: formatMessage({
+                    id: 'dataviewer.getStatistic',
+                    default: '[FNC] [DATA_ID]'
+                }),
+                blockType: BlockType.REPORTER,
+                arguments: {
+                    DATA_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataId',
+                        defaultValue: 'data1'
+                    },
+                    FNC: {
+                        type: ArgumentType.STRING,
+                        menu: 'statisticFunctions',
+                        defaultValue: 'mean'
+                    }
+                }
+            },
+            {
+                opcode: 'changeDataScale',
+                text: formatMessage({
+                    id: 'dataviewer.changeDataScale',
+                    default: 'change [DATA_ID] scale to [NEW_MIN] [NEW_MAX]'
+                }),
+                blockType: BlockType.COMMAND,
+                arguments: {
+                    DATA_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataId',
+                        defaultValue: 'data1'
+                    },
+                    NEW_MIN: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 0
+                    },
+                    NEW_MAX: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 100
+                    }
+                }
+            },
+            {
+                opcode: 'mapData',
+                text: formatMessage({
+                    id: 'dataviewer.mapData',
+                    default: 'map [DATA_ID] [DATA_TYPE] to [NEW_MIN] [NEW_MAX]'
+                }),
+                blockType: BlockType.REPORTER,
+                hideFromPalette: minimalBlocks,
+                arguments: {
+                    DATA_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataId',
+                        defaultValue: 'data1'
+                    },
+                    DATA_TYPE: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataType',
+                        defaultValue: 'value'
+                    },
+                    NEW_MIN: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 0
+                    },
+                    NEW_MAX: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 100
+                    }
+                }
+            },
+            {
+                opcode: 'getDataLength',
+                text: formatMessage({
+                    id: 'dataviewer.getDataLength',
+                    default: 'data length of [DATA_ID]'
+                }),
+                blockType: BlockType.REPORTER,
+                hideFromPalette: minimalBlocks,
+                arguments: {
+                    DATA_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataId',
+                        defaultValue: 'data1'
+                    }
+                }
+            },
+            {
+                opcode: 'getDataIndex', // ESTÁ COM ERRO NESSE BLOCO
+                text: formatMessage({
+                    id: 'dataviewer.getDataIndex',
+                    default: 'value in [DATA_ID] index [INDEX]'
+                }),
+                blockType: BlockType.REPORTER,
+                hideFromPalette: minimalBlocks,
+                arguments: {
+                    DATA_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataId',
+                        defaultValue: 'data1'
+                    },
+                    INDEX: { //AQUI ESSE INDEX TERIA QUE SER ESPECÍFICO PARA CADA DATASET?
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 1
+                    }
+                }
+            },
+            '---',
+            {
+                opcode: 'setScaleX',
+                blockType: BlockType.COMMAND,
+                text: formatMessage({
+                    id: 'dataviewer.setSizeX',
+                    default: 'set size X to [SCALEX] %'
+                }),
+
+                arguments: {
+                    SCALEX: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 100
+
+                    }
+                }
+            },
+            {
+                opcode: 'setScaleY',
+                blockType: BlockType.COMMAND,
+                text: formatMessage({
+                    id: 'dataviewer.setSizeY',
+                    default: 'set size Y to [SCALEY] %'
+                }),
+
+                arguments: {
+                    SCALEY: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 100
+
+                    }
+                }
             }
+        ];
+    }
+
+    getMenus () {
+        return {
+            statisticFunctions: [
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.statisticFunctions.mean',
+                        default: 'mean'
+                    }),
+                    value: 'mean'
+                },
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.statisticFunctions.min',
+                        default: 'min'
+                    }),
+                    value: 'min'
+                },
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.statisticFunctions.max',
+                        default: 'max'
+                    }),
+                    value: 'max'
+                }
+            ],
+            dataType: [
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.dataType.value',
+                        default: 'value'
+                    }),
+                    value: 'value'
+                },
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.dataType.index',
+                        default: 'index'
+                    }),
+                    value: 'index'
+                }
+            ],
+            dataId: [ //INCLUINDO
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.dataId.data1',
+                        default: 'data1'
+                    }),
+                    value: 'data1'
+                },
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.dataId.data2',
+                        default: 'data2'
+                    }),
+                    value: 'data2'
+                },
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.dataId.data3',
+                        default: 'data3'
+                    }),
+                    value: 'data3'
+                }
+            ]
         };
     }
 

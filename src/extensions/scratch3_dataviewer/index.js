@@ -20,8 +20,6 @@ const parentClassStageHeader = "stage-header_stage-size-row_1F3iv"
 const IDViewDataButton = "dataviewer-view-data-button";
 const IDTableWindows = "dataviewer-table-windows";
 
-const minimalBlocks = window.location.href.match(/[?&]minimal[?&]*/) !== null;
-
 class Scratch3DataViewerBlocks {
     static get EXTENSION_INFO_COLOR1() {
         return '#0FBD8C';
@@ -37,6 +35,9 @@ class Scratch3DataViewerBlocks {
 
     constructor (runtime) {
         this._runtime = runtime;
+
+        // Determine which blockswill be shown.
+        this.minimalBlocks = window.location.href.match(/[?&]minimal[?&]*/) !== null;
 
         this.scalex = 100;
         this.scaley = 100;
@@ -276,14 +277,14 @@ class Scratch3DataViewerBlocks {
             }),
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
-            blocks: this.getBlocks(),
-            menus: this.getMenus()
+            blocks: this.addBlocks(),
+            menus: this.addMenus()
         };
     }
 
-    getBlocks () {
-        return [
-            {
+    addBlocks () {
+        const allBlocks = {
+            setData: {
                 opcode: 'setData',
                 text: formatMessage({
                     id: 'dataviewer.setData',
@@ -302,7 +303,7 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            {
+            addValueToData: {
                 opcode: 'addValueToData',
                 text: formatMessage({
                     id: 'dataviewer.addValueToData',
@@ -321,14 +322,13 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            {
+            readCSVDataFromURL: {
                 opcode: 'readCSVDataFromURL',
                 text: formatMessage({
                     id: 'dataviewer.readCSVDataFromURL',
                     default: 'read .csv file [URL] column: [COLUMN] starting from line: [LINE]'
                 }),
                 blockType: BlockType.REPORTER,
-                hideFromPalette: minimalBlocks,
                 arguments: {
                     COLUMN: {
                         type: ArgumentType.NUMBER,
@@ -347,14 +347,13 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            {
+            readThingSpeakData: {
                 opcode: 'readThingSpeakData',
                 text: formatMessage({
                     id: 'dataviewer.readThingSpeakData',
                     default: 'read ThingSpeak channel: [CHANNEL] field: [FIELD]'
                 }),
                 blockType: BlockType.REPORTER,
-                hideFromPalette: minimalBlocks,
                 arguments: {
                     FIELD: {
                         type: ArgumentType.NUMBER,
@@ -366,8 +365,7 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            '---',
-            {
+            dataLoop: {
                 opcode: 'dataLoop',
                 text: formatMessage({
                     id: 'dataviewer.dataLoop',
@@ -382,8 +380,7 @@ class Scratch3DataViewerBlocks {
                         }
                     }
             },
-
-            {
+            getValue: {
                 opcode: 'getValue',
                 text: formatMessage({
                     id: 'dataviewer.getValue',
@@ -398,7 +395,7 @@ class Scratch3DataViewerBlocks {
                         }
                     }
             },
-            {
+            getIndex: {
                 opcode: 'getIndex',
                 text: formatMessage({
                     id: 'dataviewer.getIndex',
@@ -413,7 +410,7 @@ class Scratch3DataViewerBlocks {
                         }
                     }
             },
-            {
+            getStatistic: {
                 opcode: 'getStatistic',
                 text: formatMessage({
                     id: 'dataviewer.getStatistic',
@@ -433,7 +430,7 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            {
+            changeDataScale: {
                 opcode: 'changeDataScale',
                 text: formatMessage({
                     id: 'dataviewer.changeDataScale',
@@ -456,14 +453,13 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            {
+            mapData: {
                 opcode: 'mapData',
                 text: formatMessage({
                     id: 'dataviewer.mapData',
                     default: 'map [DATA_ID] [DATA_TYPE] to [NEW_MIN] [NEW_MAX]'
                 }),
                 blockType: BlockType.REPORTER,
-                hideFromPalette: minimalBlocks,
                 arguments: {
                     DATA_ID: {
                         type: ArgumentType.STRING,
@@ -485,14 +481,13 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            {
+            getDataLength: {
                 opcode: 'getDataLength',
                 text: formatMessage({
                     id: 'dataviewer.getDataLength',
                     default: 'data length of [DATA_ID]'
                 }),
                 blockType: BlockType.REPORTER,
-                hideFromPalette: minimalBlocks,
                 arguments: {
                     DATA_ID: {
                         type: ArgumentType.STRING,
@@ -501,14 +496,13 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            {
+            getDataIndex: {
                 opcode: 'getDataIndex', // ESTÁ COM ERRO NESSE BLOCO
                 text: formatMessage({
                     id: 'dataviewer.getDataIndex',
                     default: 'value in [DATA_ID] index [INDEX]'
                 }),
                 blockType: BlockType.REPORTER,
-                hideFromPalette: minimalBlocks,
                 arguments: {
                     DATA_ID: {
                         type: ArgumentType.STRING,
@@ -521,8 +515,7 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            '---',
-            {
+            setScaleX: {
                 opcode: 'setScaleX',
                 blockType: BlockType.COMMAND,
                 text: formatMessage({
@@ -538,7 +531,7 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            {
+            setScaleY: {
                 opcode: 'setScaleY',
                 blockType: BlockType.COMMAND,
                 text: formatMessage({
@@ -554,10 +547,42 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             }
-        ];
+        };
+        const blocks = [];
+        if (this.minimalBlocks) {
+            blocks.push(
+                allBlocks.setData,
+                allBlocks.dataLoop,
+                allBlocks.changeDataScale,
+                allBlocks.getValue,
+                allBlocks.getIndex,
+                allBlocks.getStatistic,
+                allBlocks.addValueToData,
+                allBlocks.setScaleX,
+                allBlocks.setScaleY);
+        } else {
+            blocks.push(
+                allBlocks.setData,
+                allBlocks.addValueToData,
+                allBlocks.readCSVDataFromURL,
+                allBlocks.readThingSpeakData,
+                '---',
+                allBlocks.dataLoop,
+                allBlocks.getValue,
+                allBlocks.getIndex,
+                allBlocks.getStatistic,
+                allBlocks.changeDataScale,
+                allBlocks.mapData,
+                allBlocks.getDataLength,
+                allBlocks.getDataIndex,
+                '---',
+                allBlocks.setScaleX,
+                allBlocks.setScaleY);
+        }
+        return blocks;
     }
 
-    getMenus () {
+    addMenus () {
         return {
             statisticFunctions: [
                 {

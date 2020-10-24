@@ -20,6 +20,8 @@ const parentClassStageHeader = "stage-header_stage-size-row_1F3iv"
 const IDViewDataButton = "dataviewer-view-data-button";
 const IDTableWindows = "dataviewer-table-windows";
 
+const minimalBlocks = window.location.href.match(/[?&]minimal[?&]*/) !== null;
+
 class Scratch3DataViewerBlocks {
     static get EXTENSION_INFO_COLOR1() {
         return '#0FBD8C';
@@ -320,6 +322,7 @@ class Scratch3DataViewerBlocks {
                         default: 'read .csv file [URL] column: [COLUMN] starting from line: [LINE]'
                     }),
                     blockType: BlockType.REPORTER,
+                    hideFromPalette: minimalBlocks,
                     arguments: {
                         COLUMN: {
                             type: ArgumentType.NUMBER,
@@ -345,6 +348,7 @@ class Scratch3DataViewerBlocks {
                         default: 'read ThingSpeak channel: [CHANNEL] field: [FIELD]'
                     }),
                     blockType: BlockType.REPORTER,
+                    hideFromPalette: minimalBlocks,
                     arguments: {
                         FIELD: {
                             type: ArgumentType.NUMBER,
@@ -453,6 +457,7 @@ class Scratch3DataViewerBlocks {
                         default: 'map [DATA_ID] [DATA_TYPE] to [NEW_MIN] [NEW_MAX]'
                     }),
                     blockType: BlockType.REPORTER,
+                    hideFromPalette: minimalBlocks,
                     arguments: {
                         DATA_ID: {
                         	type: ArgumentType.STRING,
@@ -481,6 +486,7 @@ class Scratch3DataViewerBlocks {
                         default: 'data length of [DATA_ID]'
                     }),
                     blockType: BlockType.REPORTER,
+                    hideFromPalette: minimalBlocks,
                     arguments: {
                         DATA_ID: {
                             type: ArgumentType.STRING,
@@ -496,6 +502,7 @@ class Scratch3DataViewerBlocks {
                         default: 'value in [DATA_ID] index [INDEX]'
                     }),
                     blockType: BlockType.REPORTER,
+                    hideFromPalette: minimalBlocks,
                     arguments: {
                         DATA_ID: {
                             type: ArgumentType.STRING,

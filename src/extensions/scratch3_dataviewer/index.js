@@ -36,8 +36,8 @@ class Scratch3DataViewerBlocks {
     constructor (runtime) {
         this._runtime = runtime;
 
-        // Determine which blockswill be shown.
-        this.minimalBlocks = window.location.href.match(/[?&]minimal[?&]*/) !== null;
+        // Always starts with the minimal-block version.
+        this._runtime.DataviewerMinimalBlocks = true;
 
         this.scalex = 100;
         this.scaley = 100;
@@ -284,6 +284,22 @@ class Scratch3DataViewerBlocks {
 
     addBlocks () {
         const allBlocks = {
+            showMoreBlocks: {
+                func: 'DATAVIEWER_SHOW_MORE_LESS_BLOCKS',
+                text: formatMessage({
+                    id: 'dataviewer.showMoreBlocks',
+                    default: 'Show More Blocks'
+                }),
+                blockType: BlockType.BUTTON
+            },
+            showLessBlocks: {
+                func: 'DATAVIEWER_SHOW_MORE_LESS_BLOCKS',
+                text: formatMessage({
+                    id: 'dataviewer.showLessBlocks',
+                    default: 'Show Less Blocks'
+                }),
+                blockType: BlockType.BUTTON
+            },
             setData: {
                 opcode: 'setData',
                 text: formatMessage({
@@ -549,7 +565,7 @@ class Scratch3DataViewerBlocks {
             }
         };
         const blocks = [];
-        if (this.minimalBlocks) {
+        if (this._runtime.DataviewerMinimalBlocks) {
             blocks.push(
                 allBlocks.setData,
                 allBlocks.dataLoop,
@@ -559,7 +575,8 @@ class Scratch3DataViewerBlocks {
                 allBlocks.getStatistic,
                 allBlocks.addValueToData,
                 allBlocks.setScaleX,
-                allBlocks.setScaleY);
+                allBlocks.setScaleY,
+                allBlocks.showMoreBlocks);
         } else {
             blocks.push(
                 allBlocks.setData,
@@ -577,7 +594,20 @@ class Scratch3DataViewerBlocks {
                 allBlocks.getDataIndex,
                 '---',
                 allBlocks.setScaleX,
-                allBlocks.setScaleY);
+                allBlocks.setScaleY,
+                '---',
+                allBlocks.showLessBlocks);
+        }
+        // if we try load a project with the extra blocks using the minimal-block version,
+        // those extra blocks won't appear in the coding area.
+        for (const [opcode, block] of Object.entries(allBlocks)) {
+            const searchBlocks = blocks.filter(searchBlock => (
+                (searchBlock.opcode === opcode) || (block.blockType === BlockType.BUTTON)
+            ));
+            if (!searchBlocks.length) {
+                block.hideFromPalette = true;
+                blocks.push(block);
+            }
         }
         return blocks;
     }

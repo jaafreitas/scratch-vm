@@ -4,6 +4,10 @@
         "gui.extension.dataviewer.description": "Brinque com seus dados",
 
         "dataviewer.categoryName": "Visualizador de Dados",
+
+        "dataviewer.showMoreBlocks": "Mostrar Mais Blocos",
+        "dataviewer.showLessBlocks": "Mostrar Menos Blocos",
+
         "dataviewer.setData": "definir [DATA_ID] como [DATA]",
         "dataviewer.setSizeX": "definir o tamanho X como [SCALEX] %",
         "dataviewer.setSizeY": "definir o tamanho Y como [SCALEY] %",

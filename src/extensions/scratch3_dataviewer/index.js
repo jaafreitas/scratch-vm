@@ -187,16 +187,14 @@ class Scratch3DataViewerBlocks {
         }
     }
 
+    /* eslint-disable */
     _mousedown (e) {
         window.addEventListener('mousemove', mousemove);
         window.addEventListener('mouseup', mouseup);
         const modalDiv = document.getElementById(IDTableWindows);
-        const prevX = e.clientX;
-        const prevY = e.clientY;
 
+        // eslint-disable-next-line require-jsdoc
         function mousemove (e) {
-            const newX = prevX - e.clientX;
-            const newY = prevY - e.clientY;
             modalDiv.style.left = `${e.clientX}px`;
             modalDiv.style.top = `${e.clientY}px`;
             return;
@@ -209,6 +207,7 @@ class Scratch3DataViewerBlocks {
         }
         return;
     }
+    /* eslint-enable */
 
     _blocksInfoUpdate (initial = true) {
         if (!document.getElementById(IDViewDataButton)) {
@@ -224,7 +223,8 @@ class Scratch3DataViewerBlocks {
                 };
                 div.innerHTML = `
 <div>
-    <span class="button_outlined-button_2f510 stage-header_stage-button_4qxON" style="width: 42px; background: ${Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR1}" role="button">
+    <span class="button_outlined-button_2f510 stage-header_stage-button_4qxON"
+        style="width: 42px; background: ${Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR1}" role="button">
         <div class="button_content_3y79K">
             <img title="View Data" class="stage-header_stage-button-icon_1SHv0" draggable="false" src="${blockIconURI}">
         </div>

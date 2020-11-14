@@ -38,6 +38,7 @@ class Scratch3DataViewerBlocks {
         // Always starts with the minimal-block version.
         this._runtime.DataviewerMinimalBlocks = true;
 
+        // DESIGN FLAW: Scale should be a property of sprites.
         this.scalex = 100;
         this.scaley = 100;
 
@@ -91,7 +92,7 @@ class Scratch3DataViewerBlocks {
             const rows = 3;
             const table = document.createElement('table');
             let columns = 0;
-            if (!this.data1) {
+            if (this.data1) {
                 columns = this.data1.length;
             }
             if (this.data2) {
@@ -210,7 +211,9 @@ class Scratch3DataViewerBlocks {
     /* eslint-enable */
 
     _blocksInfoUpdate (initial = true) {
-        if (!document.getElementById(IDViewDataButton)) {
+        // We don't have a documment when unit testing. Let's try
+        // to avoid erros checking if we have a full runtime enviroment.
+        if (this._runtime.currentStepTime && !document.getElementById(IDViewDataButton)) {
             // There should be only one element by this class.
             const stageHeader = document.getElementsByClassName(parentClassStageHeader);
             if (stageHeader && stageHeader[0]) {

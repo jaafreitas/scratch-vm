@@ -1,9 +1,11 @@
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
+const TargetType = require('../../extension-support/target-type');
+const RenderedTarget = require('../../sprites/rendered-target');
 const Cast = require('../../util/cast');
 const nets = require('nets');
 const formatMessage = require('format-message');
-const Runtime = require('../../engine/runtime'); // INCLUINDO
+const Runtime = require('../../engine/runtime');
 
 
 // eslint-disable-next-line max-len
@@ -38,11 +40,12 @@ class Scratch3DataViewerBlocks {
         // Always starts with the minimal-block version.
         this._runtime.DataviewerMinimalBlocks = true;
 
-        // DESIGN FLAW: Scale should be a property of sprites.
-        this.scalex = 100;
-        this.scaley = 100;
+        // If we have any visual change, we might have to apply the scale property again.
+        this._eventTargetVisualChange = this._eventTargetVisualChange.bind(this);
 
-        this._runtime.on(Runtime.PROJECT_START, this.reset.bind(this));
+        // If clones are created, we have to apply the scale property to them.
+        this._onTargetCreated = this._onTargetCreated.bind(this);
+        this._runtime.on('targetWasCreated', this._onTargetCreated);
 
         // When we are loading the extension automatically, there is no stage at this point.
         // The work-around is to wait for the BLOCKSINFO_UPDATE event.
@@ -242,12 +245,6 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    reset () {
-        this.scalex = 100;
-        this.scaley = 100;
-    }
-
-
     _setupTranslations () {
         const localeSetup = formatMessage.setup();
         const extTranslations = require('./locales.json');
@@ -280,7 +277,8 @@ class Scratch3DataViewerBlocks {
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: this.addBlocks(),
-            menus: this.addMenus()
+            menus: this.addMenus(),
+            customFieldTypes: {}
         };
     }
 
@@ -540,12 +538,11 @@ class Scratch3DataViewerBlocks {
                     id: 'dataviewer.setSizeX',
                     default: 'set size X to [SCALEX] %'
                 }),
-
+                filter: [TargetType.SPRITE],
                 arguments: {
                     SCALEX: {
                         type: ArgumentType.NUMBER,
-                        defaultValue: 100
-
+                        defaultValue: this.getEditingTargetScale().x
                     }
                 }
             },
@@ -556,12 +553,11 @@ class Scratch3DataViewerBlocks {
                     id: 'dataviewer.setSizeY',
                     default: 'set size Y to [SCALEY] %'
                 }),
-
+                filter: [TargetType.SPRITE],
                 arguments: {
                     SCALEY: {
                         type: ArgumentType.NUMBER,
-                        defaultValue: 100
-
+                        defaultValue: this.getEditingTargetScale().y
                     }
                 }
             }
@@ -1140,24 +1136,56 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    setScaleX (args, util) {
-        util.target.scalex = Cast.toString(args.SCALEX) / 100;
-        if (!util.target.scaley) {
-            util.target.scaley = 1;
+    getEditingTargetScale () {
+        const scale = {x: 100, y: 100};
+        const target = this._runtime.getEditingTarget();
+        if (target) {
+            scale.x = target.scalex ? target.scalex : 100;
+            scale.y = target.scaley ? target.scaley : 100;
         }
-        const finalScale = [util.target.size * util.target.scalex, util.target.size * util.target.scaley];
+        return scale;
+    }
+
+    _eventTargetVisualChange (target) {
+        this._setScale(target);
+    }
+
+    _onTargetCreated (newTarget, sourceTarget) {
+        if (sourceTarget) {
+            newTarget.scalex = sourceTarget.scalex;
+            newTarget.scaley = sourceTarget.scaley;
+            this._setScale(newTarget);
+        }
+    }
+
+    _setScale (target) {
+        if (typeof target.scalex === 'undefined') {
+            target.scalex = 100;
+        }
+        if (typeof target.scaley === 'undefined') {
+            target.scaley = 100;
+        }
+        // We shouldn't allow targets to shrink below 5% size.
+        target.scalex = Math.max(target.scalex * target.size, 500) / target.size;
+        target.scaley = Math.max(target.scaley * target.size, 500) / target.size;
+        const finalScale = [
+            target.size * target.scalex / 100,
+            target.size * target.scaley / 100
+        ];
+        target.removeListener(RenderedTarget.EVENT_TARGET_VISUAL_CHANGE, this._eventTargetVisualChange);
+        target.addListener(RenderedTarget.EVENT_TARGET_VISUAL_CHANGE, this._eventTargetVisualChange);
         this._runtime.renderer.updateDrawableProperties(
-            util.target.drawableID, {direction: util.target.direction, scale: finalScale});
+            target.drawableID, {direction: target.direction, scale: finalScale});
+    }
+
+    setScaleX (args, util) {
+        util.target.scalex = Cast.toNumber(args.SCALEX);
+        this._setScale(util.target);
     }
 
     setScaleY (args, util) {
-        util.target.scaley = Cast.toString(args.SCALEY) / 100;
-        if (!util.target.scalex) {
-            util.target.scalex = 1;
-        }
-        const finalScale = [util.target.size * util.target.scalex, util.target.size * util.target.scaley];
-        this._runtime.renderer.updateDrawableProperties(
-            util.target.drawableID, {direction: util.target.direction, scale: finalScale});
+        util.target.scaley = Cast.toNumber(args.SCALEY);
+        this._setScale(util.target);
     }
 }
 

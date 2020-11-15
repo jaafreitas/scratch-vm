@@ -8,22 +8,28 @@ const FakeRenderer = require('../fixtures/fake-renderer');
 
 const setupDataViewer = () => {
     const rt = new Runtime();
-    const fr = new FakeRenderer();
     FakeRenderer.prototype.updateDrawableProperties = () => {};
+    const fr = new FakeRenderer();
     rt.attachRenderer(fr);
 
     const blocks = new Blocks(rt);
+
+    const spriteStage = new Sprite(blocks, rt);
+    spriteStage.name = 'Stage';
+    const stage = new RenderedTarget(spriteStage, rt);
+    stage.isStage = true;
+    rt.targets = [stage];
+
     const sprite = new Sprite(blocks, rt);
     const target = new RenderedTarget(sprite, rt);
+    target.renderer = fr;
+    sprite.clones.push(target);
+    target.addCostume({id: 1});
     rt.addTarget(target);
-
-    const util = {
-        target: target
-    };
+    rt.setEditingTarget(target);
 
     const dv = new DataViewer(rt);
-
-    return {dv: dv, util: util};
+    return {dv: dv};
 };
 
 test('spec', t => {
@@ -34,16 +40,74 @@ test('spec', t => {
     t.type(dv._runtime, 'object');
     t.equal(dv._runtime.DataviewerMinimalBlocks, true);
 
-    t.equal(dv.scalex, 100);
-    t.equal(dv.scaley, 100);
+    t.type(dv._eventTargetVisualChange, 'function');
+    t.type(dv._onTargetCreated, 'function');
+    t.type(dv._blocksInfoUpdate, 'function');
 
     t.end();
 });
 
 test('Scale', t => {
+    let scale;
+
     const setup = setupDataViewer();
-    setup.dv.setScaleX({SCALEX: 150}, setup.util);
-    t.equal(setup.dv.scalex, 100);
-    t.equal(setup.dv.scaley, 100);
+    const target = setup.dv._runtime.getEditingTarget();
+
+    // Change only scaleX.
+    setup.dv.setScaleX({SCALEX: 150}, {target: target});
+    scale = setup.dv.getEditingTargetScale();
+    t.equal(scale.x, 150);
+    t.equal(scale.y, 100);
+    t.equal(target.scalex, 150);
+    t.equal(target.scaley, 100);
+
+    // Change only scaleY and preserving scaleX.
+    setup.dv.setScaleY({SCALEY: 50}, {target: target});
+    scale = setup.dv.getEditingTargetScale();
+    t.equal(scale.x, 150);
+    t.equal(scale.y, 50);
+    t.equal(target.scalex, 150);
+    t.equal(target.scaley, 50);
+
+    // Make a clone and check if we got scale property
+    const clone = target.makeClone();
+    setup.dv._runtime.setEditingTarget(clone);
+    scale = setup.dv.getEditingTargetScale();
+    t.equal(scale.x, 150);
+    t.equal(scale.y, 50);
+
+    // Can we modify the clone without changing the original target scale?
+    setup.dv.setScaleX({SCALEX: 222.2}, {target: clone});
+    setup.dv.setScaleY({SCALEY: 444.44}, {target: clone});
+    scale = setup.dv.getEditingTargetScale();
+    t.equal(scale.x, 222.2);
+    t.equal(scale.y, 444.44);
+    setup.dv._runtime.setEditingTarget(target);
+    scale = setup.dv.getEditingTargetScale();
+    t.equal(scale.x, 150);
+    t.equal(scale.y, 50);
+
+    // Minimum scale test
+    setup.dv.setScaleX({SCALEX: -100.0}, {target: target});
+    setup.dv.setScaleY({SCALEY: 4}, {target: target});
+    scale = setup.dv.getEditingTargetScale();
+    t.equal(scale.x, 5);
+    t.equal(scale.y, 5);
+
+    // Minimum scale + size test
+    target.setSize(200);
+    t.equals(target._getRenderedDirectionAndScale().scale[0], 200);
+    // The value 0 was intentionally choose for scale test.
+    setup.dv.setScaleX({SCALEX: 0}, {target: target});
+    setup.dv.setScaleY({SCALEY: 0}, {target: target});
+    scale = setup.dv.getEditingTargetScale();
+    t.equal(scale.x, 2.5);
+    t.equal(scale.y, 2.5);
+    // After changing size, the scale might need to be changed to a higher value.
+    target.setSize(100);
+    scale = setup.dv.getEditingTargetScale();
+    t.equal(scale.x, 5);
+    t.equal(scale.y, 5);
+
     t.end();
 });

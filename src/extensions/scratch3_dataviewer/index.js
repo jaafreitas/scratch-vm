@@ -679,25 +679,25 @@ class Scratch3DataViewerBlocks {
 
     getDataLength (args) {
         // SE DEIXAR O SWITCH, FUNCIONA PARA O BLOCO DE TAMANHO, MAS NÃO PARA O DE LOOP - E VICE VERSA.
+        let length = 0;
         switch (args.DATA_ID) {
         case 'data1':
             if (this.data1) {
-                return this.data1.length;
+                length = this.data1.length;
             }
             break;
         case 'data2':
             if (this.data2) {
-                return this.data2.length;
+                length = this.data2.length;
             }
             break;
         case 'data3':
             if (this.data3) {
-                return this.data3.length;
+                length = this.data3.length;
             }
             break;
-        default:
-            return 0;
         }
+        return length;
     }
 
     getValue (args) {
@@ -820,122 +820,68 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    setData (args) {
+    _setData (dataText) {
+        if (dataText.trim()) {
+            const data = [];
+            let dataIndex1 = 0;
+            const splitedComma = dataText.split(',');
+            for (let i = 0; i < splitedComma.length; i += 1) {
+                if (splitedComma[i].trim() && !isNaN(splitedComma[i])) {
+                    data[dataIndex1] = Cast.toNumber(splitedComma[i]);
+                    dataIndex1++;
+                } else {
+                    const splitedSpace = splitedComma[i].trim().split(' ');
+                    for (let j = 0; j < splitedSpace.length; j += 1) {
+                        if (splitedSpace[j].trim() && !isNaN(splitedSpace[j])) {
+                            data[dataIndex1] = Cast.toNumber(splitedSpace[j]);
+                            dataIndex1++;
+                        }
+                    }
+                }
+            }
+            return data;
+        }
+    }
 
+    setData (args) {
         switch (args.DATA_ID) {
         case 'data1':
-            if (args.DATA.trim()) {
-                const data = [];
-                let dataIndex1 = 0;
-                const splitedComma = args.DATA.split(',');
-                for (let i = 0; i < splitedComma.length; i += 1) {
-                    if (splitedComma[i].trim() && !isNaN(splitedComma[i])) {
-                        data[dataIndex1] = Cast.toNumber(splitedComma[i]);
-                        dataIndex1++;
-                    } else {
-                        const splitedSpace = splitedComma[i].trim().split(' ');
-                        for (let j = 0; j < splitedSpace.length; j += 1) {
-                            if (splitedSpace[j].trim() && !isNaN(splitedSpace[j])) {
-                                data[dataIndex1] = Cast.toNumber(splitedSpace[j]);
-                                dataIndex1++;
-                            }
-                        }
-                    }
-                }
-
-                this.data1 = data;
-                this.dataIndex1 = -1;
-            }
+            this.data1 = this._setData(args.DATA);
+            this.dataIndex1 = -1;
             break;
         case 'data2':
-            if (args.DATA.trim()) {
-                const data = [];
-                let dataIndex2 = 0;
-                const splitedComma = args.DATA.split(',');
-                for (let i = 0; i < splitedComma.length; i += 1) {
-                    if (splitedComma[i].trim() && !isNaN(splitedComma[i])) {
-                        data[dataIndex2] = Cast.toNumber(splitedComma[i]);
-                        dataIndex2++;
-                    } else {
-                        const splitedSpace = splitedComma[i].trim().split(' ');
-                        for (let j = 0; j < splitedSpace.length; j += 1) {
-                            if (splitedSpace[j].trim() && !isNaN(splitedSpace[j])) {
-                                data[dataIndex2] = Cast.toNumber(splitedSpace[j]);
-                                dataIndex2++;
-                            }
-                        }
-                    }
-                }
-
-                this.data2 = data;
-                this.dataIndex2 = -1;
-            }
+            this.data2 = this._setData(args.DATA);
+            this.dataIndex2 = -1;
             break;
         case 'data3':
-            if (args.DATA.trim()) {
-                const data = [];
-                let dataIndex3 = 0;
-                const splitedComma = args.DATA.split(',');
-                for (let i = 0; i < splitedComma.length; i += 1) {
-                    if (splitedComma[i].trim() && !isNaN(splitedComma[i])) {
-                        data[dataIndex3] = Cast.toNumber(splitedComma[i]);
-                        dataIndex3++;
-                    } else {
-                        const splitedSpace = splitedComma[i].trim().split(' ');
-                        for (let j = 0; j < splitedSpace.length; j += 1) {
-                            if (splitedSpace[j].trim() && !isNaN(splitedSpace[j])) {
-                                data[dataIndex3] = Cast.toNumber(splitedSpace[j]);
-                                dataIndex3++;
-                            }
-                        }
-                    }
-                }
-
-                this.data3 = data;
-                this.dataIndex3 = -1;
-            }
+            this.data3 = this._setData(args.DATA);
+            this.dataIndex3 = -1;
             break;
+        }
+    }
 
-
-        default:
-            return 'error';
+    _addValueToData (args, data) {
+        if (args.VALUE) {
+            if (this.getDataLength(args) > 0) {
+                data.push(Cast.toNumber(args.VALUE));
+            } else {
+                args.DATA = Cast.toString(args.VALUE);
+                this.setData(args);
+            }
         }
     }
 
     addValueToData (args) {
         switch (args.DATA_ID) {
         case 'data1':
-            if (args.VALUE) {
-                if (this.getDataLength(args) > 0) {
-                    this.data1.push(Cast.toNumber(args.VALUE));
-                } else {
-                    args.DATA = Cast.toString(args.VALUE);
-                    this.setData(args);
-                }
-            }
+            this._addValueToData(args, this.data1);
             break;
         case 'data2':
-            if (args.VALUE) {
-                if (this.getDataLength(args) > 0) {
-                    this.data2.push(Cast.toNumber(args.VALUE));
-                } else {
-                    args.DATA = Cast.toString(args.VALUE);
-                    this.setData(args);
-                }
-            }
+            this._addValueToData(args, this.data2);
             break;
         case 'data3':
-            if (args.VALUE) {
-                if (this.getDataLength(args) > 0) {
-                    this.data3.push(Cast.toNumber(args.VALUE));
-                } else {
-                    args.DATA = Cast.toString(args.VALUE);
-                    this.setData(args);
-                }
-            }
+            this._addValueToData(args, this.data3);
             break;
-        default:
-            return 'error';
         }
     }
 
@@ -1115,25 +1061,21 @@ class Scratch3DataViewerBlocks {
     }
 
     getDataIndex (args) {
-        switch (args.DATA_ID) {
-        case 'data1':
-            if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
-                return this.data1[args.INDEX - 1];
+        let value = '';
+        if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
+            switch (args.DATA_ID) {
+            case 'data1':
+                value = this.data1[args.INDEX - 1];
+                break;
+            case 'data2':
+                value = this.data2[args.INDEX - 1];
+                break;
+            case 'data3':
+                value = this.data3[args.INDEX - 1];
+                break;
             }
-            break;
-        case 'data2':
-            if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
-                return this.data2[args.INDEX - 1];
-            }
-            break;
-        case 'data3':
-            if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
-                return this.data3[args.INDEX - 1];
-            }
-            break;
-        default:
-            return 'error';
         }
+        return value;
     }
 
     getEditingTargetScale () {

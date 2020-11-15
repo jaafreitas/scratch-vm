@@ -47,6 +47,45 @@ test('spec', t => {
     t.end();
 });
 
+test('Data', t => {
+    const setup = setupDataViewer();
+
+    t.equal(setup.dv.getDataLength({DATA_ID: 'data1'}), 0);
+    t.equal(setup.dv.getDataLength({DATA_ID: 'data2'}), 0);
+    t.equal(setup.dv.getDataLength({DATA_ID: 'data3'}), 0);
+
+    // Adding initial data.
+    setup.dv.setData({DATA_ID: 'data1', DATA: '1'});
+    t.equal(setup.dv.getDataLength({DATA_ID: 'data1'}), 1);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 1}), 1);
+
+    setup.dv.setData({DATA_ID: 'data2', DATA: '1, 2'});
+    t.equal(setup.dv.getDataLength({DATA_ID: 'data2'}), 2);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 2}), 2);
+
+    setup.dv.setData({DATA_ID: 'data3', DATA: '1, 2, 3'});
+    t.equal(setup.dv.getDataLength({DATA_ID: 'data3'}), 3);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 3}), 3);
+
+    // Adding more data.
+    setup.dv.addValueToData({DATA_ID: 'data1', VALUE: '2'});
+    t.equal(setup.dv.getDataLength({DATA_ID: 'data1'}), 2);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 2}), 2);
+
+    setup.dv.addValueToData({DATA_ID: 'data2', VALUE: '3'});
+    t.equal(setup.dv.getDataLength({DATA_ID: 'data2'}), 3);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 3}), 3);
+
+    setup.dv.addValueToData({DATA_ID: 'data3', VALUE: '4'});
+    t.equal(setup.dv.getDataLength({DATA_ID: 'data3'}), 4);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 4}), 4);
+
+    t.end();
+});
+
 test('Scale', t => {
     let scale;
 

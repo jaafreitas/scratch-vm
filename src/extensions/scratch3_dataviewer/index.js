@@ -215,8 +215,11 @@ class Scratch3DataViewerBlocks {
 
     _blocksInfoUpdate (initial = true) {
         // We don't have a documment when unit testing. Let's try
-        // to avoid erros checking if we have a full runtime enviroment.
-        if (this._runtime.currentStepTime && !document.getElementById(IDViewDataButton)) {
+        // to avoid erros by checking if we have a full runtime enviroment.
+        if (!this._runtime.renderer || typeof this._runtime.renderer.updateDrawableProperties !== 'function') {
+            return;
+        }
+        if (!document.getElementById(IDViewDataButton)) {
             // There should be only one element by this class.
             const stageHeader = document.getElementsByClassName(parentClassStageHeader);
             if (stageHeader && stageHeader[0]) {
@@ -1116,8 +1119,11 @@ class Scratch3DataViewerBlocks {
         ];
         target.removeListener(RenderedTarget.EVENT_TARGET_VISUAL_CHANGE, this._eventTargetVisualChange);
         target.addListener(RenderedTarget.EVENT_TARGET_VISUAL_CHANGE, this._eventTargetVisualChange);
-        this._runtime.renderer.updateDrawableProperties(
-            target.drawableID, {direction: target.direction, scale: finalScale});
+        // Only update the target if we have a full renderer set up.
+        if (this._runtime.renderer && typeof this._runtime.renderer.updateDrawableProperties === 'function') {
+            this._runtime.renderer.updateDrawableProperties(
+                target.drawableID, {direction: target.direction, scale: finalScale});
+        }
     }
 
     setScaleX (args, util) {

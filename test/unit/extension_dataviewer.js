@@ -8,7 +8,6 @@ const FakeRenderer = require('../fixtures/fake-renderer');
 
 const setupDataViewer = () => {
     const rt = new Runtime();
-    FakeRenderer.prototype.updateDrawableProperties = () => {};
     const fr = new FakeRenderer();
     rt.attachRenderer(fr);
 

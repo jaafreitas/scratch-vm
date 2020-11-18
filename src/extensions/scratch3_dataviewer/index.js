@@ -16,9 +16,7 @@ const menuIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABTCAYAA
 
 const serverTimeoutMs = 10000; // 10 seconds (chosen arbitrarily).
 
-const parentClassStageHeader = 'stage-header_stage-size-row_1F3iv';
-
-const IDViewDataButton = 'dataviewer-view-data-button';
+const IDViewDataButton = 'stage-header_stage-dataviewer-button_29VKR';
 const IDTableWindows = 'dataviewer-table-windows';
 
 class Scratch3DataViewerBlocks {
@@ -213,38 +211,21 @@ class Scratch3DataViewerBlocks {
     }
     /* eslint-enable */
 
-    _blocksInfoUpdate (initial = true) {
+    _blocksInfoUpdate () {
         // We don't have a documment when unit testing. Let's try
         // to avoid erros by checking if we have a full runtime enviroment.
         if (!this._runtime.renderer || typeof this._runtime.renderer.updateDrawableProperties !== 'function') {
             return;
         }
-        if (!document.getElementById(IDViewDataButton)) {
-            // There should be only one element by this class.
-            const stageHeader = document.getElementsByClassName(parentClassStageHeader);
-            if (stageHeader && stageHeader[0]) {
-                const div = document.createElement('div');
-                stageHeader[0].prepend(div);
-                div.id = IDViewDataButton;
-                div.style.marginRight = '.3rem';
-                div.onclick = () => {
-                    this._showData();
-                };
-                div.innerHTML = `
-<div>
-    <span class="button_outlined-button_2f510 stage-header_stage-button_4qxON"
-        style="width: 42px; background: ${Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR1}" role="button">
-        <div class="button_content_3y79K">
-            <img title="View Data" class="stage-header_stage-button-icon_1SHv0" draggable="false" src="${blockIconURI}">
-        </div>
-    </span>
-</div>
-`;
-                // Work-around: the icon will disapear when on full screen or language is changed.
-                if (initial) {
-                    setInterval(() => this._blocksInfoUpdate(false), 1000);
-                }
-            }
+        const tabletButton = document.getElementsByClassName(IDViewDataButton);
+        // There should be only one element from this class.
+        if (tabletButton && tabletButton[0]) {
+            tabletButton[0].onclick = () => {
+                this._showData();
+            };
+        // When Scratch is still loading, we don't have the stage header ready yet.
+        } else {
+            setInterval(() => this._blocksInfoUpdate(), 1000);
         }
     }
 

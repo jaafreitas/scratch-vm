@@ -3,6 +3,9 @@
         "gui.extension.dataviewer.name": "Visualizador de Dados",
         "gui.extension.dataviewer.description": "Brinque com seus dados",
 
+        "gui.stageHeader.dataviewerTable": "Visualizador de Dados em Tabela",
+        "gui.stageHeader.dataviewerChart": "Visualizador de Dados em Gráfico",
+
         "dataviewer.categoryName": "Visualizador de Dados",
 
         "dataviewer.showMoreBlocks": "Mostrar Mais Blocos",

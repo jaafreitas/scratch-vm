@@ -230,7 +230,7 @@ class Scratch3DataViewerBlocks {
     }
 
     _setupTranslations () {
-        const localeSetup = formatMessage.setup();
+        const localeSetup = formatMessage.setup({missingTranslation: 'ignore'});
         const extTranslations = require('./locales.json');
         for (const locale in extTranslations) {
             if (!localeSetup.translations[locale]) {

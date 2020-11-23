@@ -32,7 +32,7 @@ const setupDataViewer = () => {
 };
 
 test('spec', t => {
-    const dv = new DataViewer({on: () => {}});
+    const dv = new DataViewer({on: () => {}, getTargetForStage: () => {}});
 
     t.type(dv, 'object');
 
@@ -81,6 +81,44 @@ test('Data', t => {
     setup.dv.addValueToData({DATA_ID: 'data3', VALUE: '4'});
     t.equal(setup.dv.getDataLength({DATA_ID: 'data3'}), 4);
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 4}), 4);
+
+    t.end();
+});
+
+test('Min / Max / Mean', t => {
+    const setup = setupDataViewer();
+
+    setup.dv.setData({DATA_ID: 'data1', DATA: '1, 2, 3, 4, 5'});
+    t.equal(setup.dv._getMin({DATA_ID: 'data1'}), 1);
+    t.equal(setup.dv._getMax({DATA_ID: 'data1'}), 5);
+    t.equal(setup.dv._getMean({DATA_ID: 'data1'}), 3);
+
+    setup.dv.setData({DATA_ID: 'data2', DATA: '-10, 10'});
+    t.equal(setup.dv._getMin({DATA_ID: 'data2'}), -10);
+    t.equal(setup.dv._getMax({DATA_ID: 'data2'}), 10);
+    t.equal(setup.dv._getMean({DATA_ID: 'data2'}), 0);
+
+    t.end();
+});
+
+test('changeDataScale', t => {
+    const setup = setupDataViewer();
+
+    setup.dv.setData({DATA_ID: 'data1', DATA: '1, 2, 3, 4, 5'});
+    setup.dv.changeDataScale({DATA_ID: 'data1', NEW_MIN: 0, NEW_MAX: 100});
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 1}), 0);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 2}), 25);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 3}), 50);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 4}), 75);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 5}), 100);
+
+    setup.dv.setData({DATA_ID: 'data2', DATA: '5, 4, 3, 2, 1'});
+    setup.dv.changeDataScale({DATA_ID: 'data2', NEW_MIN: 0, NEW_MAX: 100});
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 1}), 100);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 2}), 75);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 3}), 50);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 4}), 25);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 5}), 0);
 
     t.end();
 });

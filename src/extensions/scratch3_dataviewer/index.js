@@ -6,7 +6,7 @@ const Cast = require('../../util/cast');
 const nets = require('nets');
 const formatMessage = require('format-message');
 const Runtime = require('../../engine/runtime');
-
+const Variable = require('../../engine/variable');
 
 // eslint-disable-next-line max-len
 const blockIconURI = 'data:image/png;base64,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';
@@ -53,14 +53,6 @@ class Scratch3DataViewerBlocks {
         this._blocksInfoUpdate();
     }
 
-    _zeros (size) {
-        const zeros = [];
-        for (let i = 0; i < size; i++) {
-            zeros.push(0);
-        }
-        return zeros;
-    }
-
     _showData () {
         if (!document.getElementById(IDTableWindows)) {
             const modalDiv = document.createElement('div');
@@ -92,27 +84,14 @@ class Scratch3DataViewerBlocks {
             // creates the table with the lenght of data1
             const rows = 3;
             const table = document.createElement('table');
-            let columns = 0;
-            if (this.data1) {
-                columns = this.data1.length;
-            }
-            if (this.data2) {
-                if (this.data2.length !== columns) {
-                    this.data2 = this._zeros(columns);
-                }
-            } else {
-                this.data2 = this._zeros(columns);
-            }
 
-            if (this.data3) {
-                if (this.data3.length !== columns) {
-                    this.data3 = this._zeros(columns);
-                }
-            } else {
-                this.data3 = this._zeros(columns);
-            }
+            const dataset = [this._data('data1').value, this._data('data2').value, this._data('data3').value];
+            const columns = dataset.reduce((a, b) => {
+                const aLength = a ? a.length : 0;
+                const bLength = b ? b.length : 0;
+                return aLength > bLength ? a : b;
+            }).length;
 
-            const dataset = [this.data1, this.data2, this.data3];
             const dtString = ['data1', 'data2', 'data3'];
 
             for (let r = 0; r < rows; r++) {
@@ -127,7 +106,11 @@ class Scratch3DataViewerBlocks {
                     }
 
                     const tabc = document.createElement('tr');
-                    tabc.appendChild(document.createTextNode(dataset[r][c].toString()));
+                    let value = dataset[r][c];
+                    if (typeof value === 'undefined') {
+                        value = '';
+                    }
+                    tabc.appendChild(document.createTextNode(value.toString()));
                     tabDiv.appendChild(tabc);
                     tabr.appendChild(tabDiv);
 
@@ -212,6 +195,18 @@ class Scratch3DataViewerBlocks {
     /* eslint-enable */
 
     _blocksInfoUpdate () {
+        // Create the first 3 list variables.
+        const stage = this._runtime.getTargetForStage();
+        if (stage) {
+            const varName = 'data';
+            [1, 2, 3].forEach(i => {
+                const variable = stage.lookupOrCreateList(varName + i, varName + i);
+                variable._monitorUpToDate = false;
+            });
+            // Show the new variable on toolbox
+            this._runtime.requestBlocksUpdate();
+        }
+
         // We don't have a documment when unit testing. Let's try
         // to avoid erros by checking if we have a full runtime enviroment.
         if (!this._runtime.renderer || typeof this._runtime.renderer.updateDrawableProperties !== 'function') {
@@ -661,25 +656,20 @@ class Scratch3DataViewerBlocks {
         };
     }
 
+    _data (varName) {
+        const stage = this._runtime.getTargetForStage();
+        if (stage) {
+            const variable = stage.lookupVariableByNameAndType(varName, Variable.LIST_TYPE, false);
+            return variable;
+        }
+    }
+
     getDataLength (args) {
         // SE DEIXAR O SWITCH, FUNCIONA PARA O BLOCO DE TAMANHO, MAS NÃO PARA O DE LOOP - E VICE VERSA.
         let length = 0;
-        switch (args.DATA_ID) {
-        case 'data1':
-            if (this.data1) {
-                length = this.data1.length;
-            }
-            break;
-        case 'data2':
-            if (this.data2) {
-                length = this.data2.length;
-            }
-            break;
-        case 'data3':
-            if (this.data3) {
-                length = this.data3.length;
-            }
-            break;
+        const variable = this._data(args.DATA_ID);
+        if (variable) {
+            length = variable.value.length;
         }
         return length;
     }
@@ -688,17 +678,17 @@ class Scratch3DataViewerBlocks {
         switch (args.DATA_ID) {
         case 'data1':
             if (this.getDataLength(args) > 0 && this.dataIndex1 >= 0) {
-                return this.data1[this.dataIndex1];
+                return this._data(args.DATA_ID).value[this.dataIndex1];
             }
             break;
         case 'data2':
             if (this.getDataLength(args) > 0 && this.dataIndex2 >= 0) {
-                return this.data2[this.dataIndex2];
+                return this._data(args.DATA_ID).value[this.dataIndex2];
             }
             break;
         case 'data3':
             if (this.getDataLength(args) > 0 && this.dataIndex3 >= 0) {
-                return this.data3[this.dataIndex3];
+                return this._data(args.DATA_ID).value[this.dataIndex3];
             }
             break;
         default:
@@ -707,19 +697,27 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-
     _getInternalIndex (args) {
-        // FIX: missing this.data3.
-        if (this.data1) {
+        if (!this._data(args.DATA_ID)) {
+            return 0;
+        }
+        switch (args.DATA_ID) {
+        case 'data1':
             if (this.getDataLength(args) > 0 && this.dataIndex1 >= 0) {
                 return this.dataIndex1;
             }
-        }
-        if (this.data2) {
+            break;
+        case 'data2':
             if (this.getDataLength(args) > 0 && this.dataIndex2 >= 0) {
                 return this.dataIndex2;
             }
-        } else {
+            break;
+        case 'data3':
+            if (this.getDataLength(args) > 0 && this.dataIndex3 >= 0) {
+                return this.dataIndex3;
+            }
+            break;
+        default:
             return 0;
         }
     }
@@ -754,53 +752,21 @@ class Scratch3DataViewerBlocks {
         if (this.getDataLength(args) > 0) {
             let total = 0.0;
             for (let i = 0; i < this.getDataLength(args); i += 1) {
-                total = total + this.data[i];
+                total = total + this._data(args.DATA_ID).value[i];
             }
-            return total / this.getDataLength();
+            return total / this.getDataLength(args);
         }
     }
 
     _getMin (args) {
-        switch (args.DATA_ID) {
-        case 'data1':
-            if (this.getDataLength(args) > 0) {
-                return this.data1.reduce((a, b) => Math.min(a, b));
-            }
-            break;
-        case 'data2':
-            if (this.getDataLength(args) > 0) {
-                return this.data2.reduce((a, b) => Math.min(a, b));
-            }
-            break;
-        case 'data3':
-            if (this.getDataLength(args) > 0) {
-                return this.data3.reduce((a, b) => Math.min(a, b));
-            }
-            break;
-        default:
-            return 'error';
+        if (this.getDataLength(args) > 0) {
+            return this._data(args.DATA_ID).value.reduce((a, b) => Math.min(a, b));
         }
     }
 
     _getMax (args) {
-        switch (args.DATA_ID) {
-        case 'data1':
-            if (this.getDataLength(args) > 0) {
-                return this.data1.reduce((a, b) => Math.max(a, b));
-            }
-            break;
-        case 'data2':
-            if (this.getDataLength(args) > 0) {
-                return this.data2.reduce((a, b) => Math.max(a, b));
-            }
-            break;
-        case 'data3':
-            if (this.getDataLength(args) > 0) {
-                return this.data3.reduce((a, b) => Math.max(a, b));
-            }
-            break;
-        default:
-            return 'error';
+        if (this.getDataLength(args) > 0) {
+            return this._data(args.DATA_ID).value.reduce((a, b) => Math.max(a, b));
         }
     }
 
@@ -830,15 +796,15 @@ class Scratch3DataViewerBlocks {
     setData (args) {
         switch (args.DATA_ID) {
         case 'data1':
-            this.data1 = this._setData(args.DATA);
+            this._data(args.DATA_ID).value = this._setData(args.DATA);
             this.dataIndex1 = -1;
             break;
         case 'data2':
-            this.data2 = this._setData(args.DATA);
+            this._data(args.DATA_ID).value = this._setData(args.DATA);
             this.dataIndex2 = -1;
             break;
         case 'data3':
-            this.data3 = this._setData(args.DATA);
+            this._data(args.DATA_ID).value = this._setData(args.DATA);
             this.dataIndex3 = -1;
             break;
         }
@@ -856,17 +822,7 @@ class Scratch3DataViewerBlocks {
     }
 
     addValueToData (args) {
-        switch (args.DATA_ID) {
-        case 'data1':
-            this._addValueToData(args, this.data1);
-            break;
-        case 'data2':
-            this._addValueToData(args, this.data2);
-            break;
-        case 'data3':
-            this._addValueToData(args, this.data3);
-            break;
-        }
+        this._addValueToData(args, this._data(args.DATA_ID).value);
     }
 
     readCSVDataFromURL (args) {
@@ -994,30 +950,16 @@ class Scratch3DataViewerBlocks {
     }
 
     changeDataScale (args) {
-        switch (args.DATA_ID) {
-        case 'data1':
-            for (let i = 0; i < this.getDataLength(args); i += 1) {
-                this.data1[i] = Cast.toNumber(this._mapValue(this.data1[i],
-                    this._getMin(args), this._getMax(args), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+        const oldMin = Cast.toNumber(this._getMin(args));
+        const oldMax = Cast.toNumber(this._getMax(args));
+        const newMin = Cast.toNumber(args.NEW_MIN);
+        const newMax = Cast.toNumber(args.NEW_MAX);
+        for (let i = 0; i < this.getDataLength(args); i += 1) {
+            const oldValue = Cast.toNumber(this._data(args.DATA_ID).value[i]);
+            const newValue = this._mapValue(oldValue, oldMin, oldMax, newMin, newMax);
+            if (oldValue !== newValue) {
+                this._data(args.DATA_ID).value[i] = newValue;
             }
-            break;
-
-        case 'data2':
-            for (let i = 0; i < this.getDataLength(args); i += 1) {
-                this.data2[i] = Cast.toNumber(this._mapValue(this.data2[i],
-                    this._getMin(args), this._getMax(args), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
-            }
-            break;
-
-        case 'data3':
-            for (let i = 0; i < this.getDataLength(args); i += 1) {
-                this.data3[i] = Cast.toNumber(this._mapValue(this.data3[i],
-                    this._getMin(args), this._getMax(args), Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
-            }
-            break;
-
-        default:
-            return;
         }
     }
 
@@ -1047,17 +989,7 @@ class Scratch3DataViewerBlocks {
     getDataIndex (args) {
         let value = '';
         if (args.INDEX > 0 && args.INDEX <= this.getDataLength(args)) {
-            switch (args.DATA_ID) {
-            case 'data1':
-                value = this.data1[args.INDEX - 1];
-                break;
-            case 'data2':
-                value = this.data2[args.INDEX - 1];
-                break;
-            case 'data3':
-                value = this.data3[args.INDEX - 1];
-                break;
-            }
+            value = this._data(args.DATA_ID).value[args.INDEX - 1];
         }
         return value;
     }

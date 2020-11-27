@@ -298,25 +298,6 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            addValueToData: {
-                opcode: 'addValueToData',
-                text: formatMessage({
-                    id: 'dataviewer.addValueToData',
-                    default: 'add value [VALUE] to [DATA_ID]'
-                }),
-                blockType: BlockType.COMMAND,
-                arguments: {
-                    DATA_ID: {
-                        type: ArgumentType.STRING,
-                        menu: 'dataId',
-                        dafaultValue: 'data1'
-                    },
-                    VALUE: {
-                        type: ArgumentType.NUMBER,
-                        defaultValue: ' '
-                    }
-                }
-            },
             readCSVDataFromURL: {
                 opcode: 'readCSVDataFromURL',
                 text: formatMessage({
@@ -476,40 +457,6 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            getDataLength: {
-                opcode: 'getDataLength',
-                text: formatMessage({
-                    id: 'dataviewer.getDataLength',
-                    default: 'data length of [DATA_ID]'
-                }),
-                blockType: BlockType.REPORTER,
-                arguments: {
-                    DATA_ID: {
-                        type: ArgumentType.STRING,
-                        menu: 'dataId',
-                        defaultValue: 'data1'
-                    }
-                }
-            },
-            getDataIndex: {
-                opcode: 'getDataIndex', // ESTÁ COM ERRO NESSE BLOCO
-                text: formatMessage({
-                    id: 'dataviewer.getDataIndex',
-                    default: 'value in [DATA_ID] index [INDEX]'
-                }),
-                blockType: BlockType.REPORTER,
-                arguments: {
-                    DATA_ID: {
-                        type: ArgumentType.STRING,
-                        menu: 'dataId',
-                        defaultValue: 'data1'
-                    },
-                    INDEX: { // AQUI ESSE INDEX TERIA QUE SER ESPECÍFICO PARA CADA DATASET?
-                        type: ArgumentType.NUMBER,
-                        defaultValue: 1
-                    }
-                }
-            },
             setScaleX: {
                 opcode: 'setScaleX',
                 blockType: BlockType.COMMAND,
@@ -550,14 +497,14 @@ class Scratch3DataViewerBlocks {
                 allBlocks.getValue,
                 allBlocks.getIndex,
                 allBlocks.getStatistic,
-                allBlocks.addValueToData,
+                '---',
                 allBlocks.setScaleX,
                 allBlocks.setScaleY,
+                '---',
                 allBlocks.showMoreBlocks);
         } else {
             blocks.push(
                 allBlocks.setData,
-                allBlocks.addValueToData,
                 allBlocks.readCSVDataFromURL,
                 allBlocks.readThingSpeakData,
                 '---',
@@ -567,8 +514,6 @@ class Scratch3DataViewerBlocks {
                 allBlocks.getStatistic,
                 allBlocks.changeDataScale,
                 allBlocks.mapData,
-                allBlocks.getDataLength,
-                allBlocks.getDataIndex,
                 '---',
                 allBlocks.setScaleX,
                 allBlocks.setScaleY,

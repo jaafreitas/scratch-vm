@@ -14,7 +14,6 @@
         "dataviewer.setData": "definir [DATA_ID] como [DATA]",
         "dataviewer.setSizeX": "definir o tamanho X como [SCALEX] %",
         "dataviewer.setSizeY": "definir o tamanho Y como [SCALEY] %",
-        "dataviewer.addValueToData": "incluir valor [VALUE] em [DATA_ID]",
         "dataviewer.readCSVDataFromURL": "ler arquivo .csv [URL] coluna: [COLUMN] começando na linha: [LINE]",
         "dataviewer.readCSVDataFromURL.default": "link para a planilha",
         "dataviewer.readThingSpeakData": "ler ThingSpeak canal: [CHANNEL] campo: [FIELD]",
@@ -24,8 +23,6 @@
         "dataviewer.getStatistic": "[FNC] de [DATA_ID]",
         "dataviewer.changeDataScale": "mudar a escala de [DATA_ID] para [NEW_MIN] [NEW_MAX]",
         "dataviewer.mapData": "mudar a escala de [DATA_TYPE] de [DATA_ID] para [NEW_MIN] [NEW_MAX]",
-        "dataviewer.getDataLength": "quantidade de dados de [DATA_ID]",
-        "dataviewer.getDataIndex": "valor no índice [INDEX] de [DATA_ID]",
 
         "dataviewer.menu.statisticFunctions.mean": "média",
         "dataviewer.menu.statisticFunctions.min": "mínimo",

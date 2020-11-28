@@ -634,24 +634,8 @@ class Scratch3DataViewerBlocks {
     }
 
     getIndex (args) {
-        switch (args.DATA_ID) {
-        case 'data1':
-            if (this._getInternalIndex(args) >= 0) {
-                return this._getInternalIndex(args) + 1; // ARRUMAR TODOS INTERNALINDEX
-            }
-            break;
-        case 'data2':
-            if (this._getInternalIndex(args) >= 0) {
-                return this._getInternalIndex(args) + 1; // ARRUMAR TODOS INTERNALINDEX
-            }
-            break;
-        case 'data3':
-            if (this._getInternalIndex(args) >= 0) {
-                return this._getInternalIndex(args) + 1; // ARRUMAR TODOS INTERNALINDEX
-            }
-            break;
-        default:
-            return '';
+        if (this._getInternalIndex(args) >= 0) {
+            return this._getInternalIndex(args) + 1;
         }
     }
 
@@ -708,24 +692,6 @@ class Scratch3DataViewerBlocks {
         const data = this._data(args.DATA_ID);
         data.value = this._setData(args.DATA);
         data.dataviewerIndex = -1;
-    }
-
-    _addValueToData (args, data) {
-        if (args.VALUE) {
-            if (this.getDataLength(args) > 0) {
-                data.push(Cast.toNumber(args.VALUE));
-            } else {
-                args.DATA = Cast.toString(args.VALUE);
-                this.setData(args);
-            }
-        }
-    }
-
-    addValueToData (args) {
-        return this.dataBlocks.addToList(
-            {LIST: {id: args.DATA_ID, name: args.DATA_ID}, ITEM: args.VALUE},
-            {target: this._runtime.getTargetForStage()}
-        );
     }
 
     readCSVDataFromURL (args) {

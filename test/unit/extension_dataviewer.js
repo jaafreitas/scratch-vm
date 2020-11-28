@@ -38,6 +38,7 @@ test('spec', t => {
 
     t.type(dv._runtime, 'object');
     t.equal(dv._runtime.DataviewerMinimalBlocks, true);
+    t.type(dv.dataBlocks, 'object');
 
     t.type(dv._eventTargetVisualChange, 'function');
     t.type(dv._onTargetCreated, 'function');
@@ -70,15 +71,21 @@ test('Data', t => {
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 3}), 3);
 
     // Adding more data.
-    setup.dv.addValueToData({DATA_ID: 'data1', VALUE: 2});
+    setup.dv.dataBlocks.addToList(
+        {LIST: {id: 'data1', name: 'data1'}, ITEM: 2},
+        {target: setup.dv._runtime.getEditingTarget()});
     t.equal(setup.dv.getDataLength({DATA_ID: 'data1'}), 2);
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 2}), 2);
 
-    setup.dv.addValueToData({DATA_ID: 'data2', VALUE: 3});
+    setup.dv.dataBlocks.addToList(
+        {LIST: {id: 'data2', name: 'data2'}, ITEM: 3},
+        {target: setup.dv._runtime.getEditingTarget()});
     t.equal(setup.dv.getDataLength({DATA_ID: 'data2'}), 3);
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 3}), 3);
 
-    setup.dv.addValueToData({DATA_ID: 'data3', VALUE: 4});
+    setup.dv.dataBlocks.addToList(
+        {LIST: {id: 'data3', name: 'data3'}, ITEM: 4},
+        {target: setup.dv._runtime.getEditingTarget()});
     t.equal(setup.dv.getDataLength({DATA_ID: 'data3'}), 4);
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 4}), 4);
 

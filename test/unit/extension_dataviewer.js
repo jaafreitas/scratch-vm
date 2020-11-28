@@ -99,13 +99,8 @@ test('Data Loop', t => {
         const thread = {stackFrames: [{executionContext: {}}]};
         return {
             thread: thread,
-            stackFrame: {
-                get loopCounter () {
-                    return thread.stackFrames[0].executionContext.loopCounter;
-                },
-                set loopCounter (value) {
-                    thread.stackFrames[0].executionContext.loopCounter = value;
-                }
+            get stackFrame () {
+                return thread.stackFrames[0].executionContext;
             },
             startBranch: () => {}
         };
@@ -127,7 +122,7 @@ test('Data Loop', t => {
 
     // First data loop
     setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1);
-    // Skip this one in the first loop // setup.dv.dataLoop({DATA_ID: 'data2'}, utilData1AnotherLoop);
+    // Skip this one in the first loop // setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1AnotherLoop);
     setup.dv.dataLoop({DATA_ID: 'data2'}, utilData2);
     t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1), 1);
     t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilData1), 10);
@@ -136,7 +131,7 @@ test('Data Loop', t => {
 
     // Second data loop
     setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1);
-    setup.dv.dataLoop({DATA_ID: 'data2'}, utilData1AnotherLoop);
+    setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1AnotherLoop);
     setup.dv.dataLoop({DATA_ID: 'data2'}, utilData2);
     t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1), 2);
     t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilData1), 20);
@@ -147,7 +142,7 @@ test('Data Loop', t => {
 
     // Third data loop
     setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1);
-    setup.dv.dataLoop({DATA_ID: 'data2'}, utilData1AnotherLoop);
+    setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1AnotherLoop);
     setup.dv.dataLoop({DATA_ID: 'data2'}, utilData2);
     t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1), 3);
     t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilData1), 30);
@@ -158,7 +153,7 @@ test('Data Loop', t => {
 
     // Going beyond data length with utilData1 and utilData2
     setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1);
-    setup.dv.dataLoop({DATA_ID: 'data2'}, utilData1AnotherLoop);
+    setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1AnotherLoop);
     setup.dv.dataLoop({DATA_ID: 'data2'}, utilData2);
     t.equivalent(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1), null);
     t.equivalent(setup.dv.getValue({DATA_ID: 'data1'}, utilData1), null);

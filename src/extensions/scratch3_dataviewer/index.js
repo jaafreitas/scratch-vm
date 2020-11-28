@@ -629,12 +629,17 @@ class Scratch3DataViewerBlocks {
     }
 
     _getInternalIndex (args, util) {
-        if (util.thread.stackFrames[0].executionContext &&
-            typeof util.thread.stackFrames[0].executionContext.loopCounter !== 'undefined' &&
-            util.thread.stackFrames[0].executionContext.loopCounter >= 0) {
-            const length = this.getDataLength(args);
-            const dataviewerIndex = length - util.thread.stackFrames[0].executionContext.loopCounter - 1;
-            return dataviewerIndex;
+        // Suports nested data loops
+        for (let i = util.thread.stackFrames.length - 1; i >= 0; i -= 1) {
+            const stackFrame = util.thread.stackFrames[i].executionContext;
+            if (stackFrame &&
+                stackFrame.dataviewerListID === args.DATA_ID &&
+                typeof stackFrame.loopCounter !== 'undefined' &&
+                stackFrame.loopCounter >= 0) {
+                const length = this.getDataLength(args);
+                const dataviewerIndex = length - stackFrame.loopCounter - 1;
+                return dataviewerIndex;
+            }
         }
     }
 
@@ -773,6 +778,7 @@ class Scratch3DataViewerBlocks {
         // Initialize loop
         if (typeof util.stackFrame.loopCounter === 'undefined') {
             util.stackFrame.loopCounter = this.getDataLength(args);
+            util.stackFrame.dataviewerListID = args.DATA_ID;
         }
 
         util.stackFrame.loopCounter--;

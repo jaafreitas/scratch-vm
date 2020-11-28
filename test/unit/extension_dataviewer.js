@@ -92,6 +92,84 @@ test('Data', t => {
     t.end();
 });
 
+test('Data Loop', t => {
+    const setup = setupDataViewer();
+
+    const utilX = () => {
+        const thread = {stackFrames: [{executionContext: {}}]};
+        return {
+            thread: thread,
+            stackFrame: {
+                get loopCounter () {
+                    return thread.stackFrames[0].executionContext.loopCounter;
+                },
+                set loopCounter (value) {
+                    thread.stackFrames[0].executionContext.loopCounter = value;
+                }
+            },
+            startBranch: () => {}
+        };
+    };
+
+    const utilData1 = utilX();
+    const utilData1AnotherLoop = utilX();
+    const utilData2 = utilX();
+
+    // Adding initial data.
+    setup.dv.setData({DATA_ID: 'data1', DATA: '10, 20, 30'});
+    setup.dv.setData({DATA_ID: 'data2', DATA: '1.1, 2.22, 3.333'});
+    t.equivalent(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1), null);
+    t.equivalent(setup.dv.getValue({DATA_ID: 'data1'}, utilData1), null);
+    t.equivalent(setup.dv.getIndex({DATA_ID: 'data2'}, utilData2), null);
+    t.equivalent(setup.dv.getValue({DATA_ID: 'data2'}, utilData2), null);
+    t.equivalent(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1AnotherLoop), null);
+    t.equivalent(setup.dv.getValue({DATA_ID: 'data1'}, utilData1AnotherLoop), null);
+
+    // First data loop
+    setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1);
+    // Skip this one in the first loop // setup.dv.dataLoop({DATA_ID: 'data2'}, utilData1AnotherLoop);
+    setup.dv.dataLoop({DATA_ID: 'data2'}, utilData2);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1), 1);
+    t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilData1), 10);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data2'}, utilData2), 1);
+    t.equal(setup.dv.getValue({DATA_ID: 'data2'}, utilData2), 1.1);
+
+    // Second data loop
+    setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1);
+    setup.dv.dataLoop({DATA_ID: 'data2'}, utilData1AnotherLoop);
+    setup.dv.dataLoop({DATA_ID: 'data2'}, utilData2);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1), 2);
+    t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilData1), 20);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1AnotherLoop), 1);
+    t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilData1AnotherLoop), 10);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data2'}, utilData2), 2);
+    t.equal(setup.dv.getValue({DATA_ID: 'data2'}, utilData2), 2.22);
+
+    // Third data loop
+    setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1);
+    setup.dv.dataLoop({DATA_ID: 'data2'}, utilData1AnotherLoop);
+    setup.dv.dataLoop({DATA_ID: 'data2'}, utilData2);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1), 3);
+    t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilData1), 30);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1AnotherLoop), 2);
+    t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilData1AnotherLoop), 20);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data2'}, utilData2), 3);
+    t.equal(setup.dv.getValue({DATA_ID: 'data2'}, utilData2), 3.333);
+
+    // Going beyond data length with utilData1 and utilData2
+    setup.dv.dataLoop({DATA_ID: 'data1'}, utilData1);
+    setup.dv.dataLoop({DATA_ID: 'data2'}, utilData1AnotherLoop);
+    setup.dv.dataLoop({DATA_ID: 'data2'}, utilData2);
+    t.equivalent(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1), null);
+    t.equivalent(setup.dv.getValue({DATA_ID: 'data1'}, utilData1), null);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1AnotherLoop), 3);
+    t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilData1AnotherLoop), 30);
+    t.equivalent(setup.dv.getIndex({DATA_ID: 'data2'}, utilData2), null);
+    t.equivalent(setup.dv.getValue({DATA_ID: 'data2'}, utilData2), null);
+
+    t.end();
+});
+
 test('Min / Max / Mean', t => {
     const setup = setupDataViewer();
 

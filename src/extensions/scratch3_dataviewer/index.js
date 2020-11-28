@@ -619,23 +619,28 @@ class Scratch3DataViewerBlocks {
         );
     }
 
-    getValue (args) {
+    getValue (args, util) {
         const data = this._data(args.DATA_ID);
-        if (this.getDataLength(args) > 0 && data.dataviewerIndex >= 0) {
-            return data.value[data.dataviewerIndex];
+        const index = this._getInternalIndex(args, util);
+
+        if (this.getDataLength(args) > 0 && index >= 0) {
+            return data.value[index];
         }
     }
 
-    _getInternalIndex (args) {
-        const data = this._data(args.DATA_ID);
-        if (this.getDataLength(args) > 0 && data.dataviewerIndex >= 0) {
-            return data.dataviewerIndex;
+    _getInternalIndex (args, util) {
+        if (util.thread.stackFrames[0].executionContext &&
+            typeof util.thread.stackFrames[0].executionContext.loopCounter !== 'undefined' &&
+            util.thread.stackFrames[0].executionContext.loopCounter >= 0) {
+            const length = this.getDataLength(args);
+            const dataviewerIndex = length - util.thread.stackFrames[0].executionContext.loopCounter - 1;
+            return dataviewerIndex;
         }
     }
 
-    getIndex (args) {
-        if (this._getInternalIndex(args) >= 0) {
-            return this._getInternalIndex(args) + 1;
+    getIndex (args, util) {
+        if (this._getInternalIndex(args, util) >= 0) {
+            return this._getInternalIndex(args, util) + 1;
         }
     }
 
@@ -691,7 +696,6 @@ class Scratch3DataViewerBlocks {
     setData (args) {
         const data = this._data(args.DATA_ID);
         data.value = this._setData(args.DATA);
-        data.dataviewerIndex = -1;
     }
 
     readCSVDataFromURL (args) {
@@ -765,17 +769,16 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    // PROBLEMA: DOIS BLOCOS IGUAIS RODANDO AO MESMO TEMPO. PODERIA TER UMA VARIÁVEL QUE CHECA SE ESTÁ RODANDO.
-    // SE SIM, NÃO DEIXA RODAR DE NOVO
     dataLoop (args, util) {
-        const data = this._data(args.DATA_ID);
-        if (data.dataviewerIndex < this.getDataLength(args)) {
-            data.dataviewerIndex++;
+        // Initialize loop
+        if (typeof util.stackFrame.loopCounter === 'undefined') {
+            util.stackFrame.loopCounter = this.getDataLength(args);
         }
-        if (data.dataviewerIndex < this.getDataLength(args)) {
+
+        util.stackFrame.loopCounter--;
+        // If we still have some left, start the branch.
+        if (util.stackFrame.loopCounter >= 0) {
             util.startBranch(1, true);
-        } else {
-            data.dataviewerIndex = -1;
         }
     }
 
@@ -806,12 +809,12 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    mapData (args) {
+    mapData (args, util) {
         switch (args.DATA_TYPE) {
         case 'index':
             if (this.getDataLength(args) > 0) {
                 return Cast.toNumber(this._mapValue(
-                    this._getInternalIndex(args),
+                    this._getInternalIndex(args, util),
                     0, this.getDataLength(args) - 1,
                     Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
             }

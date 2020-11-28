@@ -620,50 +620,16 @@ class Scratch3DataViewerBlocks {
     }
 
     getValue (args) {
-        switch (args.DATA_ID) {
-        case 'data1':
-            if (this.getDataLength(args) > 0 && this.dataIndex1 >= 0) {
-                return this._data(args.DATA_ID).value[this.dataIndex1];
-            }
-            break;
-        case 'data2':
-            if (this.getDataLength(args) > 0 && this.dataIndex2 >= 0) {
-                return this._data(args.DATA_ID).value[this.dataIndex2];
-            }
-            break;
-        case 'data3':
-            if (this.getDataLength(args) > 0 && this.dataIndex3 >= 0) {
-                return this._data(args.DATA_ID).value[this.dataIndex3];
-            }
-            break;
-        default:
-            return '';
-
+        const data = this._data(args.DATA_ID);
+        if (this.getDataLength(args) > 0 && data.dataviewerIndex >= 0) {
+            return data.value[data.dataviewerIndex];
         }
     }
 
     _getInternalIndex (args) {
-        if (!this._data(args.DATA_ID)) {
-            return 0;
-        }
-        switch (args.DATA_ID) {
-        case 'data1':
-            if (this.getDataLength(args) > 0 && this.dataIndex1 >= 0) {
-                return this.dataIndex1;
-            }
-            break;
-        case 'data2':
-            if (this.getDataLength(args) > 0 && this.dataIndex2 >= 0) {
-                return this.dataIndex2;
-            }
-            break;
-        case 'data3':
-            if (this.getDataLength(args) > 0 && this.dataIndex3 >= 0) {
-                return this.dataIndex3;
-            }
-            break;
-        default:
-            return 0;
+        const data = this._data(args.DATA_ID);
+        if (this.getDataLength(args) > 0 && data.dataviewerIndex >= 0) {
+            return data.dataviewerIndex;
         }
     }
 
@@ -718,18 +684,18 @@ class Scratch3DataViewerBlocks {
     _setData (dataText) {
         if (dataText.trim()) {
             const data = [];
-            let dataIndex1 = 0;
+            let dataviewerIndex = 0;
             const splitedComma = dataText.split(',');
             for (let i = 0; i < splitedComma.length; i += 1) {
                 if (splitedComma[i].trim() && !isNaN(splitedComma[i])) {
-                    data[dataIndex1] = Cast.toNumber(splitedComma[i]);
-                    dataIndex1++;
+                    data[dataviewerIndex] = Cast.toNumber(splitedComma[i]);
+                    dataviewerIndex++;
                 } else {
                     const splitedSpace = splitedComma[i].trim().split(' ');
                     for (let j = 0; j < splitedSpace.length; j += 1) {
                         if (splitedSpace[j].trim() && !isNaN(splitedSpace[j])) {
-                            data[dataIndex1] = Cast.toNumber(splitedSpace[j]);
-                            dataIndex1++;
+                            data[dataviewerIndex] = Cast.toNumber(splitedSpace[j]);
+                            dataviewerIndex++;
                         }
                     }
                 }
@@ -739,20 +705,9 @@ class Scratch3DataViewerBlocks {
     }
 
     setData (args) {
-        switch (args.DATA_ID) {
-        case 'data1':
-            this._data(args.DATA_ID).value = this._setData(args.DATA);
-            this.dataIndex1 = -1;
-            break;
-        case 'data2':
-            this._data(args.DATA_ID).value = this._setData(args.DATA);
-            this.dataIndex2 = -1;
-            break;
-        case 'data3':
-            this._data(args.DATA_ID).value = this._setData(args.DATA);
-            this.dataIndex3 = -1;
-            break;
-        }
+        const data = this._data(args.DATA_ID);
+        data.value = this._setData(args.DATA);
+        data.dataviewerIndex = -1;
     }
 
     _addValueToData (args, data) {
@@ -847,40 +802,14 @@ class Scratch3DataViewerBlocks {
     // PROBLEMA: DOIS BLOCOS IGUAIS RODANDO AO MESMO TEMPO. PODERIA TER UMA VARIÁVEL QUE CHECA SE ESTÁ RODANDO.
     // SE SIM, NÃO DEIXA RODAR DE NOVO
     dataLoop (args, util) {
-        switch (args.DATA_ID) {
-        case 'data1':
-            // FARIA SENTIDO JÁ TER UMA VARIÁVEL CONSTANTE PARA CADA TAMANHO DE DADO?
-            if (this.dataIndex1 < this.getDataLength(args)) {
-                this.dataIndex1++;
-            }
-            if (this.dataIndex1 < this.getDataLength(args)) {
-                util.startBranch(1, true);
-            } else {
-                this.dataIndex1 = -1;
-            }
-            break;
-        case 'data2':
-            if (this.dataIndex2 < this.getDataLength(args)) {
-                this.dataIndex2++;
-            }
-            if (this.dataIndex2 < this.getDataLength(args)) {
-                util.startBranch(1, true);
-            } else {
-                this.dataIndex2 = -1;
-            }
-            break;
-        case 'data3':
-            if (this.dataIndex3 < this.getDataLength(args)) {
-                this.dataIndex3++;
-            }
-            if (this.dataIndex3 < this.getDataLength(args)) {
-                util.startBranch(1, true);
-            } else {
-                this.dataIndex3 = -1;
-            }
-            break;
-        default:
-            return 'error';
+        const data = this._data(args.DATA_ID);
+        if (data.dataviewerIndex < this.getDataLength(args)) {
+            data.dataviewerIndex++;
+        }
+        if (data.dataviewerIndex < this.getDataLength(args)) {
+            util.startBranch(1, true);
+        } else {
+            data.dataviewerIndex = -1;
         }
     }
 

@@ -203,6 +203,49 @@ test('changeDataScale', t => {
     t.end();
 });
 
+test('DataID Menu', t => {
+    const setup = setupDataViewer();
+
+    // Initial setup
+    let items = setup.dv.getDataIdMenu();
+    t.equal(items.length, 3);
+    t.equal(items[0].text, 'data1');
+    t.equal(items[0].value, 'data1');
+    t.equal(items[1].text, 'data2');
+    t.equal(items[1].value, 'data2');
+    t.equal(items[2].text, 'data3');
+    t.equal(items[2].value, 'data3');
+    t.equal(setup.dv.getDataIdMenuDefaultValue(), 'data1');
+
+    // Delete one variable in the midle of the menu list
+    const stage = setup.dv._runtime.getTargetForStage();
+    stage.deleteVariable('data2');
+    items = setup.dv.getDataIdMenu();
+    t.equal(items.length, 2);
+    t.equal(items[0].text, 'data1');
+    t.equal(items[0].value, 'data1');
+    t.equal(items[1].text, 'data3');
+    t.equal(items[1].value, 'data3');
+    t.equal(setup.dv.getDataIdMenuDefaultValue(), 'data1');
+
+    // Add another variables that should appear before others
+    stage.lookupOrCreateList('a1', 'aaa1'); // id, name
+    stage.lookupOrCreateList('A2', 'Aaa2'); // id, name
+    items = setup.dv.getDataIdMenu();
+    t.equal(items.length, 4);
+    t.equal(items[0].text, 'aaa1');
+    t.equal(items[0].value, 'a1');
+    t.equal(items[1].text, 'Aaa2');
+    t.equal(items[1].value, 'A2');
+    t.equal(items[2].text, 'data1');
+    t.equal(items[2].value, 'data1');
+    t.equal(items[3].text, 'data3');
+    t.equal(items[3].value, 'data3');
+    t.equal(setup.dv.getDataIdMenuDefaultValue(), 'aaa1');
+
+    t.end();
+});
+
 test('Scale', t => {
     let scale;
 

@@ -84,32 +84,31 @@ class Scratch3DataViewerBlocks {
             closeButtonDiv.appendChild(closeButton);
             header.appendChild(closeButtonDiv);
 
-            // creates the table with the lenght of data1
-            const rows = 3;
             const table = document.createElement('table');
 
-            const dataset = [this._data('data1').value, this._data('data2').value, this._data('data3').value];
-            const columns = dataset.reduce((a, b) => {
+            const items = this.getDataIdMenu();
+            const dtString = items.map(item => item.text);
+            const dataset = items.map(item => this._data(item.value).value);
+            const columns = dtString.length;
+            const rows = dataset.reduce((a, b) => {
                 const aLength = a ? a.length : 0;
                 const bLength = b ? b.length : 0;
                 return aLength > bLength ? a : b;
             }).length;
 
-            const dtString = ['data1', 'data2', 'data3'];
-
-            for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < columns; c++) {
                 const tabr = document.createElement('td');
-                for (let c = 0; c < columns; c++) {
+                for (let r = 0; r < rows; r++) {
                     const tabDiv = document.createElement('div');
 
-                    if (c === 0) {
+                    if (r === 0) {
                         const tabc = document.createElement('tr');
-                        tabc.appendChild(document.createTextNode(dtString[r]));
+                        tabc.appendChild(document.createTextNode(dtString[c]));
                         tabr.appendChild(tabc);
                     }
 
                     const tabc = document.createElement('tr');
-                    let value = dataset[r][c];
+                    let value = dataset[c][r];
                     if (typeof value === 'undefined') {
                         value = '';
                     }
@@ -293,7 +292,7 @@ class Scratch3DataViewerBlocks {
                     DATA_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataId',
-                        defaultValue: 'data1'
+                        defaultValue: this.getDataIdMenuDefaultValue()
                     },
                     DATA: {
                         type: ArgumentType.STRING,
@@ -355,7 +354,7 @@ class Scratch3DataViewerBlocks {
                     DATA_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataId',
-                        defaultValue: 'data1'
+                        defaultValue: this.getDataIdMenuDefaultValue()
                     }
                 }
             },
@@ -370,7 +369,7 @@ class Scratch3DataViewerBlocks {
                     DATA_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataId',
-                        defaultValue: 'data1'
+                        defaultValue: this.getDataIdMenuDefaultValue()
                     }
                 }
             },
@@ -385,7 +384,7 @@ class Scratch3DataViewerBlocks {
                     DATA_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataId',
-                        defaultValue: 'data1'
+                        defaultValue: this.getDataIdMenuDefaultValue()
                     }
                 }
             },
@@ -400,7 +399,7 @@ class Scratch3DataViewerBlocks {
                     DATA_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataId',
-                        defaultValue: 'data1'
+                        defaultValue: this.getDataIdMenuDefaultValue()
                     },
                     FNC: {
                         type: ArgumentType.STRING,
@@ -420,7 +419,7 @@ class Scratch3DataViewerBlocks {
                     DATA_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataId',
-                        defaultValue: 'data1'
+                        defaultValue: this.getDataIdMenuDefaultValue()
                     },
                     NEW_MIN: {
                         type: ArgumentType.NUMBER,
@@ -443,7 +442,7 @@ class Scratch3DataViewerBlocks {
                     DATA_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataId',
-                        defaultValue: 'data1'
+                        defaultValue: this.getDataIdMenuDefaultValue()
                     },
                     DATA_TYPE: {
                         type: ArgumentType.STRING,
@@ -578,43 +577,49 @@ class Scratch3DataViewerBlocks {
                     value: 'index'
                 }
             ],
-            dataId: [ // INCLUINDO
-                {
-                    text: formatMessage({
-                        id: 'dataviewer.menu.dataId.data1',
-                        default: 'data1'
-                    }),
-                    value: 'data1'
-                },
-                {
-                    text: formatMessage({
-                        id: 'dataviewer.menu.dataId.data2',
-                        default: 'data2'
-                    }),
-                    value: 'data2'
-                },
-                {
-                    text: formatMessage({
-                        id: 'dataviewer.menu.dataId.data3',
-                        default: 'data3'
-                    }),
-                    value: 'data3'
-                }
-            ]
+            dataId: {
+                items: 'getDataIdMenu'
+            }
         };
     }
 
-    _data (varName) {
+    getDataIdMenu () {
+        const stage = this._runtime.getTargetForStage();
+        const items = [];
+        if (stage) {
+            for (const varId in stage.variables) {
+                const currVar = stage.variables[varId];
+                if (currVar.type === Variable.LIST_TYPE) {
+                    items.push(({text: currVar.name, value: currVar.id}));
+                }
+            }
+            items.sort((a, b) => {
+                const _a = a.text.toUpperCase();
+                const _b = b.text.toUpperCase();
+                return _a > _b ? 1 : -1;
+            });
+        }
+        return items;
+    }
+
+    getDataIdMenuDefaultValue () {
+        const items = this.getDataIdMenu();
+        if (items.length > 0) {
+            return items[0].text;
+        }
+    }
+
+    _data (varID) {
         const stage = this._runtime.getTargetForStage();
         if (stage) {
-            const variable = stage.lookupVariableByNameAndType(varName, Variable.LIST_TYPE, false);
+            const variable = stage.lookupVariableById(varID);
             return variable;
         }
     }
 
     getDataLength (args) {
         return this.dataBlocks.lengthOfList(
-            {LIST: {id: args.DATA_ID, name: args.DATA_ID}},
+            {LIST: {id: args.DATA_ID}},
             {target: this._runtime.getTargetForStage()}
         );
     }
@@ -840,7 +845,7 @@ class Scratch3DataViewerBlocks {
 
     getDataIndex (args) {
         return this.dataBlocks.getItemOfList(
-            {LIST: {id: args.DATA_ID, name: args.DATA_ID}, INDEX: args.INDEX},
+            {LIST: {id: args.DATA_ID}, INDEX: args.INDEX},
             {target: this._runtime.getTargetForStage()}
         );
     }

@@ -95,7 +95,7 @@ test('Data', t => {
 test('Data Loop', t => {
     const setup = setupDataViewer();
 
-    const utilX = () => {
+    const util = () => {
         const thread = {stackFrames: [{executionContext: {}}]};
         return {
             thread: thread,
@@ -106,9 +106,9 @@ test('Data Loop', t => {
         };
     };
 
-    const utilData1 = utilX();
-    const utilData1AnotherLoop = utilX();
-    const utilData2 = utilX();
+    const utilData1 = util();
+    const utilData1AnotherLoop = util();
+    const utilData2 = util();
 
     // Adding initial data.
     setup.dv.setData({DATA_ID: 'data1', DATA: '10 20 30'});
@@ -162,6 +162,27 @@ test('Data Loop', t => {
     t.equivalent(setup.dv.getIndex({DATA_ID: 'data2'}, utilData2), null);
     t.equivalent(setup.dv.getValue({DATA_ID: 'data2'}, utilData2), null);
 
+    //
+    // Read All
+    const utilReadAll = util();
+    setup.dv.dataLoop({DATA_ID: DataViewer.READ_ALL_DATA_ID}, utilReadAll);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilReadAll), 1);
+    t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilReadAll), 10);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data2'}, utilReadAll), 1);
+    t.equal(setup.dv.getValue({DATA_ID: 'data2'}, utilReadAll), 1.1);
+
+    setup.dv.dataLoop({DATA_ID: DataViewer.READ_ALL_DATA_ID}, utilReadAll);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilReadAll), 2);
+    t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilReadAll), 20);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data2'}, utilReadAll), 2);
+    t.equal(setup.dv.getValue({DATA_ID: 'data2'}, utilReadAll), 2.22);
+
+    setup.dv.dataLoop({DATA_ID: DataViewer.READ_ALL_DATA_ID}, utilReadAll);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data1'}, utilReadAll), 3);
+    t.equal(setup.dv.getValue({DATA_ID: 'data1'}, utilReadAll), 30);
+    t.equal(setup.dv.getIndex({DATA_ID: 'data2'}, utilReadAll), 3);
+    t.equal(setup.dv.getValue({DATA_ID: 'data2'}, utilReadAll), 3.333);
+
     t.end();
 });
 
@@ -207,7 +228,7 @@ test('DataID Menu', t => {
     const setup = setupDataViewer();
 
     // Initial setup
-    let items = setup.dv.getDataIdMenu();
+    let items = setup.dv.getDataMenu();
     t.equal(items.length, 3);
     t.equal(items[0].text, 'data1');
     t.equal(items[0].value, 'data1');
@@ -215,23 +236,23 @@ test('DataID Menu', t => {
     t.equal(items[1].value, 'data2');
     t.equal(items[2].text, 'data3');
     t.equal(items[2].value, 'data3');
-    t.equal(setup.dv.getDataIdMenuDefaultValue(), 'data1');
+    t.equal(setup.dv.getDataMenuDefaultValue(), 'data1');
 
     // Delete one variable in the midle of the menu list
     const stage = setup.dv._runtime.getTargetForStage();
     stage.deleteVariable('data2');
-    items = setup.dv.getDataIdMenu();
+    items = setup.dv.getDataMenu();
     t.equal(items.length, 2);
     t.equal(items[0].text, 'data1');
     t.equal(items[0].value, 'data1');
     t.equal(items[1].text, 'data3');
     t.equal(items[1].value, 'data3');
-    t.equal(setup.dv.getDataIdMenuDefaultValue(), 'data1');
+    t.equal(setup.dv.getDataMenuDefaultValue(), 'data1');
 
     // Add another variables that should appear before others
     stage.lookupOrCreateList('a1', 'aaa1'); // id, name
     stage.lookupOrCreateList('A2', 'Aaa2'); // id, name
-    items = setup.dv.getDataIdMenu();
+    items = setup.dv.getDataMenu();
     t.equal(items.length, 4);
     t.equal(items[0].text, 'aaa1');
     t.equal(items[0].value, 'a1');
@@ -241,7 +262,25 @@ test('DataID Menu', t => {
     t.equal(items[2].value, 'data1');
     t.equal(items[3].text, 'data3');
     t.equal(items[3].value, 'data3');
-    t.equal(setup.dv.getDataIdMenuDefaultValue(), 'aaa1');
+    t.equal(setup.dv.getDataMenuDefaultValue(), 'aaa1');
+
+    t.end();
+});
+
+test('DataID Read All Menu', t => {
+    const setup = setupDataViewer();
+
+    let items = setup.dv.getDataLoopMenu();
+    t.equal(items.length, 4);
+    t.equal(items[3].text, 'data1 + data2 + data3');
+    t.equal(items[3].value, DataViewer.READ_ALL_DATA_ID);
+
+    const stage = setup.dv._runtime.getTargetForStage();
+    stage.deleteVariable('data2');
+    items = setup.dv.getDataLoopMenu();
+    t.equal(items.length, 3);
+    t.equal(items[2].text, 'data1 + data3');
+    t.equal(items[2].value, DataViewer.READ_ALL_DATA_ID);
 
     t.end();
 });

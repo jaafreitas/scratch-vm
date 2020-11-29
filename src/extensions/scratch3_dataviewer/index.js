@@ -813,7 +813,8 @@ class Scratch3DataViewerBlocks {
             const oldValue = Cast.toNumber(this._data(args.DATA_ID).value[i]);
             const newValue = this._mapValue(oldValue, oldMin, oldMax, newMin, newMax);
             if (oldValue !== newValue) {
-                this._data(args.DATA_ID).value[i] = newValue;
+                // Two decimal points is a trade-off between precision and legibility
+                this._data(args.DATA_ID).value[i] = Cast.toNumber(newValue.toFixed(2));
             }
         }
     }

@@ -193,11 +193,11 @@ test('changeDataScale', t => {
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 5}), 100);
 
     setup.dv.setData({DATA_ID: 'data2', DATA: '5 4 3 2 1'});
-    setup.dv.changeDataScale({DATA_ID: 'data2', NEW_MIN: 0, NEW_MAX: 100});
-    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 1}), 100);
-    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 2}), 75);
-    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 3}), 50);
-    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 4}), 25);
+    setup.dv.changeDataScale({DATA_ID: 'data2', NEW_MIN: 0, NEW_MAX: 0.9});
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 1}), 0.9);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 2}), 0.68);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 3}), 0.45);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 4}), 0.23);
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 5}), 0);
 
     t.end();

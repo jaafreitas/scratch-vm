@@ -36,6 +36,9 @@ class Scratch3DataViewerBlocks {
     constructor (runtime) {
         this._runtime = runtime;
 
+        // Variable names needs translation and they are created on _blocksInfoUpdate().
+        this._setupTranslations();
+
         // Always starts with the minimal-block version.
         this._runtime.DataviewerMinimalBlocks = true;
 
@@ -200,9 +203,12 @@ class Scratch3DataViewerBlocks {
         // Create the first 3 list variables.
         const stage = this._runtime.getTargetForStage();
         if (stage) {
-            const varName = 'data';
+            const varID = 'data';
+            const varName = formatMessage({
+                id: 'dataviewer.menu.dataId.data',
+                default: varID});
             [1, 2, 3].forEach(i => {
-                const variable = stage.lookupOrCreateList(varName + i, varName + i);
+                const variable = stage.lookupOrCreateList(varID + i, `${varName}${i}`);
                 variable._monitorUpToDate = false;
             });
             // Show the new variable on toolbox
@@ -705,7 +711,9 @@ class Scratch3DataViewerBlocks {
 
     setData (args) {
         const data = this._data(args.DATA_ID);
-        data.value = this._setData(args.DATA);
+        if (data) {
+            data.value = this._setData(args.DATA);
+        }
     }
 
     readCSVDataFromURL (args) {

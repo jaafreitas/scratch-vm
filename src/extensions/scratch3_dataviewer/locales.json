@@ -29,8 +29,6 @@
         "dataviewer.menu.statisticFunctions.max": "máximo",
         "dataviewer.menu.dataType.value": "valor",
         "dataviewer.menu.dataType.index": "índice",
-        "dataviewer.menu.dataId.data1": "dado1",
-        "dataviewer.menu.dataId.data2": "dado2",
-        "dataviewer.menu.dataId.data3": "dado3"
+        "dataviewer.menu.dataId.data": "dado"
     }
 }

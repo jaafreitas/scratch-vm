@@ -686,33 +686,23 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    _setData (dataText) {
-        if (dataText.trim()) {
-            const data = [];
-            let dataviewerIndex = 0;
-            const splitedComma = dataText.split(',');
-            for (let i = 0; i < splitedComma.length; i += 1) {
-                if (splitedComma[i].trim() && !isNaN(splitedComma[i])) {
-                    data[dataviewerIndex] = Cast.toNumber(splitedComma[i]);
-                    dataviewerIndex++;
-                } else {
-                    const splitedSpace = splitedComma[i].trim().split(' ');
-                    for (let j = 0; j < splitedSpace.length; j += 1) {
-                        if (splitedSpace[j].trim() && !isNaN(splitedSpace[j])) {
-                            data[dataviewerIndex] = Cast.toNumber(splitedSpace[j]);
-                            dataviewerIndex++;
-                        }
-                    }
+    _textToData (text) {
+        // Accept comma or space separated values
+        // Accept strings, but try to keep numbers as numbers
+        return text.split(/[\s|,]/)
+            .filter(i => i !== '')
+            .map(i => {
+                if (!isNaN(i)) {
+                    return Cast.toNumber(i);
                 }
-            }
-            return data;
-        }
+                return i;
+            });
     }
 
     setData (args) {
         const data = this._data(args.DATA_ID);
         if (data) {
-            data.value = this._setData(args.DATA);
+            data.value = this._textToData(args.DATA);
         }
     }
 
@@ -747,7 +737,7 @@ class Scratch3DataViewerBlocks {
                         }
                     }
 
-                    return resolve(data.join(','));
+                    return resolve(data.join(' '));
                 });
             });
         }
@@ -781,7 +771,7 @@ class Scratch3DataViewerBlocks {
                         }
                     }
 
-                    return resolve(data.join(','));
+                    return resolve(data.join(' '));
                 });
             });
         }

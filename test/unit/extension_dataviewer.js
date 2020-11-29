@@ -64,11 +64,11 @@ test('Data', t => {
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 1}), 1);
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 2}), 2);
 
-    setup.dv.setData({DATA_ID: 'data3', DATA: '1, 2, 3'});
+    setup.dv.setData({DATA_ID: 'data3', DATA: 'a,    2.22 ccc'});
     t.equal(setup.dv.getDataLength({DATA_ID: 'data3'}), 3);
-    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 1}), 1);
-    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 2}), 2);
-    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 3}), 3);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 1}), 'a');
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 2}), 2.22);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 3}), 'ccc');
 
     // Adding more data.
     setup.dv.dataBlocks.addToList(
@@ -84,10 +84,10 @@ test('Data', t => {
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 3}), 3);
 
     setup.dv.dataBlocks.addToList(
-        {LIST: {id: 'data3', name: 'data3'}, ITEM: 4},
+        {LIST: {id: 'data3', name: 'data3'}, ITEM: 'dddd'},
         {target: setup.dv._runtime.getEditingTarget()});
     t.equal(setup.dv.getDataLength({DATA_ID: 'data3'}), 4);
-    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 4}), 4);
+    t.equal(setup.dv.getDataIndex({DATA_ID: 'data3', INDEX: 4}), 'dddd');
 
     t.end();
 });
@@ -111,8 +111,8 @@ test('Data Loop', t => {
     const utilData2 = utilX();
 
     // Adding initial data.
-    setup.dv.setData({DATA_ID: 'data1', DATA: '10, 20, 30'});
-    setup.dv.setData({DATA_ID: 'data2', DATA: '1.1, 2.22, 3.333'});
+    setup.dv.setData({DATA_ID: 'data1', DATA: '10 20 30'});
+    setup.dv.setData({DATA_ID: 'data2', DATA: '1.1 2.22 3.333'});
     t.equivalent(setup.dv.getIndex({DATA_ID: 'data1'}, utilData1), null);
     t.equivalent(setup.dv.getValue({DATA_ID: 'data1'}, utilData1), null);
     t.equivalent(setup.dv.getIndex({DATA_ID: 'data2'}, utilData2), null);
@@ -168,12 +168,12 @@ test('Data Loop', t => {
 test('Min / Max / Mean', t => {
     const setup = setupDataViewer();
 
-    setup.dv.setData({DATA_ID: 'data1', DATA: '1, 2, 3, 4, 5'});
+    setup.dv.setData({DATA_ID: 'data1', DATA: '1 2 3 4 5'});
     t.equal(setup.dv._getMin({DATA_ID: 'data1'}), 1);
     t.equal(setup.dv._getMax({DATA_ID: 'data1'}), 5);
     t.equal(setup.dv._getMean({DATA_ID: 'data1'}), 3);
 
-    setup.dv.setData({DATA_ID: 'data2', DATA: '-10, 10'});
+    setup.dv.setData({DATA_ID: 'data2', DATA: '-10 10'});
     t.equal(setup.dv._getMin({DATA_ID: 'data2'}), -10);
     t.equal(setup.dv._getMax({DATA_ID: 'data2'}), 10);
     t.equal(setup.dv._getMean({DATA_ID: 'data2'}), 0);
@@ -184,7 +184,7 @@ test('Min / Max / Mean', t => {
 test('changeDataScale', t => {
     const setup = setupDataViewer();
 
-    setup.dv.setData({DATA_ID: 'data1', DATA: '1, 2, 3, 4, 5'});
+    setup.dv.setData({DATA_ID: 'data1', DATA: '1 2 3 4 5'});
     setup.dv.changeDataScale({DATA_ID: 'data1', NEW_MIN: 0, NEW_MAX: 100});
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 1}), 0);
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 2}), 25);
@@ -192,7 +192,7 @@ test('changeDataScale', t => {
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 4}), 75);
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data1', INDEX: 5}), 100);
 
-    setup.dv.setData({DATA_ID: 'data2', DATA: '5, 4, 3, 2, 1'});
+    setup.dv.setData({DATA_ID: 'data2', DATA: '5 4 3 2 1'});
     setup.dv.changeDataScale({DATA_ID: 'data2', NEW_MIN: 0, NEW_MAX: 100});
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 1}), 100);
     t.equal(setup.dv.getDataIndex({DATA_ID: 'data2', INDEX: 2}), 75);
@@ -310,3 +310,9 @@ test('Scale', t => {
 
     t.end();
 });
+
+
+// Pendências
+
+// mapData
+// setData for text

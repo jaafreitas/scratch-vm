@@ -254,7 +254,7 @@ test('Scale', t => {
 
     // Change only scaleX.
     setup.dv.setScaleX({SCALEX: 150}, {target: target});
-    scale = setup.dv.getEditingTargetScale();
+    scale = setup.dv._getEditingTargetScale();
     t.equal(scale.x, 150);
     t.equal(scale.y, 100);
     t.equal(target.scalex, 150);
@@ -262,7 +262,7 @@ test('Scale', t => {
 
     // Change only scaleY and preserving scaleX.
     setup.dv.setScaleY({SCALEY: 50}, {target: target});
-    scale = setup.dv.getEditingTargetScale();
+    scale = setup.dv._getEditingTargetScale();
     t.equal(scale.x, 150);
     t.equal(scale.y, 50);
     t.equal(target.scalex, 150);
@@ -271,25 +271,25 @@ test('Scale', t => {
     // Make a clone and check if we got scale property
     const clone = target.makeClone();
     setup.dv._runtime.setEditingTarget(clone);
-    scale = setup.dv.getEditingTargetScale();
+    scale = setup.dv._getEditingTargetScale();
     t.equal(scale.x, 150);
     t.equal(scale.y, 50);
 
     // Can we modify the clone without changing the original target scale?
     setup.dv.setScaleX({SCALEX: 222.2}, {target: clone});
     setup.dv.setScaleY({SCALEY: 444.44}, {target: clone});
-    scale = setup.dv.getEditingTargetScale();
+    scale = setup.dv._getEditingTargetScale();
     t.equal(scale.x, 222.2);
     t.equal(scale.y, 444.44);
     setup.dv._runtime.setEditingTarget(target);
-    scale = setup.dv.getEditingTargetScale();
+    scale = setup.dv._getEditingTargetScale();
     t.equal(scale.x, 150);
     t.equal(scale.y, 50);
 
     // Minimum scale test
     setup.dv.setScaleX({SCALEX: -100.0}, {target: target});
     setup.dv.setScaleY({SCALEY: 4}, {target: target});
-    scale = setup.dv.getEditingTargetScale();
+    scale = setup.dv._getEditingTargetScale();
     t.equal(scale.x, 5);
     t.equal(scale.y, 5);
 
@@ -299,20 +299,18 @@ test('Scale', t => {
     // The value 0 was intentionally choose for scale test.
     setup.dv.setScaleX({SCALEX: 0}, {target: target});
     setup.dv.setScaleY({SCALEY: 0}, {target: target});
-    scale = setup.dv.getEditingTargetScale();
+    scale = setup.dv._getEditingTargetScale();
     t.equal(scale.x, 2.5);
     t.equal(scale.y, 2.5);
     // After changing size, the scale might need to be changed to a higher value.
     target.setSize(100);
-    scale = setup.dv.getEditingTargetScale();
+    scale = setup.dv._getEditingTargetScale();
     t.equal(scale.x, 5);
     t.equal(scale.y, 5);
 
     t.end();
 });
 
-
 // Pendências
-
 // mapData
-// setData for text
+// Funções com índices

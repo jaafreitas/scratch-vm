@@ -476,7 +476,7 @@ class Scratch3DataViewerBlocks {
                 arguments: {
                     SCALEX: {
                         type: ArgumentType.NUMBER,
-                        defaultValue: this.getEditingTargetScale().x
+                        defaultValue: 100
                     }
                 }
             },
@@ -491,7 +491,7 @@ class Scratch3DataViewerBlocks {
                 arguments: {
                     SCALEY: {
                         type: ArgumentType.NUMBER,
-                        defaultValue: this.getEditingTargetScale().y
+                        defaultValue: 100
                     }
                 }
             }
@@ -849,7 +849,7 @@ class Scratch3DataViewerBlocks {
         );
     }
 
-    getEditingTargetScale () {
+    _getEditingTargetScale () {
         const scale = {x: 100, y: 100};
         const target = this._runtime.getEditingTarget();
         if (target) {

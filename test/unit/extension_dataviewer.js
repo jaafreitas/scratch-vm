@@ -266,7 +266,7 @@ test('Data Loop Strings', t => {
     t.end();
 });
 
-test('Min / Max / Mean', t => {
+test('Min / Max / Mean Numbers', t => {
     const setup = setupDataViewer();
 
     // Initial state.
@@ -286,6 +286,23 @@ test('Min / Max / Mean', t => {
     t.equal(setup.dv._getMin({LIST_ID: 'dataviewer#list#2'}), -10);
     t.equal(setup.dv._getMax({LIST_ID: 'dataviewer#list#2'}), 10);
     t.equal(setup.dv._getMean({LIST_ID: 'dataviewer#list#2'}), 0);
+
+    t.end();
+});
+
+test('Min / Max / Mean Strings', t => {
+    const setup = setupDataViewer();
+
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 CCC aaaa'});
+
+    t.equivalent(setup.dv._getMin({LIST_ID: 'dataviewer#list#1'}), null);
+    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#list#1', FNC: 'min'}), '');
+
+    t.equivalent(setup.dv._getMax({LIST_ID: 'dataviewer#list#1'}), null);
+    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#list#1', FNC: 'max'}), '');
+
+    t.equivalent(setup.dv._getMean({LIST_ID: 'dataviewer#list#1'}), null);
+    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#list#1', FNC: 'mean'}), '');
 
     t.end();
 });

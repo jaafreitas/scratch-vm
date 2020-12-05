@@ -714,19 +714,27 @@ class Scratch3DataViewerBlocks {
             for (let i = 0; i < this.getDataLength(args); i += 1) {
                 total = total + this._data(args.LIST_ID).value[i];
             }
-            return total / this.getDataLength(args);
+            if (!isNaN(total)) {
+                return total / this.getDataLength(args);
+            }
         }
     }
 
     _getMin (args) {
         if (this.getDataLength(args) > 0) {
-            return this._data(args.LIST_ID).value.reduce((a, b) => Math.min(a, b));
+            const value = this._data(args.LIST_ID).value.reduce((a, b) => Math.min(a, b));
+            if (!isNaN(value)) {
+                return value;
+            }
         }
     }
 
     _getMax (args) {
         if (this.getDataLength(args) > 0) {
-            return this._data(args.LIST_ID).value.reduce((a, b) => Math.max(a, b));
+            const value = this._data(args.LIST_ID).value.reduce((a, b) => Math.max(a, b));
+            if (!isNaN(value)) {
+                return value;
+            }
         }
     }
 

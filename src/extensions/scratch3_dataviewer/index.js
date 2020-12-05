@@ -870,27 +870,36 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    mapData (args, util) {
+    _mapData (args, util) {
         switch (args.DATA_TYPE) {
         case 'index':
             if (this.getDataLength(args) > 0) {
-                return Cast.toNumber(this._mapValue(
+                return this._mapValue(
                     this._getInternalIndex(args, util),
                     0, this.getDataLength(args) - 1,
-                    Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                    Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX));
             }
             break;
         case 'value':
             if (this.getDataLength(args) > 0) {
-                return Cast.toNumber(this._mapValue(
-                    this.getValue(args),
-                    this._getMin(args), this._getMax(args),
-                    Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX)));
+                const oldValue = this._getValue(args, util);
+                if (!isNaN(oldValue)) {
+                    return this._mapValue(
+                        oldValue,
+                        this._getMin(args), this._getMax(args),
+                        Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX));
+                }
             }
             break;
-        default:
-            break;
         }
+    }
+
+    mapData (args, util) {
+        const value = this._mapData(args, util);
+        if (typeof value !== 'undefined' && !isNaN(value)) {
+            return Cast.toNumber(value.toFixed(2));
+        }
+        return '';
     }
 
     getDataIndex (args) {

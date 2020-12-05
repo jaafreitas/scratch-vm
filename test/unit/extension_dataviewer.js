@@ -289,6 +289,44 @@ test('changeDataScale', t => {
     t.end();
 });
 
+test('Data Loop Map Data', t => {
+    const setup = setupDataViewer();
+    const utilList1 = util();
+
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 4 5'});
+
+    const argValue = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'value', NEW_MIN: 0, NEW_MAX: 100};
+    const argIndex = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'value', NEW_MIN: 0, NEW_MAX: 0.9};
+
+    // Initial state.
+    t.equivalent(setup.dv._mapData(argValue, utilList1), null);
+    t.equivalent(setup.dv._mapData(argIndex, utilList1), null);
+    t.equal(setup.dv.mapData(argValue, utilList1), '');
+    t.equal(setup.dv.mapData(argIndex, utilList1), '');
+
+    setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), 0);
+    t.equal(setup.dv.mapData(argIndex, utilList1), 0);
+
+    setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), 25);
+    t.equal(setup.dv.mapData(argIndex, utilList1), 0.23);
+
+    setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), 50);
+    t.equal(setup.dv.mapData(argIndex, utilList1), 0.45);
+
+    setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), 75);
+    t.equal(setup.dv.mapData(argIndex, utilList1), 0.68);
+
+    setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), 100);
+    t.equal(setup.dv.mapData(argIndex, utilList1), 0.9);
+
+    t.end();
+});
+
 test('Data Menu', t => {
     const setup = setupDataViewer();
 

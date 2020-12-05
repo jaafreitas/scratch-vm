@@ -31,6 +31,17 @@ const setupDataViewer = () => {
     return {dv: dv};
 };
 
+const util = () => {
+    const thread = {stackFrames: [{executionContext: {}}]};
+    return {
+        thread: thread,
+        get stackFrame () {
+            return thread.stackFrames[0].executionContext;
+        },
+        startBranch: () => {}
+    };
+};
+
 test('spec', t => {
     const dv = new DataViewer({on: () => {}, getTargetForStage: () => {}});
 
@@ -89,22 +100,17 @@ test('Data', t => {
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#3'}), 4);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 4}), 'dddd');
 
+    // Deleting data.
+    setup.dv.dataBlocks.deleteOfList(
+        {LIST: {id: 'dataviewer#list#3', name: 'list 3'}, INDEX: 2},
+        {target: setup.dv._runtime.getEditingTarget()});
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#3'}), 3);
+
     t.end();
 });
 
 test('Data Loop', t => {
     const setup = setupDataViewer();
-
-    const util = () => {
-        const thread = {stackFrames: [{executionContext: {}}]};
-        return {
-            thread: thread,
-            get stackFrame () {
-                return thread.stackFrames[0].executionContext;
-            },
-            startBranch: () => {}
-        };
-    };
 
     const utilList1 = util();
     const utilList1AnotherLoop = util();
@@ -117,16 +123,16 @@ test('Data Loop', t => {
     // Initial state.
     t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1), null);
     t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#list#1'}, utilList1), null);
-    t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), null);
-    t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), null);
     t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1AnotherLoop), null);
     t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#list#1'}, utilList1AnotherLoop), null);
+    t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), null);
+    t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), null);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1), '');
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#1'}, utilList1), '');
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), '');
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), '');
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1AnotherLoop), '');
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#1'}, utilList1AnotherLoop), '');
+    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), '');
+    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), '');
 
     // First data loop
     setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
@@ -163,6 +169,12 @@ test('Data Loop', t => {
     setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
     setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1AnotherLoop);
     setup.dv.dataLoop({LIST_ID: 'dataviewer#list#2'}, utilList2);
+    t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1), null);
+    t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#list#1'}, utilList1), null);
+    t.equal(setup.dv._getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1AnotherLoop), 3);
+    t.equal(setup.dv._getValue({LIST_ID: 'dataviewer#list#1'}, utilList1AnotherLoop), 30);
+    t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), null);
+    t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), null);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1), '');
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#1'}, utilList1), '');
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1AnotherLoop), 3);
@@ -170,9 +182,17 @@ test('Data Loop', t => {
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), '');
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), '');
 
-    //
-    // Read All
+    t.end();
+});
+
+test('Data Loop Read All', t => {
+    const setup = setupDataViewer();
     const utilReadAll = util();
+
+    // Adding initial data.
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '10 20 30'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: '1.1 2.22 3.333'});
+
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilReadAll);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#1'}, utilReadAll), 1);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#1'}, utilReadAll), 10);
@@ -191,13 +211,16 @@ test('Data Loop', t => {
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 3);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 3.333);
 
-    //
-    // Read All Different Lengths
+    t.end();
+});
+
+test('Data Loop Read All Different Lengths', t => {
+    const setup = setupDataViewer();
     const utilReadAllDifferentLengths = util();
-    setup.dv.dataBlocks.deleteOfList(
-        {LIST: {id: 'dataviewer#list#1', name: 'list 1'}, INDEX: 2},
-        {target: setup.dv._runtime.getEditingTarget()});
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 2);
+
+    // Adding initial data.
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '10 30'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: '1.1 2.22 3.333'});
 
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilReadAllDifferentLengths);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#1'}, utilReadAllDifferentLengths), 1);

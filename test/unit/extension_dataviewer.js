@@ -336,14 +336,14 @@ test('changeDataScale Numbers + Strings', t => {
     t.end();
 });
 
-test('Data Loop Map Data', t => {
+test('Data Loop Map Numbers', t => {
     const setup = setupDataViewer();
     const utilList1 = util();
 
-    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 4 5'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '10 20 30 40 50'});
 
     const argValue = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'value', NEW_MIN: 0, NEW_MAX: 100};
-    const argIndex = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'value', NEW_MIN: 0, NEW_MAX: 0.9};
+    const argIndex = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'index', NEW_MIN: 0, NEW_MAX: 0.9};
 
     // Initial state.
     t.equivalent(setup.dv._mapData(argValue, utilList1), null);
@@ -370,6 +370,30 @@ test('Data Loop Map Data', t => {
     setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
     t.equal(setup.dv.mapData(argValue, utilList1), 100);
     t.equal(setup.dv.mapData(argIndex, utilList1), 0.9);
+
+    t.end();
+});
+
+test('Data Loop Map Numbers + Strings', t => {
+    const setup = setupDataViewer();
+    const utilList1 = util();
+
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 CCC'});
+
+    const argValue = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'value', NEW_MIN: 0, NEW_MAX: 100};
+    const argIndex = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'index', NEW_MIN: 0, NEW_MAX: 100};
+
+    setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), '');
+    t.equal(setup.dv.mapData(argIndex, utilList1), 0);
+
+    setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), '');
+    t.equal(setup.dv.mapData(argIndex, utilList1), 50);
+
+    setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), '');
+    t.equal(setup.dv.mapData(argIndex, utilList1), 100);
 
     t.end();
 });
@@ -499,7 +523,3 @@ test('Scale', t => {
 
     t.end();
 });
-
-// Pendências
-// mapData
-// Funções com índices

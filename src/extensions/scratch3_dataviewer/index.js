@@ -878,26 +878,25 @@ class Scratch3DataViewerBlocks {
     }
 
     _mapData (args, util) {
+        let oldMin;
+        let oldMax;
+        let oldValue;
+        const newMin = Cast.toNumber(args.NEW_MIN);
+        const newMax = Cast.toNumber(args.NEW_MAX);
         switch (args.DATA_TYPE) {
         case 'index':
-            if (this.getDataLength(args) > 0) {
-                return this._mapValue(
-                    this._getInternalIndex(args, util),
-                    0, this.getDataLength(args) - 1,
-                    Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX));
-            }
+            oldMin = 0;
+            oldMax = this.getDataLength(args) - 1;
+            oldValue = this._getInternalIndex(args, util);
             break;
         case 'value':
-            if (this.getDataLength(args) > 0) {
-                const oldValue = this._getValue(args, util);
-                if (!isNaN(oldValue)) {
-                    return this._mapValue(
-                        oldValue,
-                        this._getMin(args), this._getMax(args),
-                        Cast.toNumber(args.NEW_MIN), Cast.toNumber(args.NEW_MAX));
-                }
-            }
+            oldMin = this._getMin(args);
+            oldMax = this._getMax(args);
+            oldValue = this._getValue(args, util);
             break;
+        }
+        if (this.getDataLength(args) > 0 && !isNaN(oldValue)) {
+            return this._mapValue(oldValue, oldMin, oldMax, newMin, newMax);
         }
     }
 

@@ -856,17 +856,24 @@ class Scratch3DataViewerBlocks {
     }
 
     changeDataScale (args) {
-        const oldMin = Cast.toNumber(this._getMin(args));
-        const oldMax = Cast.toNumber(this._getMax(args));
-        const newMin = Cast.toNumber(args.NEW_MIN);
-        const newMax = Cast.toNumber(args.NEW_MAX);
-        for (let i = 0; i < this.getDataLength(args); i += 1) {
-            const oldValue = Cast.toNumber(this._data(args.LIST_ID).value[i]);
-            const newValue = this._mapValue(oldValue, oldMin, oldMax, newMin, newMax);
-            if (oldValue !== newValue) {
-                // Two decimal points is a trade-off between precision and legibility
-                this._data(args.LIST_ID).value[i] = Cast.toNumber(newValue.toFixed(2));
+        const oldMin = this._getMin(args);
+        const oldMax = this._getMax(args);
+        if (!isNaN(oldMin) && !isNaN(oldMax)) {
+            const newMin = Cast.toNumber(args.NEW_MIN);
+            const newMax = Cast.toNumber(args.NEW_MAX);
+            let monitorUpToDate = true;
+            for (let i = 0; i < this.getDataLength(args); i += 1) {
+                const oldValue = this._data(args.LIST_ID).value[i];
+                if (!isNaN(oldValue)) {
+                    const newValue = this._mapValue(oldValue, oldMin, oldMax, newMin, newMax);
+                    if (oldValue !== newValue) {
+                        // Two decimal points is a trade-off between precision and legibility
+                        this._data(args.LIST_ID).value[i] = Cast.toNumber(newValue.toFixed(2));
+                        monitorUpToDate = false;
+                    }
+                }
             }
+            this._data(args.LIST_ID)._monitorUpToDate = monitorUpToDate;
         }
     }
 

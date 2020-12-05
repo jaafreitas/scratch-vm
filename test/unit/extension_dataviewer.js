@@ -222,6 +222,8 @@ test('Data Loop Read All Different Lengths', t => {
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '10 30'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: '1.1 2.22 3.333'});
 
+    t.equal(setup.dv._getMaxDataLengthReadAll(), 3);
+
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilReadAllDifferentLengths);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#1'}, utilReadAllDifferentLengths), 1);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#1'}, utilReadAllDifferentLengths), 10);
@@ -239,6 +241,27 @@ test('Data Loop Read All Different Lengths', t => {
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#1'}, utilReadAllDifferentLengths), '');
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAllDifferentLengths), 3);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAllDifferentLengths), 3.333);
+
+    t.end();
+});
+
+test('Data Loop Strings', t => {
+    const setup = setupDataViewer();
+    const utilList1 = util();
+
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: 'A 2 CCC'});
+
+    setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilList1);
+    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1), 1);
+    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#1'}, utilList1), 'A');
+
+    setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilList1);
+    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1), 2);
+    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#1'}, utilList1), 2);
+
+    setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilList1);
+    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#1'}, utilList1), 3);
+    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#1'}, utilList1), 'CCC');
 
     t.end();
 });
@@ -267,7 +290,7 @@ test('Min / Max / Mean', t => {
     t.end();
 });
 
-test('changeDataScale', t => {
+test('changeDataScale Numbers', t => {
     const setup = setupDataViewer();
 
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 4 5'});
@@ -285,6 +308,30 @@ test('changeDataScale', t => {
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 3}), 0.45);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 4}), 0.23);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 5}), 0);
+
+    t.end();
+});
+
+test('changeDataScale Strings', t => {
+    const setup = setupDataViewer();
+
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: 'A BB CCC'});
+    setup.dv.changeDataScale({LIST_ID: 'dataviewer#list#1', NEW_MIN: 0, NEW_MAX: 100});
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 'A');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 'BB');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 3}), 'CCC');
+
+    t.end();
+});
+
+test('changeDataScale Numbers + Strings', t => {
+    const setup = setupDataViewer();
+
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 CCC'});
+    setup.dv.changeDataScale({LIST_ID: 'dataviewer#list#1', NEW_MIN: 0, NEW_MAX: 100});
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 3}), 'CCC');
 
     t.end();
 });

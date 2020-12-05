@@ -11,24 +11,26 @@
         "dataviewer.showMoreBlocks": "Mostrar Mais Blocos",
         "dataviewer.showLessBlocks": "Mostrar Menos Blocos",
 
-        "dataviewer.setData": "definir [DATA_ID] como [DATA]",
+        "dataviewer.setData": "definir [LIST_ID] como [DATA]",
         "dataviewer.setSizeX": "definir o tamanho X como [SCALEX] %",
         "dataviewer.setSizeY": "definir o tamanho Y como [SCALEY] %",
         "dataviewer.readCSVDataFromURL": "ler arquivo .csv [URL] coluna: [COLUMN] começando na linha: [LINE]",
         "dataviewer.readCSVDataFromURL.default": "link para a planilha",
         "dataviewer.readThingSpeakData": "ler ThingSpeak canal: [CHANNEL] campo: [FIELD]",
-        "dataviewer.dataLoop": "ler todos os valores de [DATA_ID]",
-        "dataviewer.getValue": "valor de [DATA_ID]",
-        "dataviewer.getIndex": "índice de [DATA_ID]",
-        "dataviewer.getStatistic": "[FNC] de [DATA_ID]",
-        "dataviewer.changeDataScale": "mudar a escala de [DATA_ID] para [NEW_MIN] [NEW_MAX]",
-        "dataviewer.mapData": "mudar a escala de [DATA_TYPE] de [DATA_ID] para [NEW_MIN] [NEW_MAX]",
+        "dataviewer.dataLoop": "ler todos os valores de [LIST_ID]",
+        "dataviewer.getValue": "valor de [LIST_ID]",
+        "dataviewer.getIndex": "índice de [LIST_ID]",
+        "dataviewer.getStatistic": "[FNC] de [LIST_ID]",
+        "dataviewer.changeDataScale": "mudar a escala de [LIST_ID] para [NEW_MIN] [NEW_MAX]",
+        "dataviewer.mapData": "mudar a escala de [DATA_TYPE] de [LIST_ID] para [NEW_MIN] [NEW_MAX]",
 
         "dataviewer.menu.statisticFunctions.mean": "média",
         "dataviewer.menu.statisticFunctions.min": "mínimo",
         "dataviewer.menu.statisticFunctions.max": "máximo",
         "dataviewer.menu.dataType.value": "valor",
         "dataviewer.menu.dataType.index": "índice",
-        "dataviewer.menu.data": "dado"
+
+        "dataviewer.list": "lista",
+        "dataviewer.allLists": "todas as listas"
     }
 }

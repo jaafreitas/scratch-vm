@@ -22,20 +22,27 @@ const IDTableWindows = 'dataviewer-table-windows';
 
 class Scratch3DataViewerBlocks {
     static get EXTENSION_INFO_COLOR1 () {
-        return '#0FBD8C';
+        return '#0ABAB5'; // rgb(10,186,181)
     }
 
     static get EXTENSION_INFO_COLOR2 () {
-        return '#0DA57A';
+        return '#FFFFFF';
     }
 
     static get EXTENSION_INFO_COLOR3 () {
-        return '#0B8E69';
+        return '#078A86'; // rgb(7,138,134)
     }
 
-    static get READ_ALL_DATA_ID () {
-        return 'dataviewer#read#all#data';
+    get READ_ALL_LISTS_ID () {
+        return 'dataviewer#read#all#lists';
     }
+
+    get READ_ALL_LISTS_VALUE () {
+        return formatMessage({
+            id: 'dataviewer.allLists',
+            default: 'all lists'});
+    }
+
     constructor (runtime) {
         this._runtime = runtime;
 
@@ -199,15 +206,15 @@ class Scratch3DataViewerBlocks {
     /* eslint-enable */
 
     _blocksInfoUpdate () {
-        // Create the first 3 list variables.
+        // Create the first 2 lists.
         const stage = this._runtime.getTargetForStage();
         if (stage) {
-            const varID = 'data';
+            const varID = 'list';
             const varName = formatMessage({
-                id: 'dataviewer.menu.data',
+                id: 'dataviewer.list',
                 default: varID});
-            [1, 2, 3].forEach(i => {
-                const variable = stage.lookupOrCreateList(varID + i, `${varName}${i}`);
+            [1, 2].forEach(i => {
+                const variable = stage.lookupOrCreateList(`dataviewer#${varID}#${i}`, `${varName} ${i}`);
                 variable._monitorUpToDate = false;
             });
             // Show the new variable on toolbox
@@ -250,11 +257,6 @@ class Scratch3DataViewerBlocks {
             color1: Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR1,
             color2: Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR2,
             color3: Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR3,
-            // Default values from Runtime > defaultExtensionColors.
-            // Colors should be synced with documentation.
-            // color1: '#444444',
-            // color2: '#000000',
-            // color3: '#BBBBBB',
             name: formatMessage({
                 id: 'dataviewer.categoryName',
                 default: 'Data Viewer',
@@ -290,11 +292,11 @@ class Scratch3DataViewerBlocks {
                 opcode: 'setData',
                 text: formatMessage({
                     id: 'dataviewer.setData',
-                    default: 'set [DATA_ID] to [DATA]'
+                    default: 'set [LIST_ID] to [DATA]'
                 }),
                 blockType: BlockType.COMMAND,
                 arguments: {
-                    DATA_ID: {
+                    LIST_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataMenu',
                         defaultValue: this.getDataMenuDefaultValue()
@@ -312,6 +314,7 @@ class Scratch3DataViewerBlocks {
                     default: 'read .csv file [URL] column: [COLUMN] starting from line: [LINE]'
                 }),
                 blockType: BlockType.REPORTER,
+                disableMonitor: true,
                 arguments: {
                     COLUMN: {
                         type: ArgumentType.NUMBER,
@@ -337,6 +340,7 @@ class Scratch3DataViewerBlocks {
                     default: 'read ThingSpeak channel: [CHANNEL] field: [FIELD]'
                 }),
                 blockType: BlockType.REPORTER,
+                disableMonitor: true,
                 arguments: {
                     FIELD: {
                         type: ArgumentType.NUMBER,
@@ -352,11 +356,11 @@ class Scratch3DataViewerBlocks {
                 opcode: 'dataLoop',
                 text: formatMessage({
                     id: 'dataviewer.dataLoop',
-                    default: 'read all values from [DATA_ID]'
+                    default: 'read all values from [LIST_ID]'
                 }),
                 blockType: BlockType.LOOP,
                 arguments: {
-                    DATA_ID: {
+                    LIST_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataLoopMenu',
                         defaultValue: this.getDataMenuDefaultValue()
@@ -367,11 +371,12 @@ class Scratch3DataViewerBlocks {
                 opcode: 'getValue',
                 text: formatMessage({
                     id: 'dataviewer.getValue',
-                    default: 'value from [DATA_ID]'
+                    default: 'value from [LIST_ID]'
                 }),
                 blockType: BlockType.REPORTER,
+                disableMonitor: true,
                 arguments: {
-                    DATA_ID: {
+                    LIST_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataMenu',
                         defaultValue: this.getDataMenuDefaultValue()
@@ -382,11 +387,12 @@ class Scratch3DataViewerBlocks {
                 opcode: 'getIndex',
                 text: formatMessage({
                     id: 'dataviewer.getIndex',
-                    default: 'index from [DATA_ID]'
+                    default: 'index from [LIST_ID]'
                 }),
                 blockType: BlockType.REPORTER,
+                disableMonitor: true,
                 arguments: {
-                    DATA_ID: {
+                    LIST_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataMenu',
                         defaultValue: this.getDataMenuDefaultValue()
@@ -397,11 +403,12 @@ class Scratch3DataViewerBlocks {
                 opcode: 'getStatistic',
                 text: formatMessage({
                     id: 'dataviewer.getStatistic',
-                    default: '[FNC] [DATA_ID]'
+                    default: '[FNC] [LIST_ID]'
                 }),
                 blockType: BlockType.REPORTER,
+                disableMonitor: true,
                 arguments: {
-                    DATA_ID: {
+                    LIST_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataMenu',
                         defaultValue: this.getDataMenuDefaultValue()
@@ -417,11 +424,11 @@ class Scratch3DataViewerBlocks {
                 opcode: 'changeDataScale',
                 text: formatMessage({
                     id: 'dataviewer.changeDataScale',
-                    default: 'change [DATA_ID] scale to [NEW_MIN] [NEW_MAX]'
+                    default: 'change [LIST_ID] scale to [NEW_MIN] [NEW_MAX]'
                 }),
                 blockType: BlockType.COMMAND,
                 arguments: {
-                    DATA_ID: {
+                    LIST_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataMenu',
                         defaultValue: this.getDataMenuDefaultValue()
@@ -440,11 +447,12 @@ class Scratch3DataViewerBlocks {
                 opcode: 'mapData',
                 text: formatMessage({
                     id: 'dataviewer.mapData',
-                    default: 'map [DATA_ID] [DATA_TYPE] to [NEW_MIN] [NEW_MAX]'
+                    default: 'map [LIST_ID] [DATA_TYPE] to [NEW_MIN] [NEW_MAX]'
                 }),
                 blockType: BlockType.REPORTER,
+                disableMonitor: true,
                 arguments: {
-                    DATA_ID: {
+                    LIST_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataMenu',
                         defaultValue: this.getDataMenuDefaultValue()
@@ -495,37 +503,31 @@ class Scratch3DataViewerBlocks {
                 }
             }
         };
-        const blocks = [];
+        const blocks = [
+            allBlocks.setData,
+            allBlocks.changeDataScale,
+            allBlocks.dataLoop,
+            allBlocks.getValue,
+            allBlocks.getIndex,
+            allBlocks.getStatistic,
+            '---',
+            allBlocks.setScaleX,
+            allBlocks.setScaleY,
+            '---'
+        ];
         if (this._runtime.DataviewerMinimalBlocks) {
             blocks.push(
-                allBlocks.setData,
-                allBlocks.dataLoop,
-                allBlocks.changeDataScale,
-                allBlocks.getValue,
-                allBlocks.getIndex,
-                allBlocks.getStatistic,
-                '---',
-                allBlocks.setScaleX,
-                allBlocks.setScaleY,
-                '---',
-                allBlocks.showMoreBlocks);
+                allBlocks.showMoreBlocks
+            );
         } else {
             blocks.push(
-                allBlocks.setData,
+                allBlocks.showLessBlocks,
+                '---',
                 allBlocks.readCSVDataFromURL,
                 allBlocks.readThingSpeakData,
                 '---',
-                allBlocks.dataLoop,
-                allBlocks.getValue,
-                allBlocks.getIndex,
-                allBlocks.getStatistic,
-                allBlocks.changeDataScale,
-                allBlocks.mapData,
-                '---',
-                allBlocks.setScaleX,
-                allBlocks.setScaleY,
-                '---',
-                allBlocks.showLessBlocks);
+                allBlocks.mapData
+            );
         }
         // if we try load a project with the extra blocks using the minimal-block version,
         // those extra blocks won't appear in the coding area.
@@ -594,8 +596,7 @@ class Scratch3DataViewerBlocks {
 
     getDataLoopMenu () {
         const items = this.getDataMenu();
-        const alldata = items.map(item => item.text).join(' + ');
-        items.push(({text: alldata, value: Scratch3DataViewerBlocks.READ_ALL_DATA_ID}));
+        items.push(({text: this.READ_ALL_LISTS_VALUE, value: this.READ_ALL_LISTS_ID}));
         return items;
     }
 
@@ -621,7 +622,7 @@ class Scratch3DataViewerBlocks {
     getDataMenuDefaultValue () {
         const items = this.getDataMenu();
         if (items.length > 0) {
-            return items[0].text;
+            return items[0].value;
         }
     }
 
@@ -645,22 +646,30 @@ class Scratch3DataViewerBlocks {
     }
 
     getDataLength (args) {
-        if (args.DATA_ID === Scratch3DataViewerBlocks.READ_ALL_DATA_ID) {
+        if (args.LIST_ID === this.READ_ALL_LISTS_ID) {
             return this._getMaxDataLengthReadAll();
         }
         return this.dataBlocks.lengthOfList(
-            {LIST: {id: args.DATA_ID}},
+            {LIST: {id: args.LIST_ID}},
             {target: this._runtime.getTargetForStage()}
         );
     }
 
-    getValue (args, util) {
-        const data = this._data(args.DATA_ID);
+    _getValue (args, util) {
+        const data = this._data(args.LIST_ID);
         const index = this._getInternalIndex(args, util);
 
         if (this.getDataLength(args) > 0 && index >= 0) {
             return data.value[index];
         }
+    }
+
+    getValue (args, util) {
+        const value = this._getValue(args, util);
+        if (typeof value !== 'undefined') {
+            return value;
+        }
+        return '';
     }
 
     // 0-based list
@@ -669,22 +678,30 @@ class Scratch3DataViewerBlocks {
         for (let i = util.thread.stackFrames.length - 1; i >= 0; i -= 1) {
             const stackFrame = util.thread.stackFrames[i].executionContext;
             if (stackFrame &&
-                (stackFrame.dataviewerListID === args.DATA_ID ||
-                    stackFrame.dataviewerListID === Scratch3DataViewerBlocks.READ_ALL_DATA_ID) &&
+                (stackFrame.dataviewerListID === args.LIST_ID ||
+                    stackFrame.dataviewerListID === this.READ_ALL_LISTS_ID) &&
                 typeof stackFrame.loopCounter !== 'undefined' &&
-                stackFrame.loopCounter >= 0) {
-                const length = this.getDataLength(args);
-                const dataviewerIndex = length - stackFrame.loopCounter - 1;
+                stackFrame.loopLength - stackFrame.loopCounter > 0 &&
+                stackFrame.loopCounter < this.getDataLength(args)) {
+                const dataviewerIndex = stackFrame.loopCounter;
                 return dataviewerIndex;
             }
         }
     }
 
     // 1-based list
-    getIndex (args, util) {
+    _getIndex (args, util) {
         if (this._getInternalIndex(args, util) >= 0) {
             return this._getInternalIndex(args, util) + 1;
         }
+    }
+
+    getIndex (args, util) {
+        const index = this._getIndex(args, util);
+        if (typeof index !== 'undefined') {
+            return index;
+        }
+        return '';
     }
 
     _mapValue (value, oldMin, oldMax, newMin, newMax) {
@@ -695,7 +712,7 @@ class Scratch3DataViewerBlocks {
         if (this.getDataLength(args) > 0) {
             let total = 0.0;
             for (let i = 0; i < this.getDataLength(args); i += 1) {
-                total = total + this._data(args.DATA_ID).value[i];
+                total = total + this._data(args.LIST_ID).value[i];
             }
             return total / this.getDataLength(args);
         }
@@ -703,13 +720,13 @@ class Scratch3DataViewerBlocks {
 
     _getMin (args) {
         if (this.getDataLength(args) > 0) {
-            return this._data(args.DATA_ID).value.reduce((a, b) => Math.min(a, b));
+            return this._data(args.LIST_ID).value.reduce((a, b) => Math.min(a, b));
         }
     }
 
     _getMax (args) {
         if (this.getDataLength(args) > 0) {
-            return this._data(args.DATA_ID).value.reduce((a, b) => Math.max(a, b));
+            return this._data(args.LIST_ID).value.reduce((a, b) => Math.max(a, b));
         }
     }
 
@@ -727,7 +744,7 @@ class Scratch3DataViewerBlocks {
     }
 
     setData (args) {
-        const data = this._data(args.DATA_ID);
+        const data = this._data(args.LIST_ID);
         if (data) {
             data.value = this._textToData(args.DATA);
         }
@@ -807,28 +824,35 @@ class Scratch3DataViewerBlocks {
     dataLoop (args, util) {
         // Initialize loop
         if (typeof util.stackFrame.loopCounter === 'undefined') {
-            util.stackFrame.loopCounter = this.getDataLength(args);
-            util.stackFrame.dataviewerListID = args.DATA_ID;
+            util.stackFrame.loopLength = this.getDataLength(args);
+            util.stackFrame.loopCounter = -1;
+            util.stackFrame.dataviewerListID = args.LIST_ID;
         }
 
-        util.stackFrame.loopCounter--;
+        util.stackFrame.loopCounter++;
         // If we still have some left, start the branch.
-        if (util.stackFrame.loopCounter >= 0) {
+        if (util.stackFrame.loopLength - util.stackFrame.loopCounter > 0) {
             util.startBranch(1, true);
         }
     }
 
     getStatistic (args) {
+        let value;
         switch (args.FNC) {
         case 'mean':
-            return this._getMean(args);
+            value = this._getMean(args);
+            break;
         case 'min':
-            return this._getMin(args);
+            value = this._getMin(args);
+            break;
         case 'max':
-            return this._getMax(args);
-        default:
-            return 0;
+            value = this._getMax(args);
+            break;
         }
+        if (typeof value !== 'undefined') {
+            return value;
+        }
+        return '';
     }
 
     changeDataScale (args) {
@@ -837,11 +861,11 @@ class Scratch3DataViewerBlocks {
         const newMin = Cast.toNumber(args.NEW_MIN);
         const newMax = Cast.toNumber(args.NEW_MAX);
         for (let i = 0; i < this.getDataLength(args); i += 1) {
-            const oldValue = Cast.toNumber(this._data(args.DATA_ID).value[i]);
+            const oldValue = Cast.toNumber(this._data(args.LIST_ID).value[i]);
             const newValue = this._mapValue(oldValue, oldMin, oldMax, newMin, newMax);
             if (oldValue !== newValue) {
                 // Two decimal points is a trade-off between precision and legibility
-                this._data(args.DATA_ID).value[i] = Cast.toNumber(newValue.toFixed(2));
+                this._data(args.LIST_ID).value[i] = Cast.toNumber(newValue.toFixed(2));
             }
         }
     }
@@ -871,7 +895,7 @@ class Scratch3DataViewerBlocks {
 
     getDataIndex (args) {
         return this.dataBlocks.getItemOfList(
-            {LIST: {id: args.DATA_ID}, INDEX: args.INDEX},
+            {LIST: {id: args.LIST_ID}, INDEX: args.INDEX},
             {target: this._runtime.getTargetForStage()}
         );
     }

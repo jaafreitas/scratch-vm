@@ -2,6 +2,7 @@
     "pt-br": {
         "gui.extension.dataviewer.name": "Visualizador de Dados",
         "gui.extension.dataviewer.description": "Brinque com seus dados",
+        "gui.extension.dataviewer.index": "índice",
 
         "gui.stageHeader.dataviewerTable": "Visualizador de Dados em Tabela",
         "gui.stageHeader.dataviewerChart": "Visualizador de Dados em Gráfico",

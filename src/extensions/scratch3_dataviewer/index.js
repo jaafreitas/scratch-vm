@@ -708,6 +708,36 @@ class Scratch3DataViewerBlocks {
         return '';
     }
 
+    deleteOfList (args) {
+        const keepValue = (value, deleteValue, OP) => {
+            switch (OP) {
+            case '>':
+                return !(value > deleteValue);
+            case '<':
+                return !(value < deleteValue);
+            case '=':
+                return !(value === deleteValue);
+            default:
+                return true;
+            }
+        };
+        const data = this._data(args.LIST_ID);
+        let deleteValue = args.VALUE;
+        if (!isNaN(args.VALUE)) {
+            deleteValue = Cast.toNumber(args.VALUE);
+        }
+        if (data && deleteValue) {
+            const newList = [];
+            data.value.forEach(item => {
+                if (keepValue(item, deleteValue, args.OP)) {
+                    newList.push(item);
+                }
+            });
+            data.value = newList;
+            data._monitorUpToDate = false;
+        }
+    }
+
     changeDataScale (args) {
         const oldMin = this._getMin(args);
         const oldMax = this._getMax(args);

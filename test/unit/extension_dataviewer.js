@@ -307,6 +307,36 @@ test('Min / Max / Mean Strings', t => {
     t.end();
 });
 
+test('Data delete', t => {
+    const setup = setupDataViewer();
+
+    // greater than.
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '>', VALUE: '1'});
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 1);
+
+    // less than.
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '<', VALUE: '3'});
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 3);
+
+    // equals to.
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '=', VALUE: '2'});
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 3}), 1);
+
+    t.end();
+});
+
 test('changeDataScale Numbers', t => {
     const setup = setupDataViewer();
 

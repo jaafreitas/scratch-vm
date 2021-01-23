@@ -35,6 +35,14 @@ class Scratch3DataViewerBlocks {
         return 'dataviewer#read#all#lists';
     }
 
+    get DATA_TYPE_INDEX () {
+        return 'index';
+    }
+
+    get DATA_TYPE_VALUE () {
+        return 'value';
+    }
+
     get READ_ALL_LISTS_VALUE () {
         return formatMessage({
             id: 'dataviewer.allLists',
@@ -460,14 +468,14 @@ class Scratch3DataViewerBlocks {
                         id: 'dataviewer.menu.dataType.value',
                         default: 'values'
                     }),
-                    value: 'value'
+                    value: this.DATA_TYPE_VALUE
                 },
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.dataType.index',
                         default: 'indexes'
                     }),
-                    value: 'index'
+                    value: this.DATA_TYPE_INDEX
                 }
             ],
             dataMenu: {
@@ -779,7 +787,7 @@ class Scratch3DataViewerBlocks {
             const newList = [];
             list.value.forEach((item, index) => {
                 let currentValue;
-                if (args.DATA_TYPE === 'index') {
+                if (args.DATA_TYPE === this.DATA_TYPE_INDEX) {
                     currentValue = index + 1;
                 } else {
                     currentValue = item;
@@ -822,12 +830,12 @@ class Scratch3DataViewerBlocks {
         const newMin = Cast.toNumber(args.NEW_MIN);
         const newMax = Cast.toNumber(args.NEW_MAX);
         switch (args.DATA_TYPE) {
-        case 'index':
+        case this.DATA_TYPE_INDEX:
             oldMin = 0;
             oldMax = this.getDataLength(args) - 1;
             oldValue = this._getInternalIndex(args, util);
             break;
-        case 'value':
+        case this.DATA_TYPE_VALUE:
             oldMin = this._getMin(args);
             oldMax = this._getMax(args);
             oldValue = this._getValue(args, util);

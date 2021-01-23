@@ -100,12 +100,6 @@ test('Data', t => {
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#3'}), 4);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 4}), 'dddd');
 
-    // Deleting data.
-    setup.dv.dataBlocks.deleteOfList(
-        {LIST: {id: 'dataviewer#list#3', name: 'list 3'}, INDEX: 2},
-        {target: setup.dv._runtime.getEditingTarget()});
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#3'}), 3);
-
     t.end();
 });
 
@@ -312,7 +306,7 @@ test('Data delete value', t => {
 
     // greater than.
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '>', VALUE: '1', DATA_TYPE: 'value'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '>', VALUE: '1', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 2);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 1);
@@ -320,14 +314,14 @@ test('Data delete value', t => {
 
     // less than.
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '<', VALUE: '3', DATA_TYPE: 'value'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '<', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 1);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 3);
 
     // equals to.
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '=', VALUE: '2', DATA_TYPE: 'value'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '=', VALUE: '2', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 3);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 1);
@@ -336,13 +330,14 @@ test('Data delete value', t => {
 
     // equals to 'defaultValue'.
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '=', VALUE: ' ', DATA_TYPE: 'value'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '=', VALUE: ' ', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 5);
 
     // All lists
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: 'a bb ccc bb d'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'd bb bbb'});
-    setup.dv.deleteOfList({LIST_ID: setup.dv.READ_ALL_LISTS_ID, OP: '=', VALUE: 'bb', DATA_TYPE: 'value'});
+    setup.dv.deleteOfList(
+        {LIST_ID: setup.dv.READ_ALL_LISTS_ID, OP: '=', VALUE: 'bb', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 3);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 'a');
@@ -360,7 +355,7 @@ test('Data delete index', t => {
     const setup = setupDataViewer();
 
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '>', VALUE: '2', DATA_TYPE: 'index'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '>', VALUE: '2', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 2);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 1);
@@ -368,7 +363,7 @@ test('Data delete index', t => {
 
     // less than.
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '<', VALUE: '3', DATA_TYPE: 'index'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '<', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 3);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 3);
@@ -377,7 +372,7 @@ test('Data delete index', t => {
 
     // equals to.
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '=', VALUE: '3', DATA_TYPE: 'index'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '=', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 4);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 1);
@@ -387,13 +382,14 @@ test('Data delete index', t => {
 
     // equals to 'defaultValue'.
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '=', VALUE: ' ', DATA_TYPE: 'index'});
+    setup.dv.deleteOfList({LIST_ID: 'dataviewer#list#1', OP: '=', VALUE: ' ', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 5);
 
     // All lists
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: 'a bb ccc bb d'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'd bb bbb'});
-    setup.dv.deleteOfList({LIST_ID: setup.dv.READ_ALL_LISTS_ID, OP: '>', VALUE: '3', DATA_TYPE: 'index'});
+    setup.dv.deleteOfList({
+        LIST_ID: setup.dv.READ_ALL_LISTS_ID, OP: '>', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 3);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 'a');
@@ -460,8 +456,8 @@ test('Data Loop Map Numbers', t => {
 
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '10 20 30 40 50'});
 
-    const argValue = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'value', NEW_MIN: 0, NEW_MAX: 100};
-    const argIndex = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'index', NEW_MIN: 0, NEW_MAX: 0.9};
+    const argValue = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: setup.dv.DATA_TYPE_VALUE, NEW_MIN: 0, NEW_MAX: 100};
+    const argIndex = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: setup.dv.DATA_TYPE_INDEX, NEW_MIN: 0, NEW_MAX: 0.9};
 
     // Initial state.
     t.equivalent(setup.dv._mapData(argValue, utilList1), null);
@@ -498,8 +494,8 @@ test('Data Loop Map Numbers + Strings', t => {
 
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 CCC'});
 
-    const argValue = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'value', NEW_MIN: 0, NEW_MAX: 100};
-    const argIndex = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: 'index', NEW_MIN: 0, NEW_MAX: 100};
+    const argValue = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: setup.dv.DATA_TYPE_VALUE, NEW_MIN: 0, NEW_MAX: 100};
+    const argIndex = {LIST_ID: 'dataviewer#list#1', DATA_TYPE: setup.dv.DATA_TYPE_INDEX, NEW_MIN: 0, NEW_MAX: 100};
 
     setup.dv.dataLoop({LIST_ID: 'dataviewer#list#1'}, utilList1);
     t.equal(setup.dv.mapData(argValue, utilList1), '');

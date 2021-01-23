@@ -201,7 +201,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'dataLoop',
                 text: formatMessage({
                     id: 'dataviewer.dataLoop',
-                    default: 'read all values from [LIST_ID]'
+                    default: 'read all values of [LIST_ID]'
                 }),
                 blockType: BlockType.LOOP,
                 arguments: {
@@ -216,7 +216,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'getValue',
                 text: formatMessage({
                     id: 'dataviewer.getValue',
-                    default: 'value from [LIST_ID]'
+                    default: 'value of [LIST_ID]'
                 }),
                 blockType: BlockType.REPORTER,
                 disableMonitor: true,
@@ -232,7 +232,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'getIndex',
                 text: formatMessage({
                     id: 'dataviewer.getIndex',
-                    default: 'index from [LIST_ID]'
+                    default: 'index of [LIST_ID]'
                 }),
                 blockType: BlockType.REPORTER,
                 disableMonitor: true,
@@ -248,7 +248,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'getStatistic',
                 text: formatMessage({
                     id: 'dataviewer.getStatistic',
-                    default: '[FNC] [LIST_ID]'
+                    default: '[FNC] value of [LIST_ID]'
                 }),
                 blockType: BlockType.REPORTER,
                 disableMonitor: true,
@@ -269,10 +269,15 @@ class Scratch3DataViewerBlocks {
                 opcode: 'deleteOfList',
                 text: formatMessage({
                     id: 'dataviewer.deleteOfList',
-                    default: 'delete values [OP] [VALUE] of [LIST_ID]'
+                    default: 'delete [DATA_TYPE] [OP] [VALUE] of [LIST_ID]'
                 }),
                 blockType: BlockType.COMMAND,
                 arguments: {
+                    DATA_TYPE: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataType',
+                        defaultValue: 'value'
+                    },
                     OP: {
                         type: ArgumentType.STRING,
                         menu: 'deleteListOpMenu',
@@ -316,7 +321,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'mapData',
                 text: formatMessage({
                     id: 'dataviewer.mapData',
-                    default: 'map [LIST_ID] [DATA_TYPE] to [NEW_MIN] [NEW_MAX]'
+                    default: 'map [DATA_TYPE] of [LIST_ID] to [NEW_MIN] [NEW_MAX]'
                 }),
                 blockType: BlockType.REPORTER,
                 disableMonitor: true,
@@ -453,14 +458,14 @@ class Scratch3DataViewerBlocks {
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.dataType.value',
-                        default: 'value'
+                        default: 'values'
                     }),
                     value: 'value'
                 },
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.dataType.index',
-                        default: 'index'
+                        default: 'indexes'
                     }),
                     value: 'index'
                 }

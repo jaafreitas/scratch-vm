@@ -708,34 +708,42 @@ class Scratch3DataViewerBlocks {
         return '';
     }
 
+    _keepValueInList (value, deleteValue, OP) {
+        switch (OP) {
+        case '>':
+            return !(value > deleteValue);
+        case '<':
+            return !(value < deleteValue);
+        case '=':
+            return !(value === deleteValue);
+        default:
+            return true;
+        }
+    }
+
     deleteOfList (args) {
-        const keepValue = (value, deleteValue, OP) => {
-            switch (OP) {
-            case '>':
-                return !(value > deleteValue);
-            case '<':
-                return !(value < deleteValue);
-            case '=':
-                return !(value === deleteValue);
-            default:
-                return true;
-            }
-        };
-        const data = this._data(args.LIST_ID);
         let deleteValue = args.VALUE;
         if (!isNaN(args.VALUE)) {
             deleteValue = Cast.toNumber(args.VALUE);
         }
-        if (data && deleteValue) {
+
+        const lists = [];
+        if (args.LIST_ID === this.READ_ALL_LISTS_ID) {
+            const items = this.getDataMenu();
+            items.forEach(item => lists.push(this._data(item.value)));
+        } else {
+            lists.push(this._data(args.LIST_ID));
+        }
+        lists.forEach(list => {
             const newList = [];
-            data.value.forEach(item => {
-                if (keepValue(item, deleteValue, args.OP)) {
+            list.value.forEach(item => {
+                if (this._keepValueInList(item, deleteValue, args.OP)) {
                     newList.push(item);
                 }
             });
-            data.value = newList;
-            data._monitorUpToDate = false;
-        }
+            list.value = newList;
+            list._monitorUpToDate = false;
+        });
     }
 
     changeDataScale (args) {

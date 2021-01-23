@@ -334,6 +334,21 @@ test('Data delete', t => {
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 3);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 3}), 1);
 
+
+    // All lists
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: 'a bb ccc bb d'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'd bb bbb'});
+    setup.dv.deleteOfList({LIST_ID: setup.dv.READ_ALL_LISTS_ID, OP: '=', VALUE: 'bb'});
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 'a');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 'ccc');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 3}), 'd');
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 1}), 'd');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 2}), 'bbb');
+
     t.end();
 });
 

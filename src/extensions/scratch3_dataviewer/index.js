@@ -265,6 +265,30 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
+            deleteOfList: {
+                opcode: 'deleteOfList',
+                text: formatMessage({
+                    id: 'dataviewer.deleteOfList',
+                    default: 'delete values [OP] [VALUE] of [LIST_ID]'
+                }),
+                blockType: BlockType.COMMAND,
+                arguments: {
+                    OP: {
+                        type: ArgumentType.STRING,
+                        menu: 'deleteListOpMenu',
+                        defaultValue: '='
+                    },
+                    VALUE: {
+                        type: ArgumentType.STRING,
+                        defaultValue: ' '
+                    },
+                    LIST_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataLoopMenu',
+                        defaultValue: this.getDataMenuDefaultValue()
+                    }
+                }
+            },
             changeDataScale: {
                 opcode: 'changeDataScale',
                 text: formatMessage({
@@ -351,6 +375,7 @@ class Scratch3DataViewerBlocks {
         const blocks = [
             allBlocks.setData,
             allBlocks.changeDataScale,
+            allBlocks.deleteOfList,
             allBlocks.dataLoop,
             allBlocks.getValue,
             allBlocks.getIndex,
@@ -411,6 +436,17 @@ class Scratch3DataViewerBlocks {
                         default: 'max'
                     }),
                     value: 'max'
+                }
+            ],
+            deleteListOpMenu: [
+                {
+                    text: '>', value: '>'
+                },
+                {
+                    text: '<', value: '<'
+                },
+                {
+                    text: '=', value: '='
                 }
             ],
             dataType: [
@@ -722,8 +758,8 @@ class Scratch3DataViewerBlocks {
     }
 
     deleteOfList (args) {
-        let deleteValue = args.VALUE;
-        if (!isNaN(args.VALUE)) {
+        let deleteValue = args.VALUE.trim();
+        if (deleteValue !== '' && !isNaN(args.VALUE)) {
             deleteValue = Cast.toNumber(args.VALUE);
         }
 

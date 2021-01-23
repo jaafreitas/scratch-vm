@@ -777,8 +777,14 @@ class Scratch3DataViewerBlocks {
         }
         lists.forEach(list => {
             const newList = [];
-            list.value.forEach(item => {
-                if (this._keepValueInList(item, deleteValue, args.OP)) {
+            list.value.forEach((item, index) => {
+                let currentValue;
+                if (args.DATA_TYPE === 'index') {
+                    currentValue = index + 1;
+                } else {
+                    currentValue = item;
+                }
+                if (this._keepValueInList(currentValue, deleteValue, args.OP)) {
                     newList.push(item);
                 }
             });

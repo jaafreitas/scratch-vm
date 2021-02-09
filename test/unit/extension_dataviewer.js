@@ -560,15 +560,18 @@ test('Data Loop Menu', t => {
 
     let items = setup.dv.getDataLoopMenu();
     t.equal(items.length, 3);
-    t.equal(items[2].text, setup.dv.READ_ALL_LISTS_VALUE);
-    t.equal(items[2].value, setup.dv.READ_ALL_LISTS_ID);
+    t.equal(items[0].text, setup.dv.READ_ALL_LISTS_VALUE);
+    t.equal(items[0].value, setup.dv.READ_ALL_LISTS_ID);
+    t.equal(items[1].value, 'dataviewer#list#1');
+    t.equal(items[2].value, 'dataviewer#list#2');
 
     const stage = setup.dv._runtime.getTargetForStage();
-    stage.deleteVariable('dataviewer#list#2');
+    stage.deleteVariable('dataviewer#list#1');
     items = setup.dv.getDataLoopMenu();
     t.equal(items.length, 2);
-    t.equal(items[1].text, setup.dv.READ_ALL_LISTS_VALUE);
-    t.equal(items[1].value, setup.dv.READ_ALL_LISTS_ID);
+    t.equal(items[0].text, setup.dv.READ_ALL_LISTS_VALUE);
+    t.equal(items[0].value, setup.dv.READ_ALL_LISTS_ID);
+    t.equal(items[1].value, 'dataviewer#list#2');
 
     t.end();
 });

@@ -216,7 +216,7 @@ class Scratch3DataViewerBlocks {
                     LIST_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataLoopMenu',
-                        defaultValue: this.getDataMenuDefaultValue()
+                        defaultValue: this.getDataMenuDefaultValue(true)
                     }
                 }
             },
@@ -489,8 +489,8 @@ class Scratch3DataViewerBlocks {
     }
 
     getDataLoopMenu () {
-        const items = this.getDataMenu();
-        items.push(({text: this.READ_ALL_LISTS_VALUE, value: this.READ_ALL_LISTS_ID}));
+        const items = [{text: this.READ_ALL_LISTS_VALUE, value: this.READ_ALL_LISTS_ID}];
+        this.getDataMenu().forEach(item => items.push(item));
         return items;
     }
 
@@ -513,8 +513,13 @@ class Scratch3DataViewerBlocks {
         return items;
     }
 
-    getDataMenuDefaultValue () {
-        const items = this.getDataMenu();
+    getDataMenuDefaultValue (isDataLoopMenu = false) {
+        let items;
+        if (isDataLoopMenu) {
+            items = this.getDataLoopMenu();
+        } else {
+            items = this.getDataMenu();
+        }
         if (items.length > 0) {
             return items[0].value;
         }

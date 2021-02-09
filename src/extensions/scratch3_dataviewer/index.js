@@ -277,7 +277,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'deleteOfList',
                 text: formatMessage({
                     id: 'dataviewer.deleteOfList',
-                    default: 'delete [DATA_TYPE] [OP] [VALUE] of [LIST_ID]'
+                    default: 'delete [DATA_TYPE] [OP] [VALUE] of [LIST_ID] from [DATASET]'
                 }),
                 blockType: BlockType.COMMAND,
                 arguments: {
@@ -297,8 +297,13 @@ class Scratch3DataViewerBlocks {
                     },
                     LIST_ID: {
                         type: ArgumentType.STRING,
+                        menu: 'dataMenu',
+                        defaultValue: this.getDataMenuDefaultValue(false)
+                    },
+                    DATASET: {
+                        type: ArgumentType.STRING,
                         menu: 'dataLoopMenu',
-                        defaultValue: this.getDataMenuDefaultValue()
+                        defaultValue: this.getDataMenuDefaultValue(true)
                     }
                 }
             },
@@ -762,16 +767,16 @@ class Scratch3DataViewerBlocks {
         return '';
     }
 
-    _keepValueInList (value, deleteValue, OP) {
+    _deleteValueInList (value, deleteValue, OP) {
         switch (OP) {
         case '>':
-            return !(value > deleteValue);
+            return (value > deleteValue);
         case '<':
-            return !(value < deleteValue);
+            return (value < deleteValue);
         case '=':
-            return !(value === deleteValue);
+            return (value === deleteValue);
         default:
-            return true;
+            return false;
         }
     }
 
@@ -780,28 +785,36 @@ class Scratch3DataViewerBlocks {
         if (deleteValue !== '' && !isNaN(args.VALUE)) {
             deleteValue = Cast.toNumber(args.VALUE);
         }
+        if (typeof args.DATASET === 'undefined') {
+            args.DATASET = args.LIST_ID;
+        }
+
+        const deleteValueIndex = [];
+        this._data(args.LIST_ID).value.forEach((item, index) => {
+            let currentValue;
+            if (args.DATA_TYPE === this.DATA_TYPE_INDEX) {
+                currentValue = index + 1;
+            } else {
+                currentValue = item;
+            }
+            if (this._deleteValueInList(currentValue, deleteValue, args.OP)) {
+                deleteValueIndex.push(index);
+            }
+        });
 
         const lists = [];
-        if (args.LIST_ID === this.READ_ALL_LISTS_ID) {
+        if (args.DATASET === this.READ_ALL_LISTS_ID) {
             const items = this.getDataMenu();
             items.forEach(item => lists.push(this._data(item.value)));
         } else {
-            lists.push(this._data(args.LIST_ID));
+            lists.push(this._data(args.DATASET));
         }
+
         lists.forEach(list => {
-            const newList = [];
-            list.value.forEach((item, index) => {
-                let currentValue;
-                if (args.DATA_TYPE === this.DATA_TYPE_INDEX) {
-                    currentValue = index + 1;
-                } else {
-                    currentValue = item;
-                }
-                if (this._keepValueInList(currentValue, deleteValue, args.OP)) {
-                    newList.push(item);
-                }
-            });
-            list.value = newList;
+            deleteValueIndex.forEach(index => delete list.value[index]);
+            const newValues = list.value.filter(value => typeof value !== 'undefined');
+
+            list.value = newValues;
             list._monitorUpToDate = false;
         });
     }

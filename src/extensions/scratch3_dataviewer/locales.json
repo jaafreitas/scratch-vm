@@ -22,7 +22,7 @@
         "dataviewer.getValue": "valor de [LIST_ID]",
         "dataviewer.getIndex": "índice de [LIST_ID]",
         "dataviewer.getStatistic": "[FNC] de [LIST_ID]",
-        "dataviewer.deleteOfList": "apague [DATA_TYPE] [OP] [VALUE] de [LIST_ID]",
+        "dataviewer.deleteOfList": "apague [DATA_TYPE] [OP] [VALUE] de [LIST_ID] de [DATASET]",
         "dataviewer.changeDataScale": "mude a escala de [LIST_ID] para [NEW_MIN] [NEW_MAX]",
         "dataviewer.mapData": "mude a escala de [DATA_TYPE] de [LIST_ID] para [NEW_MIN] [NEW_MAX]",
 

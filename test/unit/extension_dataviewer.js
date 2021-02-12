@@ -497,7 +497,7 @@ test('Order data value from all lists', t => {
     setup.dv.orderList({
         LIST_ID: 'dataviewer#list#1',
         DATASET: setup.dv.READ_ALL_LISTS_ID,
-        ORDER: 'ASC'
+        ORDER: setup.dv.ORDER_ASC
     });
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 5);
@@ -521,7 +521,7 @@ test('Order data value from all lists', t => {
     setup.dv.orderList({
         LIST_ID: 'dataviewer#list#1',
         DATASET: setup.dv.READ_ALL_LISTS_ID,
-        ORDER: 'DESC'
+        ORDER: setup.dv.ORDER_DESC
     });
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 3);
@@ -537,7 +537,7 @@ test('Order data value from all lists', t => {
     setup.dv.orderList({
         LIST_ID: 'dataviewer#list#1',
         DATASET: 'dataviewer#list#1',
-        ORDER: 'ASC'
+        ORDER: setup.dv.ORDER_ASC
     });
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 5);
@@ -561,7 +561,7 @@ test('Order data value from all lists', t => {
     setup.dv.orderList({
         LIST_ID: 'dataviewer#list#1',
         DATASET: 'dataviewer#list#1',
-        ORDER: 'DESC'
+        ORDER: setup.dv.ORDER_DESC
     });
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 3);

@@ -23,6 +23,7 @@
         "dataviewer.getIndex": "índice de [LIST_ID]",
         "dataviewer.getStatistic": "[FNC] de [LIST_ID]",
         "dataviewer.deleteOfList": "apague [DATA_TYPE] [OP] [VALUE] de [LIST_ID] de [DATASET]",
+        "dataviewer.orderList": "ordene [LIST_ID] [ORDER] de [DATASET]",
         "dataviewer.changeDataScale": "mude a escala de [LIST_ID] para [NEW_MIN] [NEW_MAX]",
         "dataviewer.mapData": "mude a escala de [DATA_TYPE] de [LIST_ID] para [NEW_MIN] [NEW_MAX]",
 
@@ -31,6 +32,8 @@
         "dataviewer.menu.statisticFunctions.max": "máximo",
         "dataviewer.menu.dataType.value": "valores",
         "dataviewer.menu.dataType.index": "índices",
+        "dataviewer.menu.orderList.ascendant": "ascendente",
+        "dataviewer.menu.orderList.descendent": "descendente",
 
         "dataviewer.list": "lista",
         "dataviewer.allLists": "todas as listas"

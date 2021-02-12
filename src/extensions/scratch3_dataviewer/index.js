@@ -43,6 +43,14 @@ class Scratch3DataViewerBlocks {
         return 'value';
     }
 
+    get ORDER_ASC () {
+        return 'ASC';
+    }
+
+    get ORDER_DESC () {
+        return 'DESC';
+    }
+
     get READ_ALL_LISTS_VALUE () {
         return formatMessage({
             id: 'dataviewer.allLists',
@@ -307,6 +315,31 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
+            orderList: {
+                opcode: 'orderList',
+                text: formatMessage({
+                    id: 'dataviewer.orderList',
+                    default: 'order [LIST_ID] [ORDER] from [DATASET]'
+                }),
+                blockType: BlockType.COMMAND,
+                arguments: {
+                    ORDER: {
+                        type: ArgumentType.STRING,
+                        menu: 'orderListMenu',
+                        defaultValue: this.ORDER_ASC
+                    },
+                    LIST_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataMenu',
+                        defaultValue: this.getDataMenuDefaultValue(false)
+                    },
+                    DATASET: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataLoopMenu',
+                        defaultValue: this.getDataMenuDefaultValue(true)
+                    }
+                }
+            },
             changeDataScale: {
                 opcode: 'changeDataScale',
                 text: formatMessage({
@@ -394,6 +427,7 @@ class Scratch3DataViewerBlocks {
             allBlocks.setData,
             allBlocks.changeDataScale,
             allBlocks.deleteOfList,
+            allBlocks.orderList,
             allBlocks.dataLoop,
             allBlocks.getValue,
             allBlocks.getIndex,
@@ -467,6 +501,23 @@ class Scratch3DataViewerBlocks {
                     text: '=', value: '='
                 }
             ],
+            orderListMenu: [
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.orderList.ascendant',
+                        default: 'ascendant'
+                    }),
+                    value: this.ORDER_ASC
+                },
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.orderList.descendent',
+                        default: 'descendent'
+                    }),
+                    value: this.ORDER_DESC
+                }
+            ],
+
             dataType: [
                 {
                     text: formatMessage({

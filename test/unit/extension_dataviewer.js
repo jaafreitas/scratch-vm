@@ -409,7 +409,8 @@ test('Data delete value from all lists', t => {
 
     // DATASET = all lists
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '2 3 4 3 2'});
-    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'II III IV III II'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'II III IV III II I'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#3', DATA: 'B c D C'});
 
     setup.dv.deleteOfList({
         DATA_TYPE: setup.dv.DATA_TYPE_VALUE,
@@ -423,9 +424,13 @@ test('Data delete value from all lists', t => {
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 2);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 2);
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 2);
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 3);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 1}), 'II');
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 2}), 'II');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 3}), 'I');
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#3'}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 1}), 'B');
 
     // DATASET = specific list
     setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '2 3 4 3 2'});

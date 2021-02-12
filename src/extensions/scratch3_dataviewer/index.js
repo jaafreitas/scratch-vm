@@ -533,7 +533,7 @@ class Scratch3DataViewerBlocks {
     _data (varID) {
         const stage = this._runtime.getTargetForStage();
         if (stage) {
-            const variable = stage.lookupVariableById(varID);
+            const variable = stage.lookupOrCreateList(varID, varID);
             return variable;
         }
     }

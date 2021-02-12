@@ -495,10 +495,19 @@ class Scratch3DataViewerBlocks {
                     text: '>', value: '>'
                 },
                 {
+                    text: '≥', value: '>='
+                },
+                {
                     text: '<', value: '<'
                 },
                 {
+                    text: '≤', value: '<='
+                },
+                {
                     text: '=', value: '='
+                },
+                {
+                    text: '≠', value: '!='
                 }
             ],
             orderListMenu: [
@@ -853,10 +862,16 @@ class Scratch3DataViewerBlocks {
         switch (OP) {
         case '>':
             return (value > deleteValue);
+        case '>=':
+            return (value >= deleteValue);
         case '<':
             return (value < deleteValue);
+        case '<=':
+            return (value <= deleteValue);
         case '=':
             return (value === deleteValue);
+        case '!=':
+            return (value !== deleteValue);
         default:
             return false;
         }

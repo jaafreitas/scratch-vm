@@ -530,6 +530,37 @@ class Scratch3DataViewerBlocks {
         }
     }
 
+    _listsToDataset () {
+        const dataset = [];
+
+        const maxDataLengthReadAll = this._getMaxDataLengthReadAll();
+        const items = this.getDataMenu();
+
+        for (let i = 0; i < maxDataLengthReadAll; i++) {
+            const data = {};
+            items.forEach(item => {
+                data[item.value] = this._data(item.value).value[i];
+            });
+            dataset.push(data);
+        }
+
+        return dataset;
+    }
+
+    _datasetToLists (dataset) {
+        const lists = {};
+        dataset.forEach((item, index) => {
+            Object.keys(dataset[0]).forEach(listID => {
+                if (index === 0) {
+                    lists[listID] = [];
+                }
+                lists[listID].push(dataset[index][listID]);
+            });
+        });
+
+        return lists;
+    }
+
     _data (varID) {
         const stage = this._runtime.getTargetForStage();
         if (stage) {
@@ -817,6 +848,33 @@ class Scratch3DataViewerBlocks {
             list.value = newValues;
             list._monitorUpToDate = false;
         });
+    }
+
+    orderList (args) {
+        if (args.DATASET === this.READ_ALL_LISTS_ID) {
+            const dataset = this._listsToDataset();
+            dataset.sort((a, b) => {
+                let x = a[args.LIST_ID] - b[args.LIST_ID];
+                if (args.ORDER === 'DESC') {
+                    x = x * -1;
+                }
+                return x;
+            });
+            const lists = this._datasetToLists(dataset);
+            Object.keys(lists).forEach(listID => {
+                this._data(listID).value = lists[listID];
+                this._data(listID)._monitorUpToDate = false;
+            });
+        } else {
+            this._data(args.LIST_ID).value.sort((a, b) => {
+                let x = a - b;
+                if (args.ORDER === 'DESC') {
+                    x = x * -1;
+                }
+                return x;
+            });
+            this._data(args.LIST_ID)._monitorUpToDate = false;
+        }
     }
 
     changeDataScale (args) {

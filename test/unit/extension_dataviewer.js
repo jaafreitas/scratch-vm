@@ -453,6 +453,127 @@ test('Data delete value from all lists', t => {
     t.end();
 });
 
+test('all lists to dataset to lists', t => {
+    const setup = setupDataViewer();
+
+    // DATASET = all lists
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'A B C'});
+
+    const dataset = setup.dv._listsToDataset();
+
+    t.equal(dataset.length, 3);
+    t.equal(dataset[0]['dataviewer#list#1'], 1);
+    t.equal(dataset[0]['dataviewer#list#2'], 'A');
+    t.equal(dataset[1]['dataviewer#list#1'], 2);
+    t.equal(dataset[1]['dataviewer#list#2'], 'B');
+    t.equal(dataset[2]['dataviewer#list#1'], 3);
+    t.equal(dataset[2]['dataviewer#list#2'], 'C');
+
+    const lists = setup.dv._datasetToLists(dataset);
+    t.equal(Object.keys(lists).length, 2);
+    t.equal(lists['dataviewer#list#1'].length, 3);
+    t.equal(lists['dataviewer#list#2'].length, 3);
+
+    t.equal(lists['dataviewer#list#1'][0], 1);
+    t.equal(lists['dataviewer#list#1'][1], 2);
+    t.equal(lists['dataviewer#list#1'][2], 3);
+    t.equal(lists['dataviewer#list#2'][0], 'A');
+    t.equal(lists['dataviewer#list#2'][1], 'B');
+    t.equal(lists['dataviewer#list#2'][2], 'C');
+
+
+    t.end();
+});
+
+
+test('Order data value from all lists', t => {
+    const setup = setupDataViewer();
+
+    // DATASET = all lists ASC
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '3 2 1 2 3'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'IId IIIa IV IIIb IIc'});
+
+    setup.dv.orderList({
+        LIST_ID: 'dataviewer#list#1',
+        DATASET: setup.dv.READ_ALL_LISTS_ID,
+        ORDER: 'ASC'
+    });
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 5);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 3}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 4}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 5}), 3);
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 5);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 1}), 'IV');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 2}), 'IIIa');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 3}), 'IIIb');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 4}), 'IId');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 5}), 'IIc');
+
+    // // DATASET = all lists DESC
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: ''});
+
+    setup.dv.orderList({
+        LIST_ID: 'dataviewer#list#1',
+        DATASET: setup.dv.READ_ALL_LISTS_ID,
+        ORDER: 'DESC'
+    });
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 3}), 1);
+
+
+    // DATASET = specific list ASC
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '2 3 4 3 2'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'II III IV III II'});
+
+    setup.dv.orderList({
+        LIST_ID: 'dataviewer#list#1',
+        DATASET: 'dataviewer#list#1',
+        ORDER: 'ASC'
+    });
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 5);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 3}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 4}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 5}), 4);
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 5);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 1}), 'II');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 2}), 'III');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 3}), 'IV');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 4}), 'III');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 5}), 'II');
+
+    // DATASET = specific list DESC
+    setup.dv.setData({LIST_ID: 'dataviewer#list#1', DATA: '1 2 3'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: ''});
+
+    setup.dv.orderList({
+        LIST_ID: 'dataviewer#list#1',
+        DATASET: 'dataviewer#list#1',
+        ORDER: 'DESC'
+    });
+
+    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#1'}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 1}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#1', INDEX: 3}), 1);
+
+
+    t.end();
+});
+
+
 test('changeDataScale Numbers', t => {
     const setup = setupDataViewer();
 

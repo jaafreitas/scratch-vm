@@ -315,11 +315,35 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
+            deleteOfListAllLists: {
+                opcode: 'deleteOfListAllLists',
+                text: formatMessage({
+                    id: 'dataviewer.deleteOfListAllLists',
+                    default: 'delete values [OP] [VALUE] of [LIST_ID]'
+                }),
+                blockType: BlockType.COMMAND,
+                arguments: {
+                    OP: {
+                        type: ArgumentType.STRING,
+                        menu: 'deleteListOpMenu',
+                        defaultValue: '='
+                    },
+                    VALUE: {
+                        type: ArgumentType.STRING,
+                        defaultValue: ' '
+                    },
+                    LIST_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataMenu',
+                        defaultValue: this.getDataMenuDefaultValue(false)
+                    }
+                }
+            },
             orderList: {
                 opcode: 'orderList',
                 text: formatMessage({
                     id: 'dataviewer.orderList',
-                    default: 'order [LIST_ID] [ORDER] from [DATASET]'
+                    default: 'order values of [LIST_ID] [ORDER] from [DATASET]'
                 }),
                 blockType: BlockType.COMMAND,
                 arguments: {
@@ -337,6 +361,26 @@ class Scratch3DataViewerBlocks {
                         type: ArgumentType.STRING,
                         menu: 'dataLoopMenu',
                         defaultValue: this.getDataMenuDefaultValue(true)
+                    }
+                }
+            },
+            orderListAllLists: {
+                opcode: 'orderListAllLists',
+                text: formatMessage({
+                    id: 'dataviewer.orderListAllLists',
+                    default: 'order values of [LIST_ID] [ORDER]'
+                }),
+                blockType: BlockType.COMMAND,
+                arguments: {
+                    ORDER: {
+                        type: ArgumentType.STRING,
+                        menu: 'orderListMenu',
+                        defaultValue: this.ORDER_ASC
+                    },
+                    LIST_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataMenu',
+                        defaultValue: this.getDataMenuDefaultValue(false)
                     }
                 }
             },
@@ -426,8 +470,8 @@ class Scratch3DataViewerBlocks {
         const blocks = [
             allBlocks.setData,
             allBlocks.changeDataScale,
-            allBlocks.deleteOfList,
-            allBlocks.orderList,
+            allBlocks.deleteOfListAllLists,
+            allBlocks.orderListAllLists,
             allBlocks.dataLoop,
             allBlocks.getValue,
             allBlocks.getIndex,
@@ -448,7 +492,9 @@ class Scratch3DataViewerBlocks {
                 allBlocks.readCSVDataFromURL,
                 allBlocks.readThingSpeakData,
                 '---',
-                allBlocks.mapData
+                allBlocks.mapData,
+                allBlocks.deleteOfList,
+                allBlocks.orderList
             );
         }
         // if we try load a project with the extra blocks using the minimal-block version,
@@ -916,6 +962,12 @@ class Scratch3DataViewerBlocks {
         });
     }
 
+    deleteOfListAllLists (args) {
+        args.DATA_TYPE = this.DATA_TYPE_VALUE;
+        args.DATASET = this.READ_ALL_LISTS_ID;
+        this.deleteOfList(args);
+    }
+
     orderList (args) {
         if (args.DATASET === this.READ_ALL_LISTS_ID) {
             const dataset = this._listsToDataset();
@@ -941,6 +993,11 @@ class Scratch3DataViewerBlocks {
             });
             this._data(args.LIST_ID)._monitorUpToDate = false;
         }
+    }
+
+    orderListAllLists (args) {
+        args.DATASET = this.READ_ALL_LISTS_ID;
+        this.orderList(args);
     }
 
     changeDataScale (args) {

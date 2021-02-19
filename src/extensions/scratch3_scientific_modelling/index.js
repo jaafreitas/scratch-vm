@@ -54,13 +54,13 @@ class Scratch3ScientificModellingBlocks {
         this.runtime.on(Runtime.BLOCKSINFO_UPDATE, this._blocksInfoUpdate.bind(this));
         this.isTemperatureSliderLoaded = false;
         this._blocksInfoUpdate();
-       
+
         // When a new project is started and the extension is still loaded,
         // the temperature slider can be missed. If the project already has one,
         // there won't be any problem, but if it's a blank one, we need to recreate the slider.
         this.runtime.on(Runtime.RUNTIME_DISPOSED, this._runtimeDisposed.bind(this));
 
-        this._steppingInterval = null;        
+        this._steppingInterval = null;
         this.clonesList = [];
         this.compTemp = 0;
         this.counter = 0;
@@ -70,13 +70,13 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _particles () {
-        return this.clonesList
+        return this.clonesList;
     }
 
     _projectStart () {
         this._createStepInterval();
     }
-    
+
     _projectRunStart () {
         this._createStepInterval();
     }
@@ -91,7 +91,7 @@ class Scratch3ScientificModellingBlocks {
         }
     }
 
-    _runtimeDisposed() {
+    _runtimeDisposed () {
         this.isTemperatureSliderLoaded = false;
     }
 
@@ -99,7 +99,7 @@ class Scratch3ScientificModellingBlocks {
         if (!this.isTemperatureSliderLoaded) {
             const stage = this.runtime.getTargetForStage();
             if (stage) {
-                const args = { VARIABLE: { id: 'temperatureSlider', name: 'temperature' }, VALUE: 50 };
+                const args = {VARIABLE: {id: 'temperatureSlider', name: 'temperature'}, VALUE: 50};
 
                 // If we are loading a project, maybe it already has one.
                 if (!stage.variables.hasOwnProperty(args.VARIABLE.id)) {
@@ -169,11 +169,11 @@ class Scratch3ScientificModellingBlocks {
             this.counter = 0;
         }
         if (this.counter % 3 === 0) {
-            for (let i = 0; i< this.clonesList.length; i++) {
-                if(this.clonesList[i].collide) {
+            for (let i = 0; i < this.clonesList.length; i++) {
+                if (this.clonesList[i].collide) {
                     this.clonesList[i].collide = false;
                 }
-               
+
             }
         }
         this.counter++;
@@ -236,7 +236,7 @@ class Scratch3ScientificModellingBlocks {
                             menu: 'particleposition',
                             defaultValue: ''
                         }
-                        
+
                     }
                 },
 
@@ -254,7 +254,7 @@ class Scratch3ScientificModellingBlocks {
                             type: ArgumentType.STRING,
                             menu: 'whenparticletemperature',
                             defaultValue: ''
-                            
+
                         }
                     }
                 },
@@ -294,6 +294,7 @@ class Scratch3ScientificModellingBlocks {
                         id: 'scientificModelling.ifTouchingInvert',
                         default: 'if touching [TOUCHINGMENU] go to the oposite direction'
                     }),
+                    hideFromPalette: true,
                     filter: [TargetType.SPRITE],
                     arguments: {
                         TOUCHINGMENU: {
@@ -321,7 +322,7 @@ class Scratch3ScientificModellingBlocks {
                         }
                     }
                 },
-                
+
                 {
                     opcode: 'opositeDirection',
                     blockType: BlockType.COMMAND,
@@ -332,7 +333,7 @@ class Scratch3ScientificModellingBlocks {
                     }),
                     filter: [TargetType.SPRITE]
                 },
-            
+
                 {
                     opcode: 'numberParticleReporter',
                     blockType: BlockType.REPORTER,
@@ -350,7 +351,7 @@ class Scratch3ScientificModellingBlocks {
                         default: 'collisions per second'
                     })
                 }
-               
+
             ],
             menus: {
                 particlecolors: {
@@ -401,11 +402,11 @@ class Scratch3ScientificModellingBlocks {
         return costumes;
     }
 
-    getEditingTargetSpriteName() {
+    getEditingTargetSpriteName () {
         if (this.runtime.getEditingTarget()) {
             return this.runtime.getEditingTarget().sprite.name;
         }
-    }    
+    }
 
     get particleTemperatureMenu () {
         return [
@@ -488,7 +489,7 @@ class Scratch3ScientificModellingBlocks {
                 id: 'scientificModelling.positionMenuMouse',
                 default: 'on mouse position'}),
             value: 'mouse'}
-           
+
         ];
     }
 
@@ -496,7 +497,7 @@ class Scratch3ScientificModellingBlocks {
         // this.runtime._cloneCounter gives us the total of existing clones
         // total particles is the sum of the total of existing clones with the number of clones
         // we want to create
-        const totalParticles = this._particles().length + numberOfParticles;        
+        const totalParticles = this._particles().length + numberOfParticles;
         // verifies if after the creation there will be more clones than the amount allowed
         if (totalParticles > this.maxParticles) {
             numberOfParticles = this.maxParticles - this._particles().length;
@@ -506,7 +507,7 @@ class Scratch3ScientificModellingBlocks {
 
     _createNParticlesRandomly (numberOfParticles, util, rm) {
         if (util.target.isOriginal === false) {
-            return
+            return;
         }
         this.looks.show({}, {target: util.target});
         let c = 0;
@@ -539,12 +540,12 @@ class Scratch3ScientificModellingBlocks {
         }
         this.looks.hide({}, {target: util.target});
     }
-    
-    _polarToCartesian (r,theta) {
+
+    _polarToCartesian (r, theta) {
         theta = (theta * Math.PI) / 180;
-        let x = r * Math.cos(theta);
-        let y = r * Math.sin(theta);
-        return [x,y]
+        const x = r * Math.cos(theta);
+        const y = r * Math.sin(theta);
+        return [x, y];
     }
 
     _createNParticlesMouse (numberOfParticles, mousePosition, util) {
@@ -553,22 +554,22 @@ class Scratch3ScientificModellingBlocks {
         const stageWidth = this.runtime.constructor.STAGE_WIDTH;
         const stageHeight = this.runtime.constructor.STAGE_HEIGHT;
         if (mousePosition) {
-            mouseX =  util.ioQuery('mouse', 'getScratchX');
+            mouseX = util.ioQuery('mouse', 'getScratchX');
             mouseY = util.ioQuery('mouse', 'getScratchY');
         }
         // check if mouse is inside canvas
         if (Math.abs(mouseX) > stageWidth * 0.5 || Math.abs(mouseY) > stageHeight * 0.5) {
-            return
+            return;
         }
         if (util.target.isOriginal === false) {
-            return
+            return;
         }
         let r = 0;
         let theta = 0;
         let c = 0;
         let ifc = 0;
-        let dt = 20;
-        let dr = 15;
+        const dt = 20;
+        const dr = 15;
         for (let i = 0; i < numberOfParticles; i++) {
             this.looks.show({}, {target: util.target});
             const newClone = util.target.makeClone();
@@ -581,39 +582,39 @@ class Scratch3ScientificModellingBlocks {
                     if (ifc === 600) {
                         this.control.deleteClone({}, {target: newClone});
                         this.looks.hide({}, {target: util.target});
-                        return
+                        return;
                     }
-                    let x = mouseX + this._polarToCartesian(r,theta)[0];
-                    let y = mouseY + this._polarToCartesian(r,theta)[1];
+                    const x = mouseX + this._polarToCartesian(r, theta)[0];
+                    const y = mouseY + this._polarToCartesian(r, theta)[1];
                     if (Math.abs(x) > stageWidth * 0.5 || Math.abs(y) > stageHeight * 0.5) {
                         this.control.deleteClone({}, {target: newClone});
                         i = i - 1;
                         ifc++;
-                        continue
+                        continue;
                     }
-                    newClone.setXY(x,y);
+                    newClone.setXY(x, y);
                 }
                 while (newClone.isTouchingSprite(util.target.sprite.name)) {
                     if (c === 1000) {
                         this.looks.hide({}, {target: util.target});
                         this.control.deleteClone({}, {target: newClone});
-                        return
+                        return;
                     }
-                    let x = mouseX + this._polarToCartesian(r,theta)[0];
-                    let y = mouseY + this._polarToCartesian(r,theta)[1];
+                    const x = mouseX + this._polarToCartesian(r, theta)[0];
+                    const y = mouseY + this._polarToCartesian(r, theta)[1];
                     if (Math.abs(x) > stageWidth * 0.5 || Math.abs(y) > stageHeight * 0.5) {
-                        c++
-                        continue
+                        c++;
+                        continue;
                     }
-                    newClone.setXY(x,y);
-                    theta+= dt;
+                    newClone.setXY(x, y);
+                    theta += dt;
                     if (theta === 360) {
                         theta = 0;
                         if (r <= 200) {
-                            r+= dr;
+                            r += dr;
                         }
                     }
-                    c++
+                    c++;
                 }
                 newClone.speed = this.vel;
                 newClone.temperature = this.temp;
@@ -625,32 +626,32 @@ class Scratch3ScientificModellingBlocks {
     }
 
     _checkCollision (util) {
-        let x = util.target.x;
-        let y = util.target.y;
-        let distanceArray = [];
+        const x = util.target.x;
+        const y = util.target.y;
+        const distanceArray = [];
         for (let i = 0; i < this.clonesList.length; i++) {
-            let element = this.clonesList[i];
-            let elementX = element.x;
-            let elementY = element.y;
-            let dx = x - elementX;
-            let dy = y - elementY;
-            let r = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2));
-            if (r === 0 ) {
+            const element = this.clonesList[i];
+            const elementX = element.x;
+            const elementY = element.y;
+            const dx = x - elementX;
+            const dy = y - elementY;
+            let r = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+            if (r === 0) {
                 r = 1000;
             }
             distanceArray.push(r);
         }
-        let min = Math.min.apply(null,distanceArray);
-        let touchingIndex = distanceArray.indexOf(min);
-        return this.clonesList[touchingIndex]
+        const min = Math.min.apply(null, distanceArray);
+        const touchingIndex = distanceArray.indexOf(min);
+        return this.clonesList[touchingIndex];
     }
 
     _momentumUpdate (util, body2) {
-        if(util.target.collide) {
-            return
+        if (util.target.collide) {
+            return;
         }
-        let body1 = util.target;
-        let direct = body1.direction;
+        const body1 = util.target;
+        const direct = body1.direction;
         body1.setDirection(body2.direction);
         body2.setDirection(direct);
         this.motion.moveSteps({STEPS: body1.speed}, {target: body1});
@@ -748,7 +749,7 @@ class Scratch3ScientificModellingBlocks {
         }
     }
 
-    numberParticleReporter () { 
+    numberParticleReporter () {
         return this._particles().length;
     }
 }

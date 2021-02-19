@@ -11,7 +11,7 @@
         "scientificModelling.whenTemperatureIs": "quando a temperatura é [WHENTEMPMENU]",
         "scientificModelling.go": "comportamento",
         "scientificModelling.createParticlesOP": "crie [NUMBERPARTICLE] partículas [PARTICLEPOSITIONOP]",
-        "scientificModelling.temperatureReporter": "temperatura", 
+        "scientificModelling.temperatureReporter": "temperatura",
         "scientificModelling.speedReporter": "velocidade",
         "scientificModelling.speedMenuHigh": "alta",
         "scientificModelling.speedMenuMedium": "média",
@@ -30,5 +30,37 @@
         "scientificModelling.collisionReporter": "colisões por segundo",
         "scientificModelling.ifTouchingInvert": "se tocar [TOUCHINGMENU] vá para a direção oposta",
         "scientificModelling.touchingAnotherParticle": "tocando em [TOUCHINGMENU]?"
-    }   
+    },
+    "it": {
+        "gui.extension.scientificmodelling.name": "Modellazione scientifica",
+        "gui.extension.scientificmodelling.description": "Fai esperimenti scientifici",
+
+        "scientificModelling.categoryName": "Modellazione scientifica",
+        "scientificModelling.createParticles": "crea  [PARTICLES] particelle",
+        "scientificModelling.setCostume": "cambia la fantasia in [PARTICLECOSTUME]",
+        "scientificModelling.setParticleSpeed": "imposta la velocità delle particelle [PARTICLESPEED]",
+        "scientificModelling.setParticleTemperature": "imposta la temperatura delle particelle [PARTICLETEMPERATURE]",
+        "scientificModelling.whenTemperatureIs": "quando la temperatura è [WHENTEMPMENU]",
+        "scientificModelling.go": "comportamento",
+        "scientificModelling.createParticlesOP": "crea [NUMBERPARTICLE] particelle [PARTICLEPOSITIONOP]",
+        "scientificModelling.temperatureReporter": "temperatura",
+        "scientificModelling.speedReporter": "velocità",
+        "scientificModelling.speedMenuHigh": "alta",
+        "scientificModelling.speedMenuMedium": "media",
+        "scientificModelling.speedMenuLow": "bassa",
+        "scientificModelling.speedMenuZero": "zero",
+        "scientificModelling.temperatureMenuHigh": "alta",
+        "scientificModelling.temperatureMenuMedium": "media",
+        "scientificModelling.temperatureMenuLow": "bassa",
+        "scientificModelling.temperatureMenuZero": "zero",
+        "scientificModelling.opositeDirection": "vai nella posizione opposta",
+        "scientificModelling.positionMenuRandom": "casuali",
+        "scientificModelling.positionMenuCenter": "al centro",
+        "scientificModelling.positionMenuMouse": "nella posizione del mouse",
+        "scientificModelling.whenTouchingAnotherParticle": "quando collisioni tra sprite",
+        "scientificModelling.numberParticleReporter": "numero delle particelle",
+        "scientificModelling.collisionReporter": "collisioni al secondo",
+        "scientificModelling.ifTouchingInvert": "se tocar [TOUCHINGMENU] vá para a direção oposta",
+        "scientificModelling.touchingAnotherParticle": "collisioni tra [TOUCHINGMENU]?"
+    }
 }

@@ -69,6 +69,8 @@ class VirtualMachine extends EventEmitter {
          */
         this._dragTarget = null;
 
+        this.timeline = {};
+
         // Runtime emits are passed along as VM emits.
         this.runtime.on(Runtime.SCRIPT_GLOW_ON, glowData => {
             this.emit(Runtime.SCRIPT_GLOW_ON, glowData);
@@ -384,6 +386,10 @@ class VirtualMachine extends EventEmitter {
 
         // Put everything in a zip file
         zip.file('project.json', projectJson);
+
+        const timeline = StringUtil.stringify(this.timeline);
+        zip.file('timeline.json', timeline);
+
         this._addFileDescsToZip(soundDescs.concat(costumeDescs), zip);
 
         return zip.generateAsync({
@@ -454,6 +460,11 @@ class VirtualMachine extends EventEmitter {
     toJSON () {
         const sb3 = require('./serialization/sb3');
         return StringUtil.stringify(sb3.serialize(this.runtime));
+    }
+
+    serializeProject () {
+        const sb3 = require('./serialization/sb3');
+        return sb3.serialize(this.runtime);
     }
 
     // TODO do we still need this function? Keeping it here so as not to introduce

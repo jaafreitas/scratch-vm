@@ -39,11 +39,13 @@ const CORE_EXTENSIONS = [
     // 'myBlocks'
 ];
 
-
 class Timeline {
     constructor () {
-        this._log = {};
         const _timeline = this;
+
+        this._log = {};
+        this._sb3 = require('./serialization/sb3');
+        this._lastEvent = '';
         const _eventEmitterOriginalEmit = EventEmitter.prototype.emit;
         Object.assign(EventEmitter.prototype, {
             emit: function () {
@@ -52,21 +54,36 @@ class Timeline {
             }
         });
     }
+    ignoreEvent (classname, event) {
+        let ignore;
+        if (classname === 'VirtualMachine' && event === 'PROJECT_CHANGED') {
+            ignore = false;
+        } else {
+            ignore =
+                (event === 'MONITORS_UPDATE') ||
+                (event === this._lastEvent) ||
+                (classname === 'Runtime' && event === 'PROJECT_CHANGED') ||
+                (classname === 'Runtime' && event === 'TARGETS_UPDATE') ||
+                (classname === 'VirtualMachine' && event === 'targetsUpdate') ||
+                (classname === 'RenderedTarget' && event === 'EVENT_TARGET_VISUAL_CHANGE');
+        }
+        this._lastEvent = event;
+        return ignore;
+    }
 
     add (emitter, emitterArguments) {
         const event = emitterArguments[0];
         const className = emitter.constructor.name;
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
-        if (event === 'MONITORS_UPDATE') {
+        if (this.ignoreEvent(className, event)) {
             console.log(`[TIMELINE] ${timestamp} IGNORED ${JSON.stringify(frame)}`);
         } else {
             console.log(`[TIMELINE] ${timestamp} ${JSON.stringify(frame)}`);
             this._log[timestamp] = frame;
 
             if (className === 'VirtualMachine' && event === 'PROJECT_CHANGED') {
-                const sb3 = require('./serialization/sb3');
-                frame.project = sb3.serialize(emitter.runtime);
+                frame.project = this._sb3.serialize(emitter.runtime);
             }
         }
     }

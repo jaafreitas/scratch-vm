@@ -49,6 +49,7 @@ class Timeline {
         this._sb3 = require('./serialization/sb3');
         this._lastEvent = '';
         this._projectChangedSchedule = null;
+        this._scheduler = {PROJECT_CHANGED: null, TARGET_MOVED: null, MONITORS_UPDATE: null};
 
         Object.assign(EventEmitter.prototype, {
             emit: function () {
@@ -62,6 +63,10 @@ class Timeline {
         console.log(`[TIMELINE] ${timestamp} ${eventType} ${JSON.stringify(frame)}`);
     }
 
+    projectIsSerializable (className, event) {
+        return (className === 'VirtualMachine' && event === 'PROJECT_CHANGED');
+    }
+
     add (emitter, emitterArguments) {
         const event = emitterArguments[0];
         const className = emitter.constructor.name;
@@ -70,7 +75,6 @@ class Timeline {
 
         let eventType = eventTypes.log;
         if ((event === this._lastEvent) ||
-            (event === 'MONITORS_UPDATE') ||
             (event === 'TOOLBOX_EXTENSIONS_NEED_UPDATE') ||
             (className === 'Runtime' && event === 'PROJECT_CHANGED') ||
             (className === 'Runtime' && event === 'TARGETS_UPDATE') ||
@@ -78,19 +82,21 @@ class Timeline {
             (className === 'RenderedTarget' && event === 'EVENT_TARGET_VISUAL_CHANGE')) {
             eventType = eventTypes.ignore;
         }
-        if (className === 'VirtualMachine' && event === 'PROJECT_CHANGED') {
-            clearTimeout(this._projectChangedSchedule);
-            this._projectChangedSchedule = setTimeout(() => {
+        if ((eventType !== eventTypes.ignore || this.projectIsSerializable(className, event)) &&
+            (typeof this._scheduler[event] !== 'undefined')) {
+            clearTimeout(this._scheduler[event]);
+            this._scheduler[event] = setTimeout(() => {
                 this._log[timestamp] = frame;
                 // To avoid a long message output, show the log before adding project to the frame.
                 this.showEvent(timestamp, eventTypes.logSchedule, frame);
-                frame.project = this._sb3.serialize(emitter.runtime);
+                if (this.projectIsSerializable(className, event)) {
+                    frame.project = this._sb3.serialize(emitter.runtime);
+                }
             }, 5000);
             eventType = eventTypes.schedule;
         }
         if (eventType === eventTypes.log) {
             this._log[timestamp] = frame;
-            eventType = eventTypes.log;
         }
         this._lastEvent = event;
         this.showEvent(timestamp, eventType, frame);

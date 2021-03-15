@@ -38,15 +38,18 @@ const CORE_EXTENSIONS = [
     // 'variables',
     // 'myBlocks'
 ];
+const eventTypes = {log: 'LOG', ignore: 'IGNORE', schedule: 'SCHEDULE', logSchedule: 'LOG SCHEDULED'};
 
 class Timeline {
     constructor () {
         const _timeline = this;
+        const _eventEmitterOriginalEmit = EventEmitter.prototype.emit;
 
         this._log = {};
         this._sb3 = require('./serialization/sb3');
         this._lastEvent = '';
-        const _eventEmitterOriginalEmit = EventEmitter.prototype.emit;
+        this._projectChangedSchedule = null;
+
         Object.assign(EventEmitter.prototype, {
             emit: function () {
                 _timeline.add(this, arguments);
@@ -54,21 +57,9 @@ class Timeline {
             }
         });
     }
-    ignoreEvent (classname, event) {
-        let ignore;
-        if (classname === 'VirtualMachine' && event === 'PROJECT_CHANGED') {
-            ignore = false;
-        } else {
-            ignore =
-                (event === 'MONITORS_UPDATE') ||
-                (event === this._lastEvent) ||
-                (classname === 'Runtime' && event === 'PROJECT_CHANGED') ||
-                (classname === 'Runtime' && event === 'TARGETS_UPDATE') ||
-                (classname === 'VirtualMachine' && event === 'targetsUpdate') ||
-                (classname === 'RenderedTarget' && event === 'EVENT_TARGET_VISUAL_CHANGE');
-        }
-        this._lastEvent = event;
-        return ignore;
+
+    showEvent (timestamp, eventType, frame) {
+        console.log(`[TIMELINE] ${timestamp} ${eventType} ${JSON.stringify(frame)}`);
     }
 
     add (emitter, emitterArguments) {
@@ -76,16 +67,33 @@ class Timeline {
         const className = emitter.constructor.name;
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
-        if (this.ignoreEvent(className, event)) {
-            console.log(`[TIMELINE] ${timestamp} IGNORED ${JSON.stringify(frame)}`);
-        } else {
-            console.log(`[TIMELINE] ${timestamp} ${JSON.stringify(frame)}`);
-            this._log[timestamp] = frame;
 
-            if (className === 'VirtualMachine' && event === 'PROJECT_CHANGED') {
-                frame.project = this._sb3.serialize(emitter.runtime);
-            }
+        let eventType = eventTypes.log;
+        if ((event === this._lastEvent) ||
+            (event === 'MONITORS_UPDATE') ||
+            (event === 'TOOLBOX_EXTENSIONS_NEED_UPDATE') ||
+            (className === 'Runtime' && event === 'PROJECT_CHANGED') ||
+            (className === 'Runtime' && event === 'TARGETS_UPDATE') ||
+            (className === 'VirtualMachine' && event === 'targetsUpdate') ||
+            (className === 'RenderedTarget' && event === 'EVENT_TARGET_VISUAL_CHANGE')) {
+            eventType = eventTypes.ignore;
         }
+        if (className === 'VirtualMachine' && event === 'PROJECT_CHANGED') {
+            clearTimeout(this._projectChangedSchedule);
+            this._projectChangedSchedule = setTimeout(() => {
+                this._log[timestamp] = frame;
+                // To avoid a long message output, show the log before adding project to the frame.
+                this.showEvent(timestamp, eventTypes.logSchedule, frame);
+                frame.project = this._sb3.serialize(emitter.runtime);
+            }, 5000);
+            eventType = eventTypes.schedule;
+        }
+        if (eventType === eventTypes.log) {
+            this._log[timestamp] = frame;
+            eventType = eventTypes.log;
+        }
+        this._lastEvent = event;
+        this.showEvent(timestamp, eventType, frame);
     }
 
     export () {

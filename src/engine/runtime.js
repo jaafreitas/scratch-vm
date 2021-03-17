@@ -601,6 +601,15 @@ class Runtime extends EventEmitter {
     static get PERIPHERAL_LIST_UPDATE () {
         return 'PERIPHERAL_LIST_UPDATE';
     }
+    
+    /**
+     * Event name for when the user picks a bluetooth device to connect to
+     * via Companion Device Manager (CDM)
+     * @const {string}
+     */
+    static get USER_PICKED_PERIPHERAL () {
+        return 'USER_PICKED_PERIPHERAL';
+    }
 
     /**
      * Event name for reporting that a peripheral has connected.
@@ -2326,6 +2335,7 @@ class Runtime extends EventEmitter {
      * @return {boolean} true if monitor exists and was updated, false otherwise
      */
     requestHideMonitor (monitorId) {
+        this.emit('requestHideMonitor*');
         return this.requestUpdateMonitor(new Map([
             ['id', monitorId],
             ['visible', false]
@@ -2339,6 +2349,7 @@ class Runtime extends EventEmitter {
      * @return {boolean} true if monitor exists and was updated, false otherwise
      */
     requestShowMonitor (monitorId) {
+        this.emit('requestShowMonitor*');
         return this.requestUpdateMonitor(new Map([
             ['id', monitorId],
             ['visible', true]

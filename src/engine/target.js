@@ -264,6 +264,7 @@ class Target extends EventEmitter {
      * Additional checks are made that the variable can be created as a cloud variable.
      */
     createVariable (id, name, type, isCloud) {
+        this.emit('createVariable*');
         if (!this.variables.hasOwnProperty(id)) {
             const newVariable = new Variable(id, name, type, false);
             if (isCloud && this.isStage && this.runtime.canAddCloudVariable()) {
@@ -288,6 +289,7 @@ class Target extends EventEmitter {
      * @param {boolean} minimized Whether the comment is minimized.
      */
     createComment (id, blockId, text, x, y, width, height, minimized) {
+        this.emit('createComment*');
         if (!this.comments.hasOwnProperty(id)) {
             const newComment = new Comment(id, text, x, y,
                 width, height, minimized);
@@ -311,6 +313,7 @@ class Target extends EventEmitter {
      * @param {string} newName New name for the variable.
      */
     renameVariable (id, newName) {
+        this.emit('renameVariable*');
         if (this.variables.hasOwnProperty(id)) {
             const variable = this.variables[id];
             if (variable.id === id) {
@@ -362,6 +365,7 @@ class Target extends EventEmitter {
      * @param {string} id Id of variable to delete.
      */
     deleteVariable (id) {
+        this.emit('deleteVariable*');
         if (this.variables.hasOwnProperty(id)) {
             // Get info about the variable before deleting it
             const deletedVariableName = this.variables[id].name;
@@ -384,6 +388,7 @@ class Target extends EventEmitter {
      * NOTE: This does not delete any of the stage monitors like backdrop name.
      */
     deleteMonitors () {
+        this.emit('deleteMonitors*');
         this.runtime.requestRemoveMonitorByTargetId(this.id);
         let targetSpecificMonitorBlockIds;
         if (this.isStage) {

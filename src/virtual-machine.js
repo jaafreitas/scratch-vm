@@ -38,7 +38,12 @@ const CORE_EXTENSIONS = [
     // 'variables',
     // 'myBlocks'
 ];
-const eventTypes = {log: 'LOG', ignore: 'IGNORE', schedule: 'SCHEDULE', logSchedule: 'LOG SCHEDULED'};
+const eventTypes = {
+    log: 'LOG',
+    ignore: 'IGNORE',
+    schedule: 'SCHEDULE',
+    scheduledAlready: 'SCHEDULED ALREADY',
+    logSchedule: 'LOG SCHEDULED'};
 
 class Timeline {
     constructor () {
@@ -60,7 +65,9 @@ class Timeline {
     }
 
     showEvent (timestamp, eventType, frame) {
-        console.log(`[TIMELINE] ${timestamp} ${eventType} ${JSON.stringify(frame)}`);
+        if (eventType !== eventTypes.ignore && eventType !== eventTypes.scheduledAlready) {
+            console.log(`[TIMELINE] ${timestamp} ${eventType} ${JSON.stringify(frame)}`);
+        }
     }
 
     projectIsSerializable (className, event) {
@@ -77,6 +84,16 @@ class Timeline {
         if ((event === this._lastEvent) ||
             (event === 'TOOLBOX_EXTENSIONS_NEED_UPDATE') ||
             (className === 'Runtime' && event === 'PROJECT_CHANGED') ||
+
+            // Clone events.
+            (emitterArguments.length >= 2 && emitterArguments[1] !== null &&
+                typeof emitterArguments[1] === 'object' &&
+                emitterArguments[1].constructor.name === 'RenderedTarget' &&
+                !emitterArguments[1].isOriginal) ||
+
+            // Stop any threads acting on the target.
+            (className === 'Runtime' && event === 'STOP_FOR_TARGET') ||
+
             (className === 'Runtime' && event === 'TARGETS_UPDATE') ||
             (className === 'VirtualMachine' && event === 'targetsUpdate') ||
             (className === 'RenderedTarget' && event === 'EVENT_TARGET_VISUAL_CHANGE')) {
@@ -84,7 +101,12 @@ class Timeline {
         }
         if ((eventType !== eventTypes.ignore || this.projectIsSerializable(className, event)) &&
             (typeof this._scheduler[event] !== 'undefined')) {
-            clearTimeout(this._scheduler[event]);
+            if (this._scheduler[event]) {
+                eventType = eventTypes.scheduledAlready;
+                clearTimeout(this._scheduler[event]);
+            } else {
+                eventType = eventTypes.schedule;
+            }
             this._scheduler[event] = setTimeout(() => {
                 this._log[timestamp] = frame;
                 // To avoid a long message output, show the log before adding project to the frame.
@@ -92,8 +114,8 @@ class Timeline {
                 if (this.projectIsSerializable(className, event)) {
                     frame.project = this._sb3.serialize(emitter.runtime);
                 }
+                this._scheduler[event] = null;
             }, 5000);
-            eventType = eventTypes.schedule;
         }
         if (eventType === eventTypes.log) {
             this._log[timestamp] = frame;

@@ -217,7 +217,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'dataLoop',
                 text: formatMessage({
                     id: 'dataviewer.dataLoop',
-                    default: 'read all values of [LIST_ID]'
+                    default: 'for each value of [LIST_ID]'
                 }),
                 blockType: BlockType.LOOP,
                 arguments: {

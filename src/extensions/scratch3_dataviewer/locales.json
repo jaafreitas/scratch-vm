@@ -18,7 +18,7 @@
         "dataviewer.readCSVDataFromURL": "leia arquivo .csv [URL] coluna: [COLUMN] começando na linha: [LINE]",
         "dataviewer.readCSVDataFromURL.default": "link para a planilha",
         "dataviewer.readThingSpeakData": "leia ThingSpeak canal: [CHANNEL] campo: [FIELD]",
-        "dataviewer.dataLoop": "leia todos os valores de [LIST_ID]",
+        "dataviewer.dataLoop": "para cada valor de [LIST_ID]",
         "dataviewer.getValue": "valor de [LIST_ID]",
         "dataviewer.getIndex": "índice de [LIST_ID]",
         "dataviewer.getStatistic": "[FNC] de [LIST_ID]",

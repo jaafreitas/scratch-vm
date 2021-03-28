@@ -51,6 +51,7 @@ class Timeline {
         const _eventEmitterOriginalEmit = EventEmitter.prototype.emit;
 
         this._log = {};
+        this._snapshots = [];
         this._sb3 = require('./serialization/sb3');
         this._lastEvent = '';
         this._projectChangedSchedule = null;
@@ -74,6 +75,21 @@ class Timeline {
         return (className === 'VirtualMachine' && event === 'PROJECT_CHANGED');
     }
 
+    addSnapshot (runtime, timestamp) {
+        const fileName = `${timestamp}.jpg`;
+        runtime.ioDevices.video.postData({forceTransparentPreview: true});
+
+        runtime.renderer.requestSnapshot(() => {
+            // Using toBlob instead of dataURItoBlob.
+            runtime.renderer.canvas.toBlob(blob => {
+                this._snapshots.push({fileName: fileName, data: blob});
+            }, 'image/jpeg', 0.92);
+            runtime.ioDevices.video.postData({forceTransparentPreview: false});
+        });
+        runtime.renderer.draw();
+        return fileName;
+    }
+
     add (emitter, emitterArguments) {
         const event = emitterArguments[0];
         const className = emitter.constructor.name;
@@ -81,6 +97,7 @@ class Timeline {
         const timestamp = Date.now();
 
         let eventType = eventTypes.log;
+        // Events ignored.
         if ((event === this._lastEvent) ||
             (event === 'TOOLBOX_EXTENSIONS_NEED_UPDATE') ||
             (className === 'Runtime' && event === 'PROJECT_CHANGED') ||
@@ -99,6 +116,7 @@ class Timeline {
             (className === 'RenderedTarget' && event === 'EVENT_TARGET_VISUAL_CHANGE')) {
             eventType = eventTypes.ignore;
         }
+        // Events scheduled.
         if ((eventType !== eventTypes.ignore || this.projectIsSerializable(className, event)) &&
             (typeof this._scheduler[event] !== 'undefined')) {
             if (this._scheduler[event]) {
@@ -111,14 +129,27 @@ class Timeline {
                 this._log[timestamp] = frame;
                 // To avoid a long message output, show the log before adding project to the frame.
                 this.showEvent(timestamp, eventTypes.logSchedule, frame);
+                // PROJECT_CHANGE event.
                 if (this.projectIsSerializable(className, event)) {
                     frame.project = this._sb3.serialize(emitter.runtime);
+                    // frame.fileName = this.addSnapshot(emitter.runtime, timestamp);
                 }
                 this._scheduler[event] = null;
             }, 5000);
         }
+        // Events logged.
         if (eventType === eventTypes.log) {
             this._log[timestamp] = frame;
+            if (
+                (className === 'VirtualMachine' && event === 'greenFlag*') ||
+                // Event Triggered when the stop button is clicked.
+                (className === 'VirtualMachine' && event === 'stopAll*')) {
+                frame.fileName = this.addSnapshot(emitter.runtime, timestamp);
+            } else if (
+                // Event Triggered when no more blocks are running.
+                (className === 'Runtime' && event === 'PROJECT_RUN_STOP')) {
+                frame.fileName = this.addSnapshot(emitter, timestamp);
+            }
         }
         this._lastEvent = event;
         this.showEvent(timestamp, eventType, frame);
@@ -126,6 +157,13 @@ class Timeline {
 
     export () {
         return StringUtil.stringify(this._log);
+    }
+    exportSnapshots () {
+        const assetDescs = [];
+        this._snapshots.forEach(snapshot => {
+            assetDescs.push({fileName: snapshot.fileName, fileContent: snapshot.data});
+        });
+        return assetDescs;
     }
 }
 const timeline = new Timeline();
@@ -488,6 +526,7 @@ class VirtualMachine extends EventEmitter {
 
         const timelineJson = timeline.export();
         zip.file('timeline.json', timelineJson);
+        this._addFileDescsToZip(timeline.exportSnapshots(), zip);
 
         this._addFileDescsToZip(soundDescs.concat(costumeDescs), zip);
 

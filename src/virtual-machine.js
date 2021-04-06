@@ -76,14 +76,14 @@ class Timeline {
     }
 
     addSnapshot (runtime, timestamp) {
-        const fileName = `${timestamp}.jpg`;
+        const fileName = `timeline_${timestamp}.jpg`;
         runtime.ioDevices.video.postData({forceTransparentPreview: true});
 
         runtime.renderer.requestSnapshot(() => {
             // Using toBlob instead of dataURItoBlob.
             runtime.renderer.canvas.toBlob(blob => {
                 this._snapshots.push({fileName: fileName, data: blob});
-            }, 'image/jpeg', 0.92);
+            }, 'image/jpeg', 0.50);
             runtime.ioDevices.video.postData({forceTransparentPreview: false});
         });
         runtime.renderer.draw();

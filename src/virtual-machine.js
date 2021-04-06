@@ -57,13 +57,18 @@ class Timeline {
         this._projectChangedSchedule = null;
         this._scheduler = {PROJECT_CHANGED: null, TARGET_MOVED: null, MONITORS_UPDATE: null};
         this._showDebugInfo = window.location.href.match(/[?&]timelinedebug[?&]*/) !== null;
+        this._disable = window.location.href.match(/[?&]timelinedisable[?&]*/) !== null;
 
-        Object.assign(EventEmitter.prototype, {
-            emit: function () {
-                _timeline.add(this, arguments);
-                return _eventEmitterOriginalEmit.apply(this, arguments);
-            }
-        });
+        if (this._disable) {
+            this._log[Date.now()] = 'TIMELINE disabled!';
+        } else {
+            Object.assign(EventEmitter.prototype, {
+                emit: function () {
+                    _timeline.add(this, arguments);
+                    return _eventEmitterOriginalEmit.apply(this, arguments);
+                }
+            });
+        }
     }
 
     showEvent (timestamp, eventType, frame) {

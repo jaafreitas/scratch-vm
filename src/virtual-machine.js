@@ -56,6 +56,7 @@ class Timeline {
         this._lastEvent = '';
         this._projectChangedSchedule = null;
         this._scheduler = {PROJECT_CHANGED: null, TARGET_MOVED: null, MONITORS_UPDATE: null};
+        this._showDebugInfo = window.location.href.match(/[?&]timelinedebug[?&]*/) !== null;
 
         Object.assign(EventEmitter.prototype, {
             emit: function () {
@@ -66,7 +67,8 @@ class Timeline {
     }
 
     showEvent (timestamp, eventType, frame) {
-        if (eventType !== eventTypes.ignore && eventType !== eventTypes.scheduledAlready) {
+        if (this._showDebugInfo && eventType !== eventTypes.ignore && eventType !== eventTypes.scheduledAlready) {
+            // eslint-disable-next-line no-console
             console.log(`[TIMELINE] ${timestamp} ${eventType} ${JSON.stringify(frame)}`);
         }
     }

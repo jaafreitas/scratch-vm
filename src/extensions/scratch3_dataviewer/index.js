@@ -470,8 +470,6 @@ class Scratch3DataViewerBlocks {
         const blocks = [
             allBlocks.setData,
             allBlocks.changeDataScale,
-            allBlocks.deleteOfListAllLists,
-            allBlocks.orderListAllLists,
             allBlocks.dataLoop,
             allBlocks.getValue,
             allBlocks.getIndex,
@@ -493,7 +491,11 @@ class Scratch3DataViewerBlocks {
                 allBlocks.readThingSpeakData,
                 '---',
                 allBlocks.mapData,
+                '---',
+                allBlocks.deleteOfListAllLists,
                 allBlocks.deleteOfList,
+                '---',
+                allBlocks.orderListAllLists,
                 allBlocks.orderList
             );
         }

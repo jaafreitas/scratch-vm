@@ -56,17 +56,24 @@ class Timeline {
         this._lastEvent = '';
         this._projectChangedSchedule = null;
         this._scheduler = {PROJECT_CHANGED: null, TARGET_MOVED: null, MONITORS_UPDATE: null};
+        this._showDebugInfo = window.location.href.match(/[?&]timelinedebug[?&]*/) !== null;
+        this._disable = window.location.href.match(/[?&]timelinedisable[?&]*/) !== null;
 
-        Object.assign(EventEmitter.prototype, {
-            emit: function () {
-                _timeline.add(this, arguments);
-                return _eventEmitterOriginalEmit.apply(this, arguments);
-            }
-        });
+        if (this._disable) {
+            this._log[Date.now()] = 'TIMELINE disabled!';
+        } else {
+            Object.assign(EventEmitter.prototype, {
+                emit: function () {
+                    _timeline.add(this, arguments);
+                    return _eventEmitterOriginalEmit.apply(this, arguments);
+                }
+            });
+        }
     }
 
     showEvent (timestamp, eventType, frame) {
-        if (eventType !== eventTypes.ignore && eventType !== eventTypes.scheduledAlready) {
+        if (this._showDebugInfo && eventType !== eventTypes.ignore && eventType !== eventTypes.scheduledAlready) {
+            // eslint-disable-next-line no-console
             console.log(`[TIMELINE] ${timestamp} ${eventType} ${JSON.stringify(frame)}`);
         }
     }
@@ -76,14 +83,14 @@ class Timeline {
     }
 
     addSnapshot (runtime, timestamp) {
-        const fileName = `${timestamp}.jpg`;
+        const fileName = `timeline_${timestamp}.jpg`;
         runtime.ioDevices.video.postData({forceTransparentPreview: true});
 
         runtime.renderer.requestSnapshot(() => {
             // Using toBlob instead of dataURItoBlob.
             runtime.renderer.canvas.toBlob(blob => {
                 this._snapshots.push({fileName: fileName, data: blob});
-            }, 'image/jpeg', 0.92);
+            }, 'image/jpeg', 0.50);
             runtime.ioDevices.video.postData({forceTransparentPreview: false});
         });
         runtime.renderer.draw();

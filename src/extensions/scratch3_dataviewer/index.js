@@ -172,7 +172,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'readCSVDataFromURL',
                 text: formatMessage({
                     id: 'dataviewer.readCSVDataFromURL',
-                    default: 'read .csv file [URL] column: [COLUMN] starting from line: [LINE]'
+                    default: 'read CSV data from column [COLUMN] at [URL] starting from line [LINE]'
                 }),
                 blockType: BlockType.REPORTER,
                 disableMonitor: true,
@@ -803,10 +803,15 @@ class Scratch3DataViewerBlocks {
 
     readCSVDataFromURL (args) {
         if (args.URL.trim() && args.COLUMN && args.LINE) {
-            const urlBase = args.URL;
+            let urlBase = args.URL;
             const column = args.COLUMN - 1;
             const line = args.LINE;
 
+            const googleSpreadsheet = urlBase.match('docs.google.com/spreadsheets/d/(.*)/edit');
+            if (googleSpreadsheet) {
+                const id = googleSpreadsheet[1];
+                urlBase = `https://spreadsheets.google.com/feeds/cells/${id}/1/public/values?alt=json-in-script`;
+            }
             return new Promise((resolve, reject) => {
                 nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
                     if (err) {
@@ -816,18 +821,24 @@ class Scratch3DataViewerBlocks {
                         return reject('statusCode != 200');
                     }
 
-                    const lines = body.toString().split('\n');
-                    const data = [];
-                    let dataIndex = 0;
-                    for (let i = (line - 1); i < lines.length; i += 1) {
-                        const columns = lines[i].trim().split(',');
-                        if (columns[column]) {
-                            // Just to make sure we are getting only numbers.
-                            // ToDo: cover more cases...
-                            columns[column] = columns[column].replace(/\D*(\d+)/, '$1');
-                            if (!isNaN(columns[column])) {
-                                data[dataIndex] = Cast.toNumber(columns[column]);
-                                dataIndex++;
+                    let data;
+                    if (googleSpreadsheet) {
+                        const lists = this.convertGoogleSpreadsheetDataToLists(body);
+                        data = lists[Object.keys(lists)[column]];
+                    } else {
+                        const lines = body.toString().split('\n');
+                        data = [];
+                        let dataIndex = 0;
+                        for (let i = (line - 1); i < lines.length; i += 1) {
+                            const columns = lines[i].trim().split(',');
+                            if (columns[column]) {
+                                // Just to make sure we are getting only numbers.
+                                // ToDo: cover more cases...
+                                columns[column] = columns[column].replace(/\D*(\d+)/, '$1');
+                                if (!isNaN(columns[column])) {
+                                    data[dataIndex] = Cast.toNumber(columns[column]);
+                                    dataIndex++;
+                                }
                             }
                         }
                     }
@@ -837,6 +848,29 @@ class Scratch3DataViewerBlocks {
             });
         }
     }
+    convertGoogleSpreadsheetDataToLists (body) {
+        const json = JSON.parse(body.toString().substr(28)
+            .slice(0, -2));
+
+        const sheetData = json.feed.entry;
+        const lists = {};
+        for (let i = 0; i < sheetData.length; i++) {
+            const row = Cast.toNumber(json.feed.entry[i].gs$cell.row);
+            const col = Cast.toNumber(json.feed.entry[i].gs$cell.col);
+            let value = json.feed.entry[i].gs$cell.$t;
+            if (json.feed.entry[i].gs$cell.numericValue) {
+                value = Cast.toNumber(json.feed.entry[i].gs$cell.numericValue);
+            }
+            if (row === 1) {
+                lists[value] = [];
+            }
+            if (row > 1) {
+                lists[Object.keys(lists)[col - 1]].push(value);
+            }
+        }
+        return lists;
+    }
+
 
     readThingSpeakData (args) {
         if (args.CHANNEL && args.FIELD) {

@@ -15,7 +15,7 @@
         "dataviewer.setData": "defina [LIST_ID] como [DATA]",
         "dataviewer.setSizeX": "defina o tamanho X como [SCALEX] %",
         "dataviewer.setSizeY": "defina o tamanho Y como [SCALEY] %",
-        "dataviewer.readCSVDataFromURL": "leia arquivo .csv [URL] coluna: [COLUMN] começando na linha: [LINE]",
+        "dataviewer.readCSVDataFromURL": "leia dado CSV da coluna [COLUMN] da [URL] começando na linha [LINE]",
         "dataviewer.readCSVDataFromURL.default": "link para a planilha",
         "dataviewer.readThingSpeakData": "leia ThingSpeak canal: [CHANNEL] campo: [FIELD]",
         "dataviewer.dataLoop": "para cada valor de [LIST_ID]",

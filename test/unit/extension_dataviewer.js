@@ -810,3 +810,32 @@ test('Scale', t => {
 
     t.end();
 });
+
+test('Read CSV data from published Google Spreadsheet (CSV output link)', t => {
+    const setup = setupDataViewer();
+
+    setup.dv.readCSVDataFromURL({
+        URL: `https://docs.google.com/spreadsheets/d/e/2PACX-1vSMZFJxFvz9tK4Y5s2VFEozwlpjNHYEiAMNTUjvyzivmMebsHzsBw8AbxDPz0ka9-a3a8-7wqPDbMCV/pub?output=csv`,
+        COLUMN: '1',
+        LINE: '2'
+    }).then(data => {
+        t.equal(data.split(' ').length, 408);
+
+        t.end();
+    });
+});
+
+test('Read CSV data from published Google Spreadsheet', t => {
+    const setup = setupDataViewer();
+
+    setup.dv.readCSVDataFromURL({
+        URL: `https://docs.google.com/spreadsheets/d/1PBDC5fauOWlFbc5MDzbLCVhR4POSMo38IAenCRaatg4/edit#gid=0`,
+        COLUMN: '3',
+        LINE: '2'
+    }).then(data => {
+        t.equal(data.split(' ').length, 995);
+
+        t.end();
+    });
+});
+

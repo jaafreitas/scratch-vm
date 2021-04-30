@@ -839,3 +839,19 @@ test('Read CSV data from published Google Spreadsheet', t => {
     });
 });
 
+test('Create lists from Google Spreadsheet', t => {
+    const setup = setupDataViewer();
+
+    setup.dv.createListsFromGoogleSheets({
+        URL: `https://docs.google.com/spreadsheets/d/1PBDC5fauOWlFbc5MDzbLCVhR4POSMo38IAenCRaatg4/edit#gid=0`
+    }).then(() => {
+
+        t.equal(setup.dv.getDataLength({LIST_ID: 'Year'}), 408);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'One Letter'}), 995);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'Many Letters'}), 995);
+        // t.equal(setup.dv.getDataLength({LIST_ID: 'Spaced Letters'}), 995);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'áçãàü'}), 408);
+
+        t.end();
+    });
+});

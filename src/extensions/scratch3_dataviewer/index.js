@@ -149,6 +149,24 @@ class Scratch3DataViewerBlocks {
                 }),
                 blockType: BlockType.BUTTON
             },
+            createListsFromGoogleSheets: {
+                opcode: 'createListsFromGoogleSheets',
+                text: formatMessage({
+                    id: 'dataviewer.createListsFromGoogleSheets',
+                    default: 'create lists from [URL]'
+                }),
+                blockType: BlockType.COMMAND,
+                disableMonitor: true,
+                arguments: {
+                    URL: {
+                        type: ArgumentType.STRING,
+                        defaultValue: formatMessage({
+                            id: 'dataviewer.createListsFromGoogleSheets.default',
+                            default: 'link'
+                        })
+                    }
+                }
+            },
             setData: {
                 opcode: 'setData',
                 text: formatMessage({
@@ -185,7 +203,7 @@ class Scratch3DataViewerBlocks {
                         type: ArgumentType.STRING,
                         defaultValue: formatMessage({
                             id: 'dataviewer.readCSVDataFromURL.default',
-                            default: 'spreadsheet link'
+                            default: 'link'
                         })
                     },
                     LINE: {
@@ -487,6 +505,7 @@ class Scratch3DataViewerBlocks {
             blocks.push(
                 allBlocks.showLessBlocks,
                 '---',
+                allBlocks.createListsFromGoogleSheets,
                 allBlocks.readCSVDataFromURL,
                 allBlocks.readThingSpeakData,
                 '---',
@@ -807,9 +826,9 @@ class Scratch3DataViewerBlocks {
             const column = args.COLUMN - 1;
             const line = args.LINE;
 
-            const googleSpreadsheet = urlBase.match('docs.google.com/spreadsheets/d/(.*)/edit');
-            if (googleSpreadsheet) {
-                const id = googleSpreadsheet[1];
+            const googleSheets = urlBase.match('docs.google.com/spreadsheets/d/(.*)/edit');
+            if (googleSheets) {
+                const id = googleSheets[1];
                 urlBase = `https://spreadsheets.google.com/feeds/cells/${id}/1/public/values?alt=json-in-script`;
             }
             return new Promise((resolve, reject) => {
@@ -821,9 +840,9 @@ class Scratch3DataViewerBlocks {
                         return reject('statusCode != 200');
                     }
 
-                    let data;
-                    if (googleSpreadsheet) {
-                        const lists = this.convertGoogleSpreadsheetDataToLists(body);
+                    let data = [];
+                    if (googleSheets) {
+                        const lists = this.convertGoogleSheetsToLists(body);
                         data = lists[Object.keys(lists)[column]];
                     } else {
                         const lines = body.toString().split('\n');
@@ -848,7 +867,7 @@ class Scratch3DataViewerBlocks {
             });
         }
     }
-    convertGoogleSpreadsheetDataToLists (body) {
+    convertGoogleSheetsToLists (body) {
         const json = JSON.parse(body.toString().substr(28)
             .slice(0, -2));
 
@@ -871,6 +890,36 @@ class Scratch3DataViewerBlocks {
         return lists;
     }
 
+    createListsFromGoogleSheets (args) {
+        if (args.URL.trim()) {
+            let urlBase = args.URL.trim();
+            const googleSheets = urlBase.match('docs.google.com/spreadsheets/d/(.*)/edit');
+            if (googleSheets) {
+                const id = googleSheets[1];
+                urlBase = `https://spreadsheets.google.com/feeds/cells/${id}/1/public/values?alt=json-in-script`;
+
+                return new Promise((resolve, reject) => {
+                    nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
+                        if (err) {
+                            return reject(err);
+                        }
+                        if (res.statusCode !== 200) {
+                            return reject('statusCode != 200');
+                        }
+
+                        const lists = this.convertGoogleSheetsToLists(body);
+                        for (const [key, value] of Object.entries(lists)) {
+                            this._data(key).value = value;
+                            this._data(key)._monitorUpToDate = false;
+                        }
+
+                        return resolve();
+                    });
+                });
+
+            }
+        }
+    }
 
     readThingSpeakData (args) {
         if (args.CHANNEL && args.FIELD) {

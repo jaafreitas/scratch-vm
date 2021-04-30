@@ -833,37 +833,37 @@ test('Read CSV data from published Google Spreadsheet (main link)', t => {
     // Year
     setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '1', LINE: '2'})
         .then(data => {
-            t.equal(data.split(' ').length, 408);
+            t.equal(data.length, 100);
 
             // One Letter
             return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '2', LINE: '2'});
         })
         .then(data => {
-            t.equal(data.split(' ').length, 995);
+            t.equal(data.length, 100);
 
             // Many Letters
             return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '3', LINE: '2'});
         })
         .then(data => {
-            t.equal(data.split(' ').length, 995);
+            t.equal(data.length, 100);
 
-            //     // Spaced Letters
-            //     return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '4', LINE: '2'});
-            // })
-            // .then(data => {
-            //     t.equal(data.split(' ').length, 1);
+            // Spaced Letters
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '4', LINE: '2'});
+        })
+        .then(data => {
+            t.equal(data.length, 100);
 
             // áçãàü
             return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '5', LINE: '2'});
         })
         .then(data => {
-            t.equal(data.split(' ').length, 408);
+            t.equal(data.length, 100);
 
             // Column out of range.
             return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '99', LINE: '2'});
         })
         .then(data => {
-            t.equal(data.split(' ').length, 1);
+            t.equal(data.length, 0);
 
             t.end();
         });
@@ -876,11 +876,11 @@ test('Create lists from Google Spreadsheet', t => {
         URL: `https://docs.google.com/spreadsheets/d/1PBDC5fauOWlFbc5MDzbLCVhR4POSMo38IAenCRaatg4/edit#gid=0`
     }).then(() => {
 
-        t.equal(setup.dv.getDataLength({LIST_ID: 'Year'}), 408);
-        t.equal(setup.dv.getDataLength({LIST_ID: 'One Letter'}), 995);
-        t.equal(setup.dv.getDataLength({LIST_ID: 'Many Letters'}), 995);
-        // t.equal(setup.dv.getDataLength({LIST_ID: 'Spaced Letters'}), 995);
-        t.equal(setup.dv.getDataLength({LIST_ID: 'áçãàü'}), 408);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'Year'}), 100);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'One Letter'}), 100);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'Many Letters'}), 100);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'Spaced Letters'}), 100);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'áçãàü'}), 100);
 
         t.end();
     });

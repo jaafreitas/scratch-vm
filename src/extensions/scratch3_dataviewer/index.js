@@ -816,7 +816,13 @@ class Scratch3DataViewerBlocks {
     setData (args) {
         const data = this._data(args.LIST_ID);
         if (data) {
-            data.value = this._textToData(args.DATA);
+            if (Array.isArray(args.DATA)) {
+                data.value = args.DATA;
+            } else {
+                data.value = this._textToData(args.DATA);
+
+            }
+            data._monitorUpToDate = false;
         }
     }
 
@@ -863,7 +869,7 @@ class Scratch3DataViewerBlocks {
                     if (typeof data === 'undefined' || data.length === 0) {
                         return resolve('');
                     }
-                    return resolve(data.join(' '));
+                    return resolve(data);
                 });
             });
         }
@@ -885,7 +891,7 @@ class Scratch3DataViewerBlocks {
                 lists[value] = [];
             }
             if (row > 1) {
-                lists[Object.keys(lists)[col - 1]].push(value);
+                lists[Object.keys(lists)[col - 1]][row - 2] = value;
             }
         }
         return lists;
@@ -950,7 +956,7 @@ class Scratch3DataViewerBlocks {
                         }
                     }
 
-                    return resolve(data.join(' '));
+                    return resolve();
                 });
             });
         }

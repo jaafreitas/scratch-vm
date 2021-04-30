@@ -830,9 +830,34 @@ test('Read CSV data from published Google Spreadsheet (main link)', t => {
 
     const URL = 'https://docs.google.com/spreadsheets/d/1PBDC5fauOWlFbc5MDzbLCVhR4POSMo38IAenCRaatg4/edit#gid=0';
 
-    setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '3', LINE: '2'})
+    // Year
+    setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '1', LINE: '2'})
+        .then(data => {
+            t.equal(data.split(' ').length, 408);
+
+            // One Letter
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '2', LINE: '2'});
+        })
         .then(data => {
             t.equal(data.split(' ').length, 995);
+
+            // Many Letters
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '3', LINE: '2'});
+        })
+        .then(data => {
+            t.equal(data.split(' ').length, 995);
+
+            //     // Spaced Letters
+            //     return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '4', LINE: '2'});
+            // })
+            // .then(data => {
+            //     t.equal(data.split(' ').length, 1);
+
+            // áçãàü
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '5', LINE: '2'});
+        })
+        .then(data => {
+            t.equal(data.split(' ').length, 408);
 
             // Column out of range.
             return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '99', LINE: '2'});

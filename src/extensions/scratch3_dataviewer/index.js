@@ -846,7 +846,6 @@ class Scratch3DataViewerBlocks {
                         data = lists[Object.keys(lists)[column]];
                     } else {
                         const lines = body.toString().split('\n');
-                        data = [];
                         let dataIndex = 0;
                         for (let i = (line - 1); i < lines.length; i += 1) {
                             const columns = lines[i].trim().split(',');
@@ -861,7 +860,9 @@ class Scratch3DataViewerBlocks {
                             }
                         }
                     }
-
+                    if (typeof data === 'undefined' || data.length === 0) {
+                        return resolve('');
+                    }
                     return resolve(data.join(' '));
                 });
             });

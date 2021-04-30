@@ -825,18 +825,23 @@ test('Read CSV data from published Google Spreadsheet (CSV output link)', t => {
     });
 });
 
-test('Read CSV data from published Google Spreadsheet', t => {
+test('Read CSV data from published Google Spreadsheet (main link)', t => {
     const setup = setupDataViewer();
 
-    setup.dv.readCSVDataFromURL({
-        URL: `https://docs.google.com/spreadsheets/d/1PBDC5fauOWlFbc5MDzbLCVhR4POSMo38IAenCRaatg4/edit#gid=0`,
-        COLUMN: '3',
-        LINE: '2'
-    }).then(data => {
-        t.equal(data.split(' ').length, 995);
+    const URL = 'https://docs.google.com/spreadsheets/d/1PBDC5fauOWlFbc5MDzbLCVhR4POSMo38IAenCRaatg4/edit#gid=0';
 
-        t.end();
-    });
+    setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '3', LINE: '2'})
+        .then(data => {
+            t.equal(data.split(' ').length, 995);
+
+            // Column out of range.
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '99', LINE: '2'});
+        })
+        .then(data => {
+            t.equal(data.split(' ').length, 1);
+
+            t.end();
+        });
 });
 
 test('Create lists from Google Spreadsheet', t => {

@@ -852,17 +852,10 @@ class Scratch3DataViewerBlocks {
                         data = lists[Object.keys(lists)[column]];
                     } else {
                         const lines = body.toString().split('\n');
-                        let dataIndex = 0;
                         for (let i = (line - 1); i < lines.length; i += 1) {
                             const columns = lines[i].trim().split(',');
-                            if (columns[column]) {
-                                // Just to make sure we are getting only numbers.
-                                // ToDo: cover more cases...
-                                columns[column] = columns[column].replace(/\D*(\d+)/, '$1');
-                                if (!isNaN(columns[column])) {
-                                    data[dataIndex] = Cast.toNumber(columns[column]);
-                                    dataIndex++;
-                                }
+                            if (columns.length > column && column >= 0) {
+                                data[i - 1] = columns[column];
                             }
                         }
                     }

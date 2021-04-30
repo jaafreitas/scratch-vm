@@ -814,24 +814,16 @@ test('Scale', t => {
 test('Read CSV data from published Google Spreadsheet (CSV output link)', t => {
     const setup = setupDataViewer();
 
-    setup.dv.readCSVDataFromURL({
-        URL: `https://docs.google.com/spreadsheets/d/e/2PACX-1vSMZFJxFvz9tK4Y5s2VFEozwlpjNHYEiAMNTUjvyzivmMebsHzsBw8AbxDPz0ka9-a3a8-7wqPDbMCV/pub?output=csv`,
-        COLUMN: '1',
-        LINE: '2'
-    }).then(data => {
-        t.equal(data.split(' ').length, 408);
+    const URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vSMZFJxFvz9tK4Y5s2VFEozwlpjNHYEiAMNTUjvyzivmMebsHzsBw8AbxDPz0ka9-a3a8-7wqPDbMCV/pub?output=csv`;
 
-        t.end();
-    });
-});
+    // Out of range.
+    setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '0', LINE: '2'})
+        .then(data => {
+            t.equal(data.length, 0);
 
-test('Read CSV data from published Google Spreadsheet (main link)', t => {
-    const setup = setupDataViewer();
-
-    const URL = 'https://docs.google.com/spreadsheets/d/1PBDC5fauOWlFbc5MDzbLCVhR4POSMo38IAenCRaatg4/edit#gid=0';
-
-    // Year
-    setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '1', LINE: '2'})
+            // Year
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '1', LINE: '2'});
+        })
         .then(data => {
             t.equal(data.length, 100);
 
@@ -859,7 +851,58 @@ test('Read CSV data from published Google Spreadsheet (main link)', t => {
         .then(data => {
             t.equal(data.length, 100);
 
-            // Column out of range.
+            // Out of range.
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '99', LINE: '2'});
+        })
+        .then(data => {
+            t.equal(data.length, 0);
+
+            t.end();
+        });
+});
+
+test('Read CSV data from published Google Spreadsheet (main link)', t => {
+    const setup = setupDataViewer();
+
+    const URL = 'https://docs.google.com/spreadsheets/d/1PBDC5fauOWlFbc5MDzbLCVhR4POSMo38IAenCRaatg4/edit#gid=0';
+
+
+    // Out of range
+    setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '0', LINE: '2'})
+        .then(data => {
+            t.equal(data.length, 0);
+
+            // Year
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '2', LINE: '2'});
+        })
+        .then(data => {
+            t.equal(data.length, 100);
+
+            // One Letter
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '2', LINE: '2'});
+        })
+        .then(data => {
+            t.equal(data.length, 100);
+
+            // Many Letters
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '3', LINE: '2'});
+        })
+        .then(data => {
+            t.equal(data.length, 100);
+
+            // Spaced Letters
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '4', LINE: '2'});
+        })
+        .then(data => {
+            t.equal(data.length, 100);
+
+            // áçãàü
+            return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '5', LINE: '2'});
+        })
+        .then(data => {
+            t.equal(data.length, 100);
+
+            // Out of range.
             return setup.dv.readCSVDataFromURL({URL: URL, COLUMN: '99', LINE: '2'});
         })
         .then(data => {

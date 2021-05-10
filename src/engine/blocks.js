@@ -301,6 +301,15 @@ class Blocks {
     blocklyListen (e) {
         // Validate event
         if (typeof e !== 'object') return;
+
+        if ((e.origin === 'flyoutBlocks') &&
+            e.element === 'selected' &&
+            e.blockId === null &&
+            e.group === '' &&
+            this.getOpcode(this._blocks[e.newValue]) !== null) {
+            this.runtime.emit('createBlock*', this.getOpcode(this._blocks[e.newValue]));
+        }
+
         if (typeof e.blockId !== 'string' && typeof e.varId !== 'string' &&
             typeof e.commentId !== 'string') {
             return;
@@ -354,7 +363,7 @@ class Blocks {
                 this.runtime.emitBlockEndDrag(newBlocks, e.blockId);
             }
             break;
-        case 'delete':
+        case 'delete': {
             // Don't accept delete events for missing blocks,
             // or shadow blocks being obscured.
             if (!this._blocks.hasOwnProperty(e.blockId) ||
@@ -365,8 +374,19 @@ class Blocks {
             if (this._blocks[e.blockId].topLevel) {
                 this.runtime.quietGlow(e.blockId);
             }
+
+            const deletedBlockOpcode = this.getOpcode(this._blocks[e.blockId]);
+
+            const totalBlocksBefore = Object.values(this._blocks).filter(block => !block.shadow).length;
             this.deleteBlock(e.blockId);
+            const totalBlocksAfter = Object.values(this._blocks).filter(block => !block.shadow).length;
+
+            if (e.origin === 'parseScratchObject' || e.origin === 'sprite') {
+                this.runtime.emit('deleteBlock*', deletedBlockOpcode, totalBlocksBefore - totalBlocksAfter);
+            }
+
             break;
+        }
         case 'var_create':
             // Check if the variable being created is global or local
             // If local, create a local var on the current editing target, as long

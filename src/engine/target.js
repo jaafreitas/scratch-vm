@@ -27,6 +27,7 @@ class Target extends EventEmitter {
 
         if (!blocks) {
             blocks = new Blocks(runtime);
+            blocks.origin = 'target';
         }
 
         /**

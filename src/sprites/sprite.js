@@ -20,6 +20,7 @@ class Sprite {
         if (!blocks) {
             // Shared set of blocks for all clones.
             blocks = new Blocks(runtime);
+            blocks.origin = 'sprite';
         }
         this.blocks = blocks;
         /**

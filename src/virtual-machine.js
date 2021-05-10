@@ -54,6 +54,7 @@ class Timeline {
         this._snapshots = [];
         this._sb3 = require('./serialization/sb3');
         this._lastEvent = '';
+        this._ignoreDeletedBlocks = false;
         this._projectChangedSchedule = null;
         this._scheduler = {PROJECT_CHANGED: null, TARGET_MOVED: null, MONITORS_UPDATE: null};
         this._showDebugInfo = window.location.href.match(/[?&]timelinedebug[?&]*/) !== null;
@@ -103,6 +104,18 @@ class Timeline {
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
 
+        // The blocks are recreated in some cases, for instance when
+        // we choose different tabs (code, backdrops/costumes and sounds).
+        if (event === 'workspaceUpdate') {
+            this._ignoreDeletedBlocks = true;
+        }
+        if (event === 'BLOCK_DRAG_UPDATE') {
+            this._ignoreDeletedBlocks = false;
+        }
+        if (this._ignoreDeletedBlocks && event === 'deleteBlock*') {
+            return;
+        }
+
         let eventType = eventTypes.log;
         // Events ignored.
         if ((event === this._lastEvent) ||
@@ -122,6 +135,10 @@ class Timeline {
             (className === 'VirtualMachine' && event === 'targetsUpdate') ||
             (className === 'RenderedTarget' && event === 'EVENT_TARGET_VISUAL_CHANGE')) {
             eventType = eventTypes.ignore;
+        }
+        // Never ignore this events, even if they just happend before.
+        if ((event === 'createBlock*') || (event === 'deleteBlock*')) {
+            eventType = eventTypes.log;
         }
         // Events scheduled.
         if ((eventType !== eventTypes.ignore || this.projectIsSerializable(className, event)) &&
@@ -147,6 +164,12 @@ class Timeline {
         // Events logged.
         if (eventType === eventTypes.log) {
             this._log[timestamp] = frame;
+            if (event === 'createBlock*' || event === 'deleteBlock*') {
+                frame.block = emitterArguments[1];
+                if (event === 'deleteBlock*') {
+                    frame.deletedBlocks = emitterArguments[2];
+                }
+            }
             if (
                 (className === 'VirtualMachine' && event === 'greenFlag*') ||
                 // Event Triggered when the stop button is clicked.
@@ -1309,6 +1332,7 @@ class VirtualMachine extends EventEmitter {
      */
     blockListener (e) {
         if (this.editingTarget) {
+            e.origin = this.editingTarget.blocks.origin;
             this.editingTarget.blocks.blocklyListen(e);
         }
     }
@@ -1318,6 +1342,7 @@ class VirtualMachine extends EventEmitter {
      * @param {!Blockly.Event} e Any Blockly event.
      */
     flyoutBlockListener (e) {
+        e.origin = this.runtime.flyoutBlocks.origin;
         this.runtime.flyoutBlocks.blocklyListen(e);
     }
 

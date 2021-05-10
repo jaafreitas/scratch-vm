@@ -206,6 +206,7 @@ class Runtime extends EventEmitter {
          * @type {!Blocks}
          */
         this.flyoutBlocks = new Blocks(this, true /* force no glow */);
+        this.flyoutBlocks.origin = 'flyoutBlocks';
 
         /**
          * Storage container for monitor blocks.
@@ -213,6 +214,7 @@ class Runtime extends EventEmitter {
          * @type {!Blocks}
          */
         this.monitorBlocks = new Blocks(this, true /* force no glow */);
+        this.monitorBlocks.origin = 'monitorBlocks';
 
         /**
          * Currently known editing target for the VM.

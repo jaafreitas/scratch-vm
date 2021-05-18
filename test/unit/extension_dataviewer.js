@@ -915,8 +915,25 @@ test('Read CSV data from published Google Spreadsheet (main link)', t => {
 test('Create lists from Google Spreadsheet', t => {
     const setup = setupDataViewer();
 
-    setup.dv.createListsFromGoogleSheets({
+    setup.dv.createListsFromURL({
         URL: `https://docs.google.com/spreadsheets/d/1PBDC5fauOWlFbc5MDzbLCVhR4POSMo38IAenCRaatg4/edit#gid=0`
+    }).then(() => {
+
+        t.equal(setup.dv.getDataLength({LIST_ID: 'Year'}), 100);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'One Letter'}), 100);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'Many Letters'}), 100);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'Spaced Letters'}), 100);
+        t.equal(setup.dv.getDataLength({LIST_ID: 'áçãàü'}), 100);
+
+        t.end();
+    });
+});
+
+test('Create lists from CSV', t => {
+    const setup = setupDataViewer();
+
+    setup.dv.createListsFromURL({
+        URL: `https://docs.google.com/spreadsheets/d/e/2PACX-1vSMZFJxFvz9tK4Y5s2VFEozwlpjNHYEiAMNTUjvyzivmMebsHzsBw8AbxDPz0ka9-a3a8-7wqPDbMCV/pub?output=csv`
     }).then(() => {
 
         t.equal(setup.dv.getDataLength({LIST_ID: 'Year'}), 100);

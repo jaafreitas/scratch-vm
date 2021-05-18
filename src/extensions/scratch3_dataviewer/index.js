@@ -1109,8 +1109,11 @@ class Scratch3DataViewerBlocks {
             const newMax = Cast.toNumber(args.NEW_MAX);
             let monitorUpToDate = true;
             for (let i = 0; i < this.getDataLength(args); i += 1) {
-                const oldValue = this._data(args.LIST_ID).value[i];
-                if (!isNaN(oldValue)) {
+                let oldValue = this._data(args.LIST_ID).value[i];
+                if (typeof oldValue === 'string') {
+                    oldValue = oldValue.trim();
+                }
+                if (oldValue && !isNaN(oldValue)) {
                     const newValue = this._mapValue(oldValue, oldMin, oldMax, newMin, newMax);
                     if (oldValue !== newValue) {
                         // Two decimal points is a trade-off between precision and legibility

@@ -487,6 +487,7 @@ class Scratch3DataViewerBlocks {
         };
         const blocks = [
             allBlocks.setData,
+            allBlocks.createListsFromURL,
             allBlocks.changeDataScale,
             allBlocks.dataLoop,
             allBlocks.getValue,
@@ -505,17 +506,13 @@ class Scratch3DataViewerBlocks {
             blocks.push(
                 allBlocks.showLessBlocks,
                 '---',
-                allBlocks.createListsFromURL,
+                allBlocks.orderListAllLists,
+                allBlocks.deleteOfListAllLists,
+                '---',
                 allBlocks.readCSVDataFromURL,
                 allBlocks.readThingSpeakData,
                 '---',
-                allBlocks.mapData,
-                '---',
-                allBlocks.deleteOfListAllLists,
-                allBlocks.deleteOfList,
-                '---',
-                allBlocks.orderListAllLists,
-                allBlocks.orderList
+                allBlocks.mapData
             );
         }
         // if we try load a project with the extra blocks using the minimal-block version,

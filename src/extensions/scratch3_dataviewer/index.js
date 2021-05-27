@@ -84,17 +84,16 @@ class Scratch3DataViewerBlocks {
     }
 
     _blocksInfoUpdate () {
-        // Create the first 2 lists.
+        // Create the initial list.
         const stage = this._runtime.getTargetForStage();
         if (stage) {
-            const varID = 'list';
+            const varID = 'my#list';
             const varName = formatMessage({
                 id: 'dataviewer.list',
-                default: varID});
-            [1, 2].forEach(i => {
-                const variable = stage.lookupOrCreateList(`dataviewer#${varID}#${i}`, `${varName} ${i}`);
-                variable._monitorUpToDate = false;
-            });
+                default: 'my list'});
+            const variable = stage.lookupOrCreateList(`dataviewer#${varID}`, varName);
+            variable._monitorUpToDate = false;
+
             // Show the new variable on toolbox
             this._runtime.requestBlocksUpdate();
         }

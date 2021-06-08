@@ -50,18 +50,17 @@ class Timeline {
         const _timeline = this;
         const _eventEmitterOriginalEmit = EventEmitter.prototype.emit;
 
-        this._log = {};
-        this._snapshots = [];
         this._sb3 = require('./serialization/sb3');
-        this._lastEvent = '';
-        this._ignoreDeletedBlocks = false;
-        this._projectChangedSchedule = null;
+        this.fileName = 'timeline.json';
+
         this._scheduler = {PROJECT_CHANGED: null, TARGET_MOVED: null, MONITORS_UPDATE: null};
+        this.clear();
+
         this._showDebugInfo = window.location.href.match(/[?&]timelinedebug[?&]*/) !== null;
         this._disable = window.location.href.match(/[?&]timelinedisable[?&]*/) !== null;
 
         if (this._disable) {
-            this._log[Date.now()] = 'TIMELINE disabled!';
+            this.addLog(Date.now(), 'TIMELINE disabled!');
         } else {
             Object.assign(EventEmitter.prototype, {
                 emit: function () {
@@ -72,9 +71,21 @@ class Timeline {
         }
     }
 
+    clear () {
+        // Clear scheduled events.
+        Object.values(this._scheduler).forEach(event => {
+            clearTimeout(event);
+        });
+        this._log = {};
+        this._snapshots = [];
+        this._lastEvent = '';
+        this._ignoreDeletedBlocks = false;
+        this._projectChangedSchedule = null;
+    }
+
     showEvent (timestamp, eventType, frame) {
-        if (this._showDebugInfo && eventType !== eventTypes.ignore && eventType !== eventTypes.scheduledAlready) {
-            // eslint-disable-next-line no-console
+        if (this._showDebugInfo) {
+        // eslint-disable-next-line no-console
             console.log(`[TIMELINE] ${timestamp} ${eventType} ${JSON.stringify(frame)}`);
         }
     }
@@ -98,11 +109,31 @@ class Timeline {
         return fileName;
     }
 
+    addLog (timestamp, frame) {
+        // Workaround for events that happened exactly at the same timestamp.
+        while (timestamp in this._log) {
+            timestamp += 1;
+        }
+        this._log[timestamp] = frame;
+    }
+
     add (emitter, emitterArguments) {
         const event = emitterArguments[0];
         const className = emitter.constructor.name;
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
+
+        // Ignore events while loading a project and clean up the state.
+        if (event === 'loadProject*') {
+            this.clear();
+            this._lastEvent = 'loadProject*';
+            this.showEvent(timestamp, eventTypes.ignore, frame);
+            return;
+        }
+        if (this._lastEvent === 'loadProject*' && event !== 'workspaceUpdate') {
+            this.showEvent(timestamp, eventTypes.ignore, frame);
+            return;
+        }
 
         // The blocks are recreated in some cases, for instance when
         // we choose different tabs (code, backdrops/costumes and sounds).
@@ -113,6 +144,7 @@ class Timeline {
             this._ignoreDeletedBlocks = false;
         }
         if (this._ignoreDeletedBlocks && event === 'deleteBlock*') {
+            this.showEvent(timestamp, eventTypes.ignore, frame);
             return;
         }
 
@@ -150,20 +182,19 @@ class Timeline {
                 eventType = eventTypes.schedule;
             }
             this._scheduler[event] = setTimeout(() => {
-                this._log[timestamp] = frame;
+                this.addLog(timestamp, frame);
                 // To avoid a long message output, show the log before adding project to the frame.
                 this.showEvent(timestamp, eventTypes.logSchedule, frame);
                 // PROJECT_CHANGE event.
                 if (this.projectIsSerializable(className, event)) {
                     frame.project = this._sb3.serialize(emitter.runtime);
-                    // frame.fileName = this.addSnapshot(emitter.runtime, timestamp);
                 }
                 this._scheduler[event] = null;
             }, 5000);
         }
         // Events logged.
         if (eventType === eventTypes.log) {
-            this._log[timestamp] = frame;
+            this.addLog(timestamp, frame);
             if (event === 'createBlock*' || event === 'deleteBlock*') {
                 frame.block = emitterArguments[1];
                 if (event === 'deleteBlock*') {
@@ -188,12 +219,46 @@ class Timeline {
     export () {
         return StringUtil.stringify(this._log);
     }
+
+    import (timelineJson) {
+        this._log = JSON.parse(timelineJson);
+    }
+
     exportSnapshots () {
         const assetDescs = [];
         this._snapshots.forEach(snapshot => {
             assetDescs.push({fileName: snapshot.fileName, fileContent: snapshot.data});
         });
         return assetDescs;
+    }
+
+    importSnapshot (fileName, blob) {
+        this._snapshots.push({fileName: fileName, data: blob});
+    }
+
+    deserialize (zip) {
+        if (zip && zip.files.hasOwnProperty(this.fileName)) {
+            const snapshotPromisses = [];
+            const snapshotFiles = zip.file(/timeline_\d+\.jpg/);
+            snapshotFiles.forEach(zipObject => snapshotPromisses.push(zipObject.async('uint8array')));
+
+            Promise.all(snapshotPromisses)
+                .then(promises => {
+                    promises.forEach((data, index) => {
+                        this.importSnapshot(snapshotFiles[index].name, data);
+                    });
+                });
+
+            zip.file(this.fileName)
+                .async('string')
+                .then(timelineJson => {
+                    this.import(timelineJson);
+                    const frame = {classname: 'TIMELINE', event: 'projectLoaded*'};
+                    const timestamp = Date.now();
+                    this.addLog(timestamp, frame);
+                    this.showEvent(timestamp, eventTypes.log, frame);
+                });
+        }
     }
 }
 const timeline = new Timeline();
@@ -510,7 +575,10 @@ class VirtualMachine extends EventEmitter {
             });
 
         return validationPromise
-            .then(validatedInput => this.deserializeProject(validatedInput[0], validatedInput[1]))
+            .then(validatedInput => {
+                timeline.deserialize(validatedInput[1]);
+                this.deserializeProject(validatedInput[0], validatedInput[1]);
+            })
             .then(() => this.runtime.emitProjectLoaded())
             .catch(error => {
                 // Intentionally rejecting here (want errors to be handled by caller)
@@ -555,7 +623,7 @@ class VirtualMachine extends EventEmitter {
         zip.file('project.json', projectJson);
 
         const timelineJson = timeline.export();
-        zip.file('timeline.json', timelineJson);
+        zip.file(timeline.fileName, timelineJson);
         this._addFileDescsToZip(timeline.exportSnapshots(), zip);
 
         this._addFileDescsToZip(soundDescs.concat(costumeDescs), zip);

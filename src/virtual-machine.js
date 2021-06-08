@@ -50,13 +50,11 @@ class Timeline {
         const _timeline = this;
         const _eventEmitterOriginalEmit = EventEmitter.prototype.emit;
 
-        this._log = {};
-        this._snapshots = [];
         this._sb3 = require('./serialization/sb3');
-        this._lastEvent = '';
-        this._ignoreDeletedBlocks = false;
-        this._projectChangedSchedule = null;
+
         this._scheduler = {PROJECT_CHANGED: null, TARGET_MOVED: null, MONITORS_UPDATE: null};
+        this.clear();
+
         this._showDebugInfo = window.location.href.match(/[?&]timelinedebug[?&]*/) !== null;
         this._disable = window.location.href.match(/[?&]timelinedisable[?&]*/) !== null;
 
@@ -70,6 +68,18 @@ class Timeline {
                 }
             });
         }
+    }
+
+    clear () {
+        // Clear scheduled events.
+        Object.values(this._scheduler).forEach(event => {
+            clearTimeout(event);
+        });
+        this._log = {};
+        this._snapshots = [];
+        this._lastEvent = '';
+        this._ignoreDeletedBlocks = false;
+        this._projectChangedSchedule = null;
     }
 
     showEvent (timestamp, eventType, frame) {
@@ -195,12 +205,46 @@ class Timeline {
     export () {
         return StringUtil.stringify(this._log);
     }
+
+    import (timelineJson) {
+        this._log = JSON.parse(timelineJson);
+    }
+
     exportSnapshots () {
         const assetDescs = [];
         this._snapshots.forEach(snapshot => {
             assetDescs.push({fileName: snapshot.fileName, fileContent: snapshot.data});
         });
         return assetDescs;
+    }
+
+    importSnapshot (fileName, blob) {
+        this._snapshots.push({fileName: fileName, data: blob});
+    }
+
+    deserialize (zip) {
+        if (zip && zip.files.hasOwnProperty('timeline.json')) {
+            const snapshotPromisses = [];
+            const snapshotFiles = zip.file(/timeline_\d+\.jpg/);
+            snapshotFiles.forEach(zipObject => snapshotPromisses.push(zipObject.async('uint8array')));
+
+            Promise.all(snapshotPromisses)
+                .then(promises => {
+                    promises.forEach((data, index) => {
+                        this.importSnapshot(snapshotFiles[index].name, data);
+                    });
+                });
+
+            zip.file('timeline.json')
+                .async('string')
+                .then(timelineJson => {
+                    this.import(timelineJson);
+                    const frame = {classname: 'TIMELINE', event: 'projectLoaded*'};
+                    const timestamp = Date.now();
+                    this.addLog(timestamp, frame);
+                    this.showEvent(timestamp, eventTypes.log, frame);
+                });
+        }
     }
 }
 const timeline = new Timeline();
@@ -517,7 +561,10 @@ class VirtualMachine extends EventEmitter {
             });
 
         return validationPromise
-            .then(validatedInput => this.deserializeProject(validatedInput[0], validatedInput[1]))
+            .then(validatedInput => {
+                timeline.deserialize(validatedInput[1]);
+                this.deserializeProject(validatedInput[0], validatedInput[1]);
+            })
             .then(() => this.runtime.emitProjectLoaded())
             .catch(error => {
                 // Intentionally rejecting here (want errors to be handled by caller)

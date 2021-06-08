@@ -122,6 +122,18 @@ class Timeline {
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
 
+        // Ignore events while loading a project and clean up the state.
+        if (event === 'loadProject*') {
+            this.clear();
+            this._lastEvent = 'loadProject*';
+            this.showEvent(timestamp, eventTypes.ignore, frame);
+            return;
+        }
+        if (this._lastEvent === 'loadProject*' && event !== 'workspaceUpdate') {
+            this.showEvent(timestamp, eventTypes.ignore, frame);
+            return;
+        }
+
         // The blocks are recreated in some cases, for instance when
         // we choose different tabs (code, backdrops/costumes and sounds).
         if (event === 'workspaceUpdate') {
@@ -131,6 +143,7 @@ class Timeline {
             this._ignoreDeletedBlocks = false;
         }
         if (this._ignoreDeletedBlocks && event === 'deleteBlock*') {
+            this.showEvent(timestamp, eventTypes.ignore, frame);
             return;
         }
 

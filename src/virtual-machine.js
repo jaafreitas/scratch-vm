@@ -51,6 +51,7 @@ class Timeline {
         const _eventEmitterOriginalEmit = EventEmitter.prototype.emit;
 
         this._sb3 = require('./serialization/sb3');
+        this.fileName = 'timeline.json';
 
         this._scheduler = {PROJECT_CHANGED: null, TARGET_MOVED: null, MONITORS_UPDATE: null};
         this.clear();
@@ -236,7 +237,7 @@ class Timeline {
     }
 
     deserialize (zip) {
-        if (zip && zip.files.hasOwnProperty('timeline.json')) {
+        if (zip && zip.files.hasOwnProperty(this.fileName)) {
             const snapshotPromisses = [];
             const snapshotFiles = zip.file(/timeline_\d+\.jpg/);
             snapshotFiles.forEach(zipObject => snapshotPromisses.push(zipObject.async('uint8array')));
@@ -248,7 +249,7 @@ class Timeline {
                     });
                 });
 
-            zip.file('timeline.json')
+            zip.file(this.fileName)
                 .async('string')
                 .then(timelineJson => {
                     this.import(timelineJson);
@@ -622,7 +623,7 @@ class VirtualMachine extends EventEmitter {
         zip.file('project.json', projectJson);
 
         const timelineJson = timeline.export();
-        zip.file('timeline.json', timelineJson);
+        zip.file(timeline.fileName, timelineJson);
         this._addFileDescsToZip(timeline.exportSnapshots(), zip);
 
         this._addFileDescsToZip(soundDescs.concat(costumeDescs), zip);

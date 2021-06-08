@@ -61,7 +61,7 @@ class Timeline {
         this._disable = window.location.href.match(/[?&]timelinedisable[?&]*/) !== null;
 
         if (this._disable) {
-            this._log[Date.now()] = 'TIMELINE disabled!';
+            this.addLog(Date.now(), 'TIMELINE disabled!');
         } else {
             Object.assign(EventEmitter.prototype, {
                 emit: function () {
@@ -96,6 +96,14 @@ class Timeline {
         });
         runtime.renderer.draw();
         return fileName;
+    }
+
+    addLog (timestamp, frame) {
+        // Workaround for events that happened exactly at the same timestamp.
+        while (timestamp in this._log) {
+            timestamp += 1;
+        }
+        this._log[timestamp] = frame;
     }
 
     add (emitter, emitterArguments) {
@@ -150,20 +158,19 @@ class Timeline {
                 eventType = eventTypes.schedule;
             }
             this._scheduler[event] = setTimeout(() => {
-                this._log[timestamp] = frame;
+                this.addLog(timestamp, frame);
                 // To avoid a long message output, show the log before adding project to the frame.
                 this.showEvent(timestamp, eventTypes.logSchedule, frame);
                 // PROJECT_CHANGE event.
                 if (this.projectIsSerializable(className, event)) {
                     frame.project = this._sb3.serialize(emitter.runtime);
-                    // frame.fileName = this.addSnapshot(emitter.runtime, timestamp);
                 }
                 this._scheduler[event] = null;
             }, 5000);
         }
         // Events logged.
         if (eventType === eventTypes.log) {
-            this._log[timestamp] = frame;
+            this.addLog(timestamp, frame);
             if (event === 'createBlock*' || event === 'deleteBlock*') {
                 frame.block = emitterArguments[1];
                 if (event === 'deleteBlock*') {

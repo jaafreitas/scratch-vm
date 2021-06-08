@@ -83,8 +83,8 @@ class Timeline {
     }
 
     showEvent (timestamp, eventType, frame) {
-        if (this._showDebugInfo && eventType !== eventTypes.ignore && eventType !== eventTypes.scheduledAlready) {
-            // eslint-disable-next-line no-console
+        if (this._showDebugInfo) {
+        // eslint-disable-next-line no-console
             console.log(`[TIMELINE] ${timestamp} ${eventType} ${JSON.stringify(frame)}`);
         }
     }

@@ -927,6 +927,9 @@ class Scratch3DataViewerBlocks {
                         this._data(key)._monitorUpToDate = false;
                     }
 
+                    // Show new variables on toolbox.
+                    this._runtime.requestToolboxExtensionsUpdate();
+
                     return resolve();
                 });
             });

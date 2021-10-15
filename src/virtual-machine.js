@@ -169,7 +169,7 @@ class Timeline {
             eventType = eventTypes.ignore;
         }
         // Never ignore this events, even if they just happend before.
-        if ((event === 'createBlock*') || (event === 'deleteBlock*')) {
+        if ((event === 'createBlock*') || (event === 'deleteBlock*') || (event === 'duplicateBlock*')) {
             eventType = eventTypes.log;
         }
         // Events scheduled.
@@ -195,10 +195,13 @@ class Timeline {
         // Events logged.
         if (eventType === eventTypes.log) {
             this.addLog(timestamp, frame);
-            if (event === 'createBlock*' || event === 'deleteBlock*') {
+            if (event === 'createBlock*' || event === 'deleteBlock*' || event === 'duplicateBlock*') {
                 frame.block = emitterArguments[1];
                 if (event === 'deleteBlock*') {
                     frame.deletedBlocks = emitterArguments[2];
+                }
+                if (event === 'duplicateBlock*') {
+                    frame.duplicatedBlocks = emitterArguments[2];
                 }
             }
             if (

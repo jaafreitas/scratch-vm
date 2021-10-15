@@ -331,6 +331,10 @@ class Blocks {
             for (let i = 0; i < newBlocks.length; i++) {
                 this.createBlock(newBlocks[i]);
             }
+            if (e.origin === 'parseScratchObject' && e.group === '') {
+                this.runtime.emit('duplicateBlock*', this.getOpcode(this._blocks[e.blockId]),
+                    Object.values(newBlocks).filter(block => !block.shadow).length);
+            }
             break;
         }
         case 'change':

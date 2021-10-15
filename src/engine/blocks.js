@@ -350,6 +350,10 @@ class Blocks {
                 newInput: e.newInputName,
                 newCoordinate: e.newCoordinate
             });
+            if ((typeof e.oldParentId !== 'undefined' || typeof e.newParentId !== 'undefined') &&
+                (typeof e.oldCoordinate !== 'undefined' || typeof e.newCoordinate !== 'undefined')) {
+                this.runtime.emit('moveBlock*');
+            }
             break;
         case 'dragOutside':
             this.runtime.emitBlockDragUpdate(e.isOutside);

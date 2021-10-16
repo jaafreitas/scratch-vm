@@ -122,6 +122,10 @@ class Timeline {
         const className = emitter.constructor.name;
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
+        if ((event === 'moveSplitBlock*' || event === 'moveJoinBlock*') &&
+            (emitterArguments.length > 0 && typeof emitterArguments[1] === 'object')) {
+            Object.assign(frame, emitterArguments[1]);
+        }
 
         // Ignore events while loading a project and clean up the state.
         if (event === 'loadProject*') {

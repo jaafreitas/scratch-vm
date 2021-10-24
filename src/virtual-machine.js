@@ -122,8 +122,12 @@ class Timeline {
         const className = emitter.constructor.name;
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
-        if ((event === 'changeBlock*' || event === 'duplicateSprite*') &&
-            (emitterArguments.length > 0 && typeof emitterArguments[1] === 'object')) {
+        if ((event === 'changeBlock*' ||
+            event === 'duplicateSprite*' ||
+            event === 'renameSprite*' ||
+            event === 'renameCostume*' ||
+            event === 'renameSound*'
+        ) && (emitterArguments.length > 0 && typeof emitterArguments[1] === 'object')) {
             Object.assign(frame, emitterArguments[1]);
         }
 
@@ -961,7 +965,7 @@ class VirtualMachine extends EventEmitter {
      * @param {string} newName - the desired new name of the costume (will be modified if already in use).
      */
     renameCostume (costumeIndex, newName) {
-        this.emit('renameCostume*');
+        this.emit('renameCostume*', {oldName: this.editingTarget.sprite.costumes[costumeIndex].name, newName: newName});
         this.editingTarget.renameCostume(costumeIndex, newName);
         this.emitTargetsUpdate();
     }
@@ -1012,7 +1016,7 @@ class VirtualMachine extends EventEmitter {
      * @param {string} newName - the desired new name of the sound (will be modified if already in use).
      */
     renameSound (soundIndex, newName) {
-        this.emit('renameSound*');
+        this.emit('renameSound*', {oldName: this.editingTarget.sprite.sounds[soundIndex].name, newName: newName});
         this.editingTarget.renameSound(soundIndex, newName);
         this.emitTargetsUpdate();
     }
@@ -1231,7 +1235,6 @@ class VirtualMachine extends EventEmitter {
      * @param {string} newName New name of the sprite.
      */
     renameSprite (targetId, newName) {
-        this.emit('renameSprite*');
         const target = this.runtime.getTargetById(targetId);
         if (target) {
             if (!target.isSprite()) {
@@ -1254,7 +1257,10 @@ class VirtualMachine extends EventEmitter {
                     currTarget.blocks.updateAssetName(oldName, newName, 'sprite');
                 }
 
-                if (newUnusedName !== oldName) this.emitTargetsUpdate();
+                if (newUnusedName !== oldName) {
+                    this.emit('renameSprite*', {oldName: oldName, newName: newUnusedName});
+                    this.emitTargetsUpdate();
+                }
             }
         } else {
             throw new Error('No target with the provided id.');

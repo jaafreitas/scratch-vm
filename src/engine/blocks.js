@@ -344,13 +344,8 @@ class Blocks {
                 id: e.blockId,
                 element: e.element,
                 name: e.name,
-                value: e.newValue
-            });
-            this.runtime.emit('changeBlock*', {
-                block: this.getOpcode(this._blocks[this._blocks[e.blockId].parent]),
-                field: this.getOpcode(this._blocks[e.blockId]),
-                oldValue: e.oldValue,
-                newValue: e.newValue
+                value: e.newValue,
+                oldValue: e.oldValue
             });
             break;
         case 'move':
@@ -609,6 +604,18 @@ class Blocks {
         if (['field', 'mutation', 'checkbox'].indexOf(args.element) === -1) return;
         let block = this._blocks[args.id];
         if (typeof block === 'undefined') return;
+
+        let blockName;
+        let fieldName = '';
+        let oldValue = args.oldValue;
+        let newValue = args.value;
+        if (block.shadow) {
+            blockName = this.getOpcode(this._blocks[block.parent]);
+            fieldName = this.getOpcode(block);
+        } else {
+            blockName = this.getOpcode(block);
+        }
+
         switch (args.element) {
         case 'field':
             // TODO when the field of a monitored block changes,
@@ -630,6 +637,10 @@ class Blocks {
                 if (variable) {
                     block.fields[args.name].value = variable.name;
                     block.fields[args.name].id = args.value;
+
+                    fieldName = args.name;
+                    oldValue = this.runtime.getEditingTarget().lookupVariableById(args.oldValue).name;
+                    newValue = this.runtime.getEditingTarget().lookupVariableById(args.value).name;
                 }
             } else {
                 // Changing the value in a dropdown
@@ -726,6 +737,13 @@ class Blocks {
             break;
         }
         }
+        this.runtime.emit('changeBlock*', {
+            block: blockName,
+            field: fieldName,
+            oldValue: oldValue,
+            newValue: newValue
+        });
+
 
         this.emitProjectChanged();
 

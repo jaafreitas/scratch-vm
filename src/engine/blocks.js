@@ -637,10 +637,12 @@ class Blocks {
                 if (variable) {
                     block.fields[args.name].value = variable.name;
                     block.fields[args.name].id = args.value;
-
-                    fieldName = args.name;
-                    oldValue = this.runtime.getEditingTarget().lookupVariableById(args.oldValue).name;
-                    newValue = this.runtime.getEditingTarget().lookupVariableById(args.value).name;
+                    newValue = variable.name;
+                }
+                fieldName = args.name;
+                const oldVariable = this.runtime.getEditingTarget().lookupVariableById(args.oldValue);
+                if (oldVariable) {
+                    oldValue = oldVariable.name;
                 }
             } else {
                 // Changing the value in a dropdown

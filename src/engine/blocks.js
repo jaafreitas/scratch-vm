@@ -344,6 +344,12 @@ class Blocks {
                 name: e.name,
                 value: e.newValue
             });
+            this.runtime.emit('changeBlock*', {
+                block: this.getOpcode(this._blocks[this._blocks[e.blockId].parent]),
+                field: this.getOpcode(this._blocks[e.blockId]),
+                oldValue: e.oldValue,
+                newValue: e.newValue
+            });
             break;
         case 'move':
             this.moveBlock({

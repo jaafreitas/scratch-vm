@@ -976,7 +976,10 @@ class VirtualMachine extends EventEmitter {
      * @param {string} newName - the desired new name of the costume (will be modified if already in use).
      */
     renameCostume (costumeIndex, newName) {
-        this.emit('renameCostume*', {oldName: this.editingTarget.getCostumes()[costumeIndex].name, newName: newName});
+        const oldName = this.editingTarget.getCostumes()[costumeIndex].name;
+        if (newName !== oldName) {
+            this.emit('renameCostume*', {oldName: oldName, newName: newName});
+        }
         this.editingTarget.renameCostume(costumeIndex, newName);
         this.emitTargetsUpdate();
     }
@@ -1027,7 +1030,10 @@ class VirtualMachine extends EventEmitter {
      * @param {string} newName - the desired new name of the sound (will be modified if already in use).
      */
     renameSound (soundIndex, newName) {
-        this.emit('renameSound*', {oldName: this.editingTarget.getSounds()[soundIndex].name, newName: newName});
+        const oldName = this.editingTarget.getSounds()[soundIndex].name;
+        if (newName !== oldName) {
+            this.emit('renameSound*', {oldName: oldName, newName: newName});
+        }
         this.editingTarget.renameSound(soundIndex, newName);
         this.emitTargetsUpdate();
     }

@@ -122,7 +122,7 @@ class Timeline {
         const className = emitter.constructor.name;
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
-        if ((event === 'changeBlock*') &&
+        if ((event === 'changeBlock*' || event === 'duplicateSprite*') &&
             (emitterArguments.length > 0 && typeof emitterArguments[1] === 'object')) {
             Object.assign(frame, emitterArguments[1]);
         }
@@ -1314,7 +1314,6 @@ class VirtualMachine extends EventEmitter {
      *     been added to the runtime.
      */
     duplicateSprite (targetId) {
-        this.emit('duplicateSprite*');
         const target = this.runtime.getTargetById(targetId);
         if (!target) {
             throw new Error('No target with the provided id.');
@@ -1323,6 +1322,7 @@ class VirtualMachine extends EventEmitter {
         } else if (!target.sprite) {
             throw new Error('No sprite associated with this target.');
         }
+        this.emit('duplicateSprite*', {sprite: target.sprite.name});
         return target.duplicate().then(newTarget => {
             this.runtime.addTarget(newTarget);
             newTarget.goBehindOther(target);

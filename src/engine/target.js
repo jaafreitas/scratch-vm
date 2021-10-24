@@ -265,7 +265,7 @@ class Target extends EventEmitter {
      * Additional checks are made that the variable can be created as a cloud variable.
      */
     createVariable (id, name, type, isCloud) {
-        this.emit('createVariable*');
+        this.emit('createVariable*', {name: name});
         if (!this.variables.hasOwnProperty(id)) {
             const newVariable = new Variable(id, name, type, false);
             if (isCloud && this.isStage && this.runtime.canAddCloudVariable()) {
@@ -314,12 +314,13 @@ class Target extends EventEmitter {
      * @param {string} newName New name for the variable.
      */
     renameVariable (id, newName) {
-        this.emit('renameVariable*');
         if (this.variables.hasOwnProperty(id)) {
             const variable = this.variables[id];
             if (variable.id === id) {
                 const oldName = variable.name;
                 variable.name = newName;
+
+                this.emit('renameVariable*', {oldName: oldName, newName: newName});
 
                 if (this.runtime) {
                     if (variable.isCloud && this.isStage) {
@@ -366,11 +367,11 @@ class Target extends EventEmitter {
      * @param {string} id Id of variable to delete.
      */
     deleteVariable (id) {
-        this.emit('deleteVariable*');
         if (this.variables.hasOwnProperty(id)) {
             // Get info about the variable before deleting it
             const deletedVariableName = this.variables[id].name;
             const deletedVariableWasCloud = this.variables[id].isCloud;
+            this.emit('deleteVariable*', {name: deletedVariableName});
             delete this.variables[id];
             if (this.runtime) {
                 if (deletedVariableWasCloud && this.isStage) {

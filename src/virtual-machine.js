@@ -132,6 +132,10 @@ class Timeline {
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
         if ((
+            // Variable
+            event === 'renameVariable*' ||
+            event === 'createVariable*' ||
+            event === 'deleteVariable*' ||
             // Block
             event === 'createBlock*' ||
             event === 'changeBlock*' ||

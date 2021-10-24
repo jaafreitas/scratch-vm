@@ -644,6 +644,20 @@ class Blocks {
                 if (oldVariable) {
                     oldValue = oldVariable.name;
                 }
+            } else if (args.name === 'LIST_ID') {
+                const variable = this.runtime.getEditingTarget().lookupVariableById(args.value);
+                if (variable) {
+                    newValue = variable.name;
+                } else {
+                    newValue = 'all lists';
+                }
+                fieldName = args.name;
+                const oldVariable = this.runtime.getEditingTarget().lookupVariableById(args.oldValue);
+                if (oldVariable) {
+                    oldValue = oldVariable.name;
+                } else {
+                    oldValue = 'all lists';
+                }
             } else {
                 // Changing the value in a dropdown
                 block.fields[args.name].value = args.value;

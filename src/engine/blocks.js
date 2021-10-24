@@ -357,24 +357,11 @@ class Blocks {
 
             if ((typeof e.oldParentId !== 'undefined' || typeof e.newParentId !== 'undefined') &&
                 (typeof e.oldCoordinate !== 'undefined' || typeof e.newCoordinate !== 'undefined')) {
-                // this.runtime.emit('moveBlock*');
-
                 if (typeof e.oldParentId !== 'undefined' && typeof e.newParentId === 'undefined') {
-                    this.runtime.emit('moveSplitBlock*', {isGroup: (
-                        this._blocks[e.oldParentId].parent ||
-                        this._blocks[e.blockId].next
-                    ) !== null});
+                    this.runtime.emit('moveSplitBlock*', {});
                 }
                 if (typeof e.oldParentId === 'undefined' && typeof e.newParentId !== 'undefined') {
-                    this.runtime.emit('moveJoinBlock*', {isGroup:
-                        (this._blocks[e.blockId].parent && this._blocks[e.blockId].next) !== null ||
-                        this._blocks[e.newParentId].parent !== null ||
-                        (
-                            typeof this._blocks[e.blockId].inputs === 'object' &&
-                            typeof this._blocks[e.blockId].inputs.SUBSTACK !== 'undefined' &&
-                            this._blocks[e.blockId].inputs.SUBSTACK.block !== null
-                        )
-                    });
+                    this.runtime.emit('moveJoinBlock*', {});
                 }
             }
             break;

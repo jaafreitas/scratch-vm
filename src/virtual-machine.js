@@ -123,10 +123,21 @@ class Timeline {
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
         if ((event === 'changeBlock*' ||
-            event === 'duplicateSprite*' ||
+            // Sprite
+            event === 'addSprite*' ||
             event === 'renameSprite*' ||
+            event === 'duplicateSprite*' ||
+            event === 'deleteSprite*' ||
+            // Costume
+            event === 'addCostume*' ||
             event === 'renameCostume*' ||
-            event === 'renameSound*'
+            event === 'duplicateCostume*' ||
+            event === 'deleteCostume*' ||
+            // Sound
+            event === 'addSound*' ||
+            event === 'renameSound*' ||
+            event === 'duplicateSound*' ||
+            event === 'deleteSound*'
         ) && (emitterArguments.length > 0 && typeof emitterArguments[1] === 'object')) {
             Object.assign(frame, emitterArguments[1]);
         }
@@ -809,7 +820,6 @@ class VirtualMachine extends EventEmitter {
      * @return {!Promise} Promise that resolves after targets are installed.
      */
     addSprite (input) {
-        this.emit('addSprite*');
         const errorPrefix = 'Sprite Upload Error:';
         if (typeof input === 'object' && !(input instanceof ArrayBuffer) &&
           !ArrayBuffer.isView(input)) {
@@ -835,6 +845,7 @@ class VirtualMachine extends EventEmitter {
 
         return validationPromise
             .then(validatedInput => {
+                this.emit('addSprite*', {name: validatedInput[0].name});
                 const projectVersion = validatedInput[0].projectVersion;
                 if (projectVersion === 2) {
                     return this._addSprite2(validatedInput[0], validatedInput[1]);
@@ -896,7 +907,7 @@ class VirtualMachine extends EventEmitter {
      * @returns {?Promise} - a promise that resolves when the costume has been added
      */
     addCostume (md5ext, costumeObject, optTargetId, optVersion) {
-        this.emit('addCostume*');
+        this.emit('addCostume*', {name: costumeObject.name});
         const target = optTargetId ? this.runtime.getTargetById(optTargetId) :
             this.editingTarget;
         if (target) {
@@ -933,8 +944,8 @@ class VirtualMachine extends EventEmitter {
      * @returns {?Promise} - a promise that resolves when the costume has been decoded and added
      */
     duplicateCostume (costumeIndex) {
-        this.emit('duplicateCostume*');
         const originalCostume = this.editingTarget.getCostumes()[costumeIndex];
+        this.emit('duplicateCostume*', {name: originalCostume.name});
         const clone = Object.assign({}, originalCostume);
         const md5ext = `${clone.assetId}.${clone.dataFormat}`;
         return loadCostume(md5ext, clone, this.runtime).then(() => {
@@ -950,8 +961,8 @@ class VirtualMachine extends EventEmitter {
      * @returns {?Promise} - a promise that resolves when the sound has been decoded and added
      */
     duplicateSound (soundIndex) {
-        this.emit('duplicateSound*');
         const originalSound = this.editingTarget.getSounds()[soundIndex];
+        this.emit('duplicateSound*', {name: originalSound.name});
         const clone = Object.assign({}, originalSound);
         return loadSound(clone, this.runtime, this.editingTarget.sprite.soundBank).then(() => {
             this.editingTarget.addSound(clone, soundIndex + 1);
@@ -965,7 +976,7 @@ class VirtualMachine extends EventEmitter {
      * @param {string} newName - the desired new name of the costume (will be modified if already in use).
      */
     renameCostume (costumeIndex, newName) {
-        this.emit('renameCostume*', {oldName: this.editingTarget.sprite.costumes[costumeIndex].name, newName: newName});
+        this.emit('renameCostume*', {oldName: this.editingTarget.getCostumes()[costumeIndex].name, newName: newName});
         this.editingTarget.renameCostume(costumeIndex, newName);
         this.emitTargetsUpdate();
     }
@@ -977,7 +988,7 @@ class VirtualMachine extends EventEmitter {
      * if no costume was deleted.
      */
     deleteCostume (costumeIndex) {
-        this.emit('deleteCostume*');
+        this.emit('deleteCostume*', {name: this.editingTarget.getCostumes()[costumeIndex].name});
         const deletedCostume = this.editingTarget.deleteCostume(costumeIndex);
         if (deletedCostume) {
             const target = this.editingTarget;
@@ -997,7 +1008,7 @@ class VirtualMachine extends EventEmitter {
      * @returns {?Promise} - a promise that resolves when the sound has been decoded and added
      */
     addSound (soundObject, optTargetId) {
-        this.emit('addSound*');
+        this.emit('addSound*', {name: soundObject.name});
         const target = optTargetId ? this.runtime.getTargetById(optTargetId) :
             this.editingTarget;
         if (target) {
@@ -1016,7 +1027,7 @@ class VirtualMachine extends EventEmitter {
      * @param {string} newName - the desired new name of the sound (will be modified if already in use).
      */
     renameSound (soundIndex, newName) {
-        this.emit('renameSound*', {oldName: this.editingTarget.sprite.sounds[soundIndex].name, newName: newName});
+        this.emit('renameSound*', {oldName: this.editingTarget.getSounds()[soundIndex].name, newName: newName});
         this.editingTarget.renameSound(soundIndex, newName);
         this.emitTargetsUpdate();
     }
@@ -1082,8 +1093,8 @@ class VirtualMachine extends EventEmitter {
      * or null, if no sound was deleted.
      */
     deleteSound (soundIndex) {
-        this.emit('deleteSound*');
         const target = this.editingTarget;
+        this.emit('deleteSound*', {name: target.getSounds()[soundIndex].name});
         const deletedSound = this.editingTarget.deleteSound(soundIndex);
         if (deletedSound) {
             this.runtime.emitProjectChanged();
@@ -1273,7 +1284,6 @@ class VirtualMachine extends EventEmitter {
      * @return {Function} Returns a function to restore the sprite that was deleted
      */
     deleteSprite (targetId) {
-        this.emit('deleteSprite*');
         const target = this.runtime.getTargetById(targetId);
 
         if (target) {
@@ -1305,6 +1315,8 @@ class VirtualMachine extends EventEmitter {
                     }
                 }
             }
+            this.emit('deleteSprite*', {name: sprite.name});
+
             // Sprite object should be deleted by GC.
             this.emitTargetsUpdate();
             return restoreSprite;

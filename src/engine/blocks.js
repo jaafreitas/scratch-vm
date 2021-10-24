@@ -307,7 +307,7 @@ class Blocks {
             e.blockId === null &&
             e.group === '' &&
             this.getOpcode(this._blocks[e.newValue]) !== null) {
-            this.runtime.emit('createBlock*', this.getOpcode(this._blocks[e.newValue]));
+            this.runtime.emit('createBlock*', {block: this.getOpcode(this._blocks[e.newValue])});
         }
 
         if (typeof e.blockId !== 'string' && typeof e.varId !== 'string' &&
@@ -331,6 +331,12 @@ class Blocks {
             for (let i = 0; i < newBlocks.length; i++) {
                 this.createBlock(newBlocks[i]);
             }
+            if (e.origin === 'parseScratchObject' && e.group === '') {
+                this.runtime.emit('duplicateBlock*', {
+                    block: this.getOpcode(this._blocks[e.blockId]),
+                    duplicatedBlocks: Object.values(newBlocks).filter(block => !block.shadow).length
+                });
+            }
             break;
         }
         case 'change':
@@ -338,7 +344,8 @@ class Blocks {
                 id: e.blockId,
                 element: e.element,
                 name: e.name,
-                value: e.newValue
+                value: e.newValue,
+                oldValue: e.oldValue
             });
             break;
         case 'move':
@@ -350,6 +357,16 @@ class Blocks {
                 newInput: e.newInputName,
                 newCoordinate: e.newCoordinate
             });
+
+            if ((typeof e.oldParentId !== 'undefined' || typeof e.newParentId !== 'undefined') &&
+                (typeof e.oldCoordinate !== 'undefined' || typeof e.newCoordinate !== 'undefined')) {
+                if (typeof e.oldParentId !== 'undefined' && typeof e.newParentId === 'undefined') {
+                    this.runtime.emit('moveSplitBlock*', {});
+                }
+                if (typeof e.oldParentId === 'undefined' && typeof e.newParentId !== 'undefined') {
+                    this.runtime.emit('moveJoinBlock*', {});
+                }
+            }
             break;
         case 'dragOutside':
             this.runtime.emitBlockDragUpdate(e.isOutside);
@@ -382,7 +399,10 @@ class Blocks {
             const totalBlocksAfter = Object.values(this._blocks).filter(block => !block.shadow).length;
 
             if (e.origin === 'parseScratchObject' || e.origin === 'sprite') {
-                this.runtime.emit('deleteBlock*', deletedBlockOpcode, totalBlocksBefore - totalBlocksAfter);
+                this.runtime.emit('deleteBlock*', {
+                    block: deletedBlockOpcode,
+                    deletedBlocks: totalBlocksBefore - totalBlocksAfter
+                });
             }
 
             break;
@@ -584,6 +604,18 @@ class Blocks {
         if (['field', 'mutation', 'checkbox'].indexOf(args.element) === -1) return;
         let block = this._blocks[args.id];
         if (typeof block === 'undefined') return;
+
+        let blockName;
+        let fieldName = '';
+        let oldValue = args.oldValue;
+        let newValue = args.value;
+        if (block.shadow) {
+            blockName = this.getOpcode(this._blocks[block.parent]);
+            fieldName = this.getOpcode(block);
+        } else {
+            blockName = this.getOpcode(block);
+        }
+
         switch (args.element) {
         case 'field':
             // TODO when the field of a monitored block changes,
@@ -605,6 +637,12 @@ class Blocks {
                 if (variable) {
                     block.fields[args.name].value = variable.name;
                     block.fields[args.name].id = args.value;
+                    newValue = variable.name;
+                }
+                fieldName = args.name;
+                const oldVariable = this.runtime.getEditingTarget().lookupVariableById(args.oldValue);
+                if (oldVariable) {
+                    oldValue = oldVariable.name;
                 }
             } else {
                 // Changing the value in a dropdown
@@ -701,6 +739,13 @@ class Blocks {
             break;
         }
         }
+        this.runtime.emit('changeBlock*', {
+            block: blockName,
+            field: fieldName,
+            oldValue: oldValue,
+            newValue: newValue
+        });
+
 
         this.emitProjectChanged();
 

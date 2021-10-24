@@ -25,6 +25,8 @@ const {loadSound} = require('./import/load-sound.js');
 const {serializeSounds, serializeCostumes} = require('./serialization/serialize-assets');
 require('canvas-toBlob');
 
+require('regenerator-runtime/runtime');
+
 const RESERVED_NAMES = ['_mouse_', '_stage_', '_edge_', '_myself_', '_random_'];
 
 const CORE_EXTENSIONS = [
@@ -44,6 +46,8 @@ const eventTypes = {
     schedule: 'SCHEDULE',
     scheduledAlready: 'SCHEDULED ALREADY',
     logSchedule: 'LOG SCHEDULED'};
+
+const TimelineVersion = '1.1';
 
 class Timeline {
     constructor () {
@@ -77,6 +81,7 @@ class Timeline {
             clearTimeout(event);
         });
         this._log = {};
+        this.addLog(Date.now(), {classname: 'TIMELINE', event: 'newProject*', version: TimelineVersion});
         this._snapshots = [];
         this._lastEvent = '';
         this._ignoreDeletedBlocks = false;
@@ -94,18 +99,22 @@ class Timeline {
         return (className === 'VirtualMachine' && event === 'PROJECT_CHANGED');
     }
 
-    addSnapshot (runtime, timestamp) {
+    async addSnapshot (runtime, timestamp) {
         const fileName = `timeline_${timestamp}.jpg`;
-        runtime.ioDevices.video.postData({forceTransparentPreview: true});
+        const requestSnapshot = () => new Promise(resolve => {
+            runtime.ioDevices.video.postData({forceTransparentPreview: true});
 
-        runtime.renderer.requestSnapshot(() => {
-            // Using toBlob instead of dataURItoBlob.
-            runtime.renderer.canvas.toBlob(blob => {
-                this._snapshots.push({fileName: fileName, data: blob});
-            }, 'image/jpeg', 0.50);
-            runtime.ioDevices.video.postData({forceTransparentPreview: false});
+            runtime.renderer.requestSnapshot(() => {
+                // Using toBlob instead of dataURItoBlob.
+                runtime.renderer.canvas.toBlob(blob => {
+                    this._snapshots.push({fileName: fileName, data: blob});
+                    resolve();
+                }, 'image/jpeg', 0.50);
+                runtime.ioDevices.video.postData({forceTransparentPreview: false});
+            });
+            runtime.renderer.draw();
         });
-        runtime.renderer.draw();
+        await requestSnapshot();
         return fileName;
     }
 
@@ -117,11 +126,39 @@ class Timeline {
         this._log[timestamp] = frame;
     }
 
-    add (emitter, emitterArguments) {
+    async add (emitter, emitterArguments) {
         const event = emitterArguments[0];
         const className = emitter.constructor.name;
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
+        if ((
+            // Variable
+            event === 'renameVariable*' ||
+            event === 'createVariable*' ||
+            event === 'deleteVariable*' ||
+            // Block
+            event === 'createBlock*' ||
+            event === 'changeBlock*' ||
+            event === 'duplicateBlock*' ||
+            event === 'deleteBlock*' ||
+            // Sprite
+            event === 'addSprite*' ||
+            event === 'renameSprite*' ||
+            event === 'duplicateSprite*' ||
+            event === 'deleteSprite*' ||
+            // Costume
+            event === 'addCostume*' ||
+            event === 'renameCostume*' ||
+            event === 'duplicateCostume*' ||
+            event === 'deleteCostume*' ||
+            // Sound
+            event === 'addSound*' ||
+            event === 'renameSound*' ||
+            event === 'duplicateSound*' ||
+            event === 'deleteSound*'
+        ) && (emitterArguments.length > 0 && typeof emitterArguments[1] === 'object')) {
+            Object.assign(frame, emitterArguments[1]);
+        }
 
         // Ignore events while loading a project and clean up the state.
         if (event === 'loadProject*') {
@@ -169,7 +206,11 @@ class Timeline {
             eventType = eventTypes.ignore;
         }
         // Never ignore this events, even if they just happend before.
-        if ((event === 'createBlock*') || (event === 'deleteBlock*')) {
+        if (event === 'createBlock*' ||
+            event === 'deleteBlock*' ||
+            event === 'duplicateBlock*' ||
+            event === 'saveProjectSb3*'
+        ) {
             eventType = eventTypes.log;
         }
         // Events scheduled.
@@ -195,21 +236,16 @@ class Timeline {
         // Events logged.
         if (eventType === eventTypes.log) {
             this.addLog(timestamp, frame);
-            if (event === 'createBlock*' || event === 'deleteBlock*') {
-                frame.block = emitterArguments[1];
-                if (event === 'deleteBlock*') {
-                    frame.deletedBlocks = emitterArguments[2];
-                }
-            }
             if (
                 (className === 'VirtualMachine' && event === 'greenFlag*') ||
                 // Event Triggered when the stop button is clicked.
                 (className === 'VirtualMachine' && event === 'stopAll*')) {
-                frame.fileName = this.addSnapshot(emitter.runtime, timestamp);
+                frame.fileName = await this.addSnapshot(emitter.runtime, timestamp);
             } else if (
                 // Event Triggered when no more blocks are running.
-                (className === 'Runtime' && event === 'PROJECT_RUN_STOP')) {
-                frame.fileName = this.addSnapshot(emitter, timestamp);
+                (className === 'Runtime' && event === 'PROJECT_RUN_STOP') ||
+                (className === 'Runtime' && event === 'saveProjectSb3*')) {
+                frame.fileName = await this.addSnapshot(emitter, timestamp);
             }
         }
         this._lastEvent = event;
@@ -224,8 +260,9 @@ class Timeline {
         this._log = JSON.parse(timelineJson);
     }
 
-    exportSnapshots () {
+    async exportSnapshots (runtime) {
         const assetDescs = [];
+        await this.add(runtime, ['saveProjectSb3*']);
         this._snapshots.forEach(snapshot => {
             assetDescs.push({fileName: snapshot.fileName, fileContent: snapshot.data});
         });
@@ -253,7 +290,7 @@ class Timeline {
                 .async('string')
                 .then(timelineJson => {
                     this.import(timelineJson);
-                    const frame = {classname: 'TIMELINE', event: 'projectLoaded*'};
+                    const frame = {classname: 'TIMELINE', event: 'projectLoaded*', version: TimelineVersion};
                     const timestamp = Date.now();
                     this.addLog(timestamp, frame);
                     this.showEvent(timestamp, eventTypes.log, frame);
@@ -609,8 +646,7 @@ class VirtualMachine extends EventEmitter {
     /**
      * @returns {string} Project in a Scratch 3.0 JSON representation.
      */
-    saveProjectSb3 () {
-        this.emit('saveProjectSb3*');
+    async saveProjectSb3 () {
         const soundDescs = serializeSounds(this.runtime);
         const costumeDescs = serializeCostumes(this.runtime);
         const projectJson = this.toJSON();
@@ -622,9 +658,9 @@ class VirtualMachine extends EventEmitter {
         // Put everything in a zip file
         zip.file('project.json', projectJson);
 
+        this._addFileDescsToZip(await timeline.exportSnapshots(this.runtime), zip);
         const timelineJson = timeline.export();
         zip.file(timeline.fileName, timelineJson);
-        this._addFileDescsToZip(timeline.exportSnapshots(), zip);
 
         this._addFileDescsToZip(soundDescs.concat(costumeDescs), zip);
 
@@ -798,7 +834,6 @@ class VirtualMachine extends EventEmitter {
      * @return {!Promise} Promise that resolves after targets are installed.
      */
     addSprite (input) {
-        this.emit('addSprite*');
         const errorPrefix = 'Sprite Upload Error:';
         if (typeof input === 'object' && !(input instanceof ArrayBuffer) &&
           !ArrayBuffer.isView(input)) {
@@ -824,6 +859,7 @@ class VirtualMachine extends EventEmitter {
 
         return validationPromise
             .then(validatedInput => {
+                this.emit('addSprite*', {name: validatedInput[0].name});
                 const projectVersion = validatedInput[0].projectVersion;
                 if (projectVersion === 2) {
                     return this._addSprite2(validatedInput[0], validatedInput[1]);
@@ -885,7 +921,7 @@ class VirtualMachine extends EventEmitter {
      * @returns {?Promise} - a promise that resolves when the costume has been added
      */
     addCostume (md5ext, costumeObject, optTargetId, optVersion) {
-        this.emit('addCostume*');
+        this.emit('addCostume*', {name: costumeObject.name});
         const target = optTargetId ? this.runtime.getTargetById(optTargetId) :
             this.editingTarget;
         if (target) {
@@ -922,8 +958,8 @@ class VirtualMachine extends EventEmitter {
      * @returns {?Promise} - a promise that resolves when the costume has been decoded and added
      */
     duplicateCostume (costumeIndex) {
-        this.emit('duplicateCostume*');
         const originalCostume = this.editingTarget.getCostumes()[costumeIndex];
+        this.emit('duplicateCostume*', {name: originalCostume.name});
         const clone = Object.assign({}, originalCostume);
         const md5ext = `${clone.assetId}.${clone.dataFormat}`;
         return loadCostume(md5ext, clone, this.runtime).then(() => {
@@ -939,8 +975,8 @@ class VirtualMachine extends EventEmitter {
      * @returns {?Promise} - a promise that resolves when the sound has been decoded and added
      */
     duplicateSound (soundIndex) {
-        this.emit('duplicateSound*');
         const originalSound = this.editingTarget.getSounds()[soundIndex];
+        this.emit('duplicateSound*', {name: originalSound.name});
         const clone = Object.assign({}, originalSound);
         return loadSound(clone, this.runtime, this.editingTarget.sprite.soundBank).then(() => {
             this.editingTarget.addSound(clone, soundIndex + 1);
@@ -954,7 +990,10 @@ class VirtualMachine extends EventEmitter {
      * @param {string} newName - the desired new name of the costume (will be modified if already in use).
      */
     renameCostume (costumeIndex, newName) {
-        this.emit('renameCostume*');
+        const oldName = this.editingTarget.getCostumes()[costumeIndex].name;
+        if (newName !== oldName) {
+            this.emit('renameCostume*', {oldName: oldName, newName: newName});
+        }
         this.editingTarget.renameCostume(costumeIndex, newName);
         this.emitTargetsUpdate();
     }
@@ -966,7 +1005,7 @@ class VirtualMachine extends EventEmitter {
      * if no costume was deleted.
      */
     deleteCostume (costumeIndex) {
-        this.emit('deleteCostume*');
+        this.emit('deleteCostume*', {name: this.editingTarget.getCostumes()[costumeIndex].name});
         const deletedCostume = this.editingTarget.deleteCostume(costumeIndex);
         if (deletedCostume) {
             const target = this.editingTarget;
@@ -986,7 +1025,7 @@ class VirtualMachine extends EventEmitter {
      * @returns {?Promise} - a promise that resolves when the sound has been decoded and added
      */
     addSound (soundObject, optTargetId) {
-        this.emit('addSound*');
+        this.emit('addSound*', {name: soundObject.name});
         const target = optTargetId ? this.runtime.getTargetById(optTargetId) :
             this.editingTarget;
         if (target) {
@@ -1005,7 +1044,10 @@ class VirtualMachine extends EventEmitter {
      * @param {string} newName - the desired new name of the sound (will be modified if already in use).
      */
     renameSound (soundIndex, newName) {
-        this.emit('renameSound*');
+        const oldName = this.editingTarget.getSounds()[soundIndex].name;
+        if (newName !== oldName) {
+            this.emit('renameSound*', {oldName: oldName, newName: newName});
+        }
         this.editingTarget.renameSound(soundIndex, newName);
         this.emitTargetsUpdate();
     }
@@ -1071,8 +1113,8 @@ class VirtualMachine extends EventEmitter {
      * or null, if no sound was deleted.
      */
     deleteSound (soundIndex) {
-        this.emit('deleteSound*');
         const target = this.editingTarget;
+        this.emit('deleteSound*', {name: target.getSounds()[soundIndex].name});
         const deletedSound = this.editingTarget.deleteSound(soundIndex);
         if (deletedSound) {
             this.runtime.emitProjectChanged();
@@ -1224,7 +1266,6 @@ class VirtualMachine extends EventEmitter {
      * @param {string} newName New name of the sprite.
      */
     renameSprite (targetId, newName) {
-        this.emit('renameSprite*');
         const target = this.runtime.getTargetById(targetId);
         if (target) {
             if (!target.isSprite()) {
@@ -1247,7 +1288,10 @@ class VirtualMachine extends EventEmitter {
                     currTarget.blocks.updateAssetName(oldName, newName, 'sprite');
                 }
 
-                if (newUnusedName !== oldName) this.emitTargetsUpdate();
+                if (newUnusedName !== oldName) {
+                    this.emit('renameSprite*', {oldName: oldName, newName: newUnusedName});
+                    this.emitTargetsUpdate();
+                }
             }
         } else {
             throw new Error('No target with the provided id.');
@@ -1260,7 +1304,6 @@ class VirtualMachine extends EventEmitter {
      * @return {Function} Returns a function to restore the sprite that was deleted
      */
     deleteSprite (targetId) {
-        this.emit('deleteSprite*');
         const target = this.runtime.getTargetById(targetId);
 
         if (target) {
@@ -1292,6 +1335,8 @@ class VirtualMachine extends EventEmitter {
                     }
                 }
             }
+            this.emit('deleteSprite*', {name: sprite.name});
+
             // Sprite object should be deleted by GC.
             this.emitTargetsUpdate();
             return restoreSprite;
@@ -1307,7 +1352,6 @@ class VirtualMachine extends EventEmitter {
      *     been added to the runtime.
      */
     duplicateSprite (targetId) {
-        this.emit('duplicateSprite*');
         const target = this.runtime.getTargetById(targetId);
         if (!target) {
             throw new Error('No target with the provided id.');
@@ -1316,6 +1360,7 @@ class VirtualMachine extends EventEmitter {
         } else if (!target.sprite) {
             throw new Error('No sprite associated with this target.');
         }
+        this.emit('duplicateSprite*', {sprite: target.sprite.name});
         return target.duplicate().then(newTarget => {
             this.runtime.addTarget(newTarget);
             newTarget.goBehindOther(target);

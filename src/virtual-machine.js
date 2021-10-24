@@ -47,6 +47,8 @@ const eventTypes = {
     scheduledAlready: 'SCHEDULED ALREADY',
     logSchedule: 'LOG SCHEDULED'};
 
+const TimelineVersion = '1.1';
+
 class Timeline {
     constructor () {
         const _timeline = this;
@@ -79,6 +81,7 @@ class Timeline {
             clearTimeout(event);
         });
         this._log = {};
+        this.addLog(Date.now(), {classname: 'TIMELINE', event: 'newProject*', version: TimelineVersion});
         this._snapshots = [];
         this._lastEvent = '';
         this._ignoreDeletedBlocks = false;
@@ -287,7 +290,7 @@ class Timeline {
                 .async('string')
                 .then(timelineJson => {
                     this.import(timelineJson);
-                    const frame = {classname: 'TIMELINE', event: 'projectLoaded*'};
+                    const frame = {classname: 'TIMELINE', event: 'projectLoaded*', version: TimelineVersion};
                     const timestamp = Date.now();
                     this.addLog(timestamp, frame);
                     this.showEvent(timestamp, eventTypes.log, frame);

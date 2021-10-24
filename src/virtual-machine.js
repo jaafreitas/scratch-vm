@@ -131,7 +131,12 @@ class Timeline {
         const className = emitter.constructor.name;
         const frame = {classname: className, event: event};
         const timestamp = Date.now();
-        if ((event === 'changeBlock*' ||
+        if ((
+            // Block
+            event === 'createBlock*' ||
+            event === 'changeBlock*' ||
+            event === 'duplicateBlock*' ||
+            event === 'deleteBlock*' ||
             // Sprite
             event === 'addSprite*' ||
             event === 'renameSprite*' ||
@@ -227,15 +232,6 @@ class Timeline {
         // Events logged.
         if (eventType === eventTypes.log) {
             this.addLog(timestamp, frame);
-            if (event === 'createBlock*' || event === 'deleteBlock*' || event === 'duplicateBlock*') {
-                frame.block = emitterArguments[1];
-                if (event === 'deleteBlock*') {
-                    frame.deletedBlocks = emitterArguments[2];
-                }
-                if (event === 'duplicateBlock*') {
-                    frame.duplicatedBlocks = emitterArguments[2];
-                }
-            }
             if (
                 (className === 'VirtualMachine' && event === 'greenFlag*') ||
                 // Event Triggered when the stop button is clicked.

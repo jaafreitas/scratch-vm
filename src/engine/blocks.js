@@ -307,7 +307,7 @@ class Blocks {
             e.blockId === null &&
             e.group === '' &&
             this.getOpcode(this._blocks[e.newValue]) !== null) {
-            this.runtime.emit('createBlock*', this.getOpcode(this._blocks[e.newValue]));
+            this.runtime.emit('createBlock*', {block: this.getOpcode(this._blocks[e.newValue])});
         }
 
         if (typeof e.blockId !== 'string' && typeof e.varId !== 'string' &&
@@ -332,8 +332,10 @@ class Blocks {
                 this.createBlock(newBlocks[i]);
             }
             if (e.origin === 'parseScratchObject' && e.group === '') {
-                this.runtime.emit('duplicateBlock*', this.getOpcode(this._blocks[e.blockId]),
-                    Object.values(newBlocks).filter(block => !block.shadow).length);
+                this.runtime.emit('duplicateBlock*', {
+                    block: this.getOpcode(this._blocks[e.blockId]),
+                    duplicatedBlocks: Object.values(newBlocks).filter(block => !block.shadow).length
+                });
             }
             break;
         }
@@ -402,7 +404,10 @@ class Blocks {
             const totalBlocksAfter = Object.values(this._blocks).filter(block => !block.shadow).length;
 
             if (e.origin === 'parseScratchObject' || e.origin === 'sprite') {
-                this.runtime.emit('deleteBlock*', deletedBlockOpcode, totalBlocksBefore - totalBlocksAfter);
+                this.runtime.emit('deleteBlock*', {
+                    block: deletedBlockOpcode,
+                    deletedBlocks: totalBlocksBefore - totalBlocksAfter
+                });
             }
 
             break;

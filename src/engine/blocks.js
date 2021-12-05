@@ -644,20 +644,6 @@ class Blocks {
                 if (oldVariable) {
                     oldValue = oldVariable.name;
                 }
-            } else if (args.name === 'LIST_ID') {
-                const variable = this.runtime.getEditingTarget().lookupVariableById(args.value);
-                if (variable) {
-                    newValue = variable.name;
-                } else {
-                    newValue = 'all lists';
-                }
-                fieldName = args.name;
-                const oldVariable = this.runtime.getEditingTarget().lookupVariableById(args.oldValue);
-                if (oldVariable) {
-                    oldValue = oldVariable.name;
-                } else {
-                    oldValue = 'all lists';
-                }
             } else {
                 // Changing the value in a dropdown
                 block.fields[args.name].value = args.value;
@@ -680,6 +666,22 @@ class Blocks {
                         id: flyoutBlock.id,
                         params: this._getBlockParams(flyoutBlock)
                     }));
+                }
+
+                if (args.name === 'LIST_ID') {
+                    const variable = this.runtime.getTargetForStage().lookupVariableById(args.value);
+                    if (variable) {
+                        newValue = variable.name;
+                    } else {
+                        newValue = 'all lists';
+                    }
+                    fieldName = args.name;
+                    const oldVariable = this.runtime.getTargetForStage().lookupVariableById(args.oldValue);
+                    if (oldVariable) {
+                        oldValue = oldVariable.name;
+                    } else {
+                        oldValue = 'all lists';
+                    }
                 }
             }
             break;

@@ -822,17 +822,22 @@ class Scratch3DataViewerBlocks {
         }
     }
 
+    _resolveURLBase (URL) {
+        const googleSheets = URL.match('docs.google.com/spreadsheets/d/(.*)/edit');
+        let urlBase = URL;
+        if (googleSheets) {
+            const spreadsheetId = googleSheets[1];
+            const googleAPIkey = 'AIzaSyA-P95wQTOv1exXluKxZBOb-3jGmUvYiFE';
+            urlBase = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?includeGridData=true&key=${googleAPIkey}`;
+        }
+        return [urlBase, googleSheets && googleSheets.length > 0];
+    }
+
     readCSVDataFromURL (args) {
         if (args.URL.trim() && args.COLUMN && args.LINE) {
-            let urlBase = args.URL;
+            const [urlBase, isGoogleSpreadsheet] = this._resolveURLBase(args.URL.trim());
             const column = args.COLUMN - 1;
             const line = args.LINE;
-
-            const googleSheets = urlBase.match('docs.google.com/spreadsheets/d/(.*)/edit');
-            if (googleSheets) {
-                const id = googleSheets[1];
-                urlBase = `https://spreadsheets.google.com/feeds/cells/${id}/1/public/values?alt=json-in-script`;
-            }
             return new Promise((resolve, reject) => {
                 nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
                     if (err) {
@@ -843,10 +848,10 @@ class Scratch3DataViewerBlocks {
                     }
 
                     let lists;
-                    if (googleSheets) {
-                        lists = this.convertGoogleSheetsToLists(body);
+                    if (isGoogleSpreadsheet) {
+                        lists = this._convertGoogleSheetsToLists(body);
                     } else {
-                        lists = this.convertCSVToLists(body);
+                        lists = this._convertCSVToLists(body);
                     }
                     const data = lists[Object.keys(lists)[column]];
                     if (typeof data === 'undefined' || data.length === 0) {
@@ -859,30 +864,36 @@ class Scratch3DataViewerBlocks {
         }
     }
 
-    convertGoogleSheetsToLists (body) {
-        const json = JSON.parse(body.toString().substr(28)
-            .slice(0, -2));
+    _convertGoogleSheetsToLists (body) {
+        const json = JSON.parse(body.toString());
 
-        const sheetData = json.feed.entry;
+        const rows = json.sheets[0].data[0].rowData;
         const lists = {};
-        for (let i = 0; i < sheetData.length; i++) {
-            const row = Cast.toNumber(json.feed.entry[i].gs$cell.row);
-            const col = Cast.toNumber(json.feed.entry[i].gs$cell.col);
-            let value = json.feed.entry[i].gs$cell.$t;
-            if (json.feed.entry[i].gs$cell.numericValue) {
-                value = Cast.toNumber(json.feed.entry[i].gs$cell.numericValue);
-            }
-            if (row === 1) {
-                lists[value] = [];
-            }
-            if (row > 1) {
-                lists[Object.keys(lists)[col - 1]][row - 2] = value;
+        for (let row = 0; row < rows.length; row++) {
+            for (let col = 0; col < rows[row].values.length; col++) {
+                let value;
+                const colValue = rows[row].values[col];
+                if (colValue.effectiveValue) {
+                    const effectiveValue = rows[row].values[col].effectiveValue;
+                    if (effectiveValue.numberValue) {
+                        value = effectiveValue.numberValue;
+                    } else {
+                        value = effectiveValue.stringValue;
+                    }
+                } else {
+                    value = '';
+                }
+                if (row === 0) {
+                    lists[value] = [];
+                } else {
+                    lists[Object.keys(lists)[col]][row - 1] = value;
+                }
             }
         }
         return lists;
     }
 
-    convertCSVToLists (body) {
+    _convertCSVToLists (body) {
         const lines = body.toString().split('\n');
         const lists = {};
         for (let line = 0; line < lines.length; line += 1) {
@@ -901,12 +912,7 @@ class Scratch3DataViewerBlocks {
 
     createListsFromURL (args) {
         if (args.URL.trim()) {
-            let urlBase = args.URL.trim();
-            const googleSheets = urlBase.match('docs.google.com/spreadsheets/d/(.*)/edit');
-            if (googleSheets) {
-                const id = googleSheets[1];
-                urlBase = `https://spreadsheets.google.com/feeds/cells/${id}/1/public/values?alt=json-in-script`;
-            }
+            const [urlBase, isGoogleSpreadsheet] = this._resolveURLBase(args.URL.trim());
             return new Promise((resolve, reject) => {
                 nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
                     if (err) {
@@ -917,10 +923,10 @@ class Scratch3DataViewerBlocks {
                     }
 
                     let lists;
-                    if (googleSheets) {
-                        lists = this.convertGoogleSheetsToLists(body);
+                    if (isGoogleSpreadsheet) {
+                        lists = this._convertGoogleSheetsToLists(body);
                     } else {
-                        lists = this.convertCSVToLists(body);
+                        lists = this._convertCSVToLists(body);
                     }
                     for (const [key, value] of Object.entries(lists)) {
                         this._data(key).value = value;

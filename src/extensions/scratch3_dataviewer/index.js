@@ -458,7 +458,7 @@ class Scratch3DataViewerBlocks {
                 blockType: BlockType.COMMAND,
                 text: formatMessage({
                     id: 'dataviewer.setSizeX',
-                    default: 'set size X to [SCALEX] %'
+                    default: 'set width to [SCALEX] %'
                 }),
                 filter: [TargetType.SPRITE],
                 arguments: {
@@ -473,7 +473,7 @@ class Scratch3DataViewerBlocks {
                 blockType: BlockType.COMMAND,
                 text: formatMessage({
                     id: 'dataviewer.setSizeY',
-                    default: 'set size Y to [SCALEY] %'
+                    default: 'set height to [SCALEY] %'
                 }),
                 filter: [TargetType.SPRITE],
                 arguments: {

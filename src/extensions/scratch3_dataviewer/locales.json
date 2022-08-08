@@ -34,8 +34,8 @@
         "dataviewer.menu.statisticFunctions.mean": "média",
         "dataviewer.menu.statisticFunctions.min": "mínimo",
         "dataviewer.menu.statisticFunctions.max": "máximo",
-        "dataviewer.menu.dataType.value": "valores",
-        "dataviewer.menu.dataType.index": "índices",
+        "dataviewer.menu.dataType.value": "valor",
+        "dataviewer.menu.dataType.index": "índice",
         "dataviewer.menu.orderList.ascendant": "ascendente",
         "dataviewer.menu.orderList.descendent": "descendente",
 

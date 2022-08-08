@@ -827,7 +827,10 @@ class Scratch3DataViewerBlocks {
         let urlBase = URL;
         if (googleSheets) {
             const spreadsheetId = googleSheets[1];
+            // Prod
             const googleAPIkey = 'AIzaSyA-P95wQTOv1exXluKxZBOb-3jGmUvYiFE';
+            // Dev
+            // const googleAPIkey = 'AIzaSyCc2PwRrUNwXwCvQ-7cjkqeMcWcsoPlt5Q';
             urlBase = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?includeGridData=true&key=${googleAPIkey}`;
         }
         return [urlBase, googleSheets && googleSheets.length > 0];

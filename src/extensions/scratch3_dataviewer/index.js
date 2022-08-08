@@ -428,7 +428,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'mapData',
                 text: formatMessage({
                     id: 'dataviewer.mapData',
-                    default: 'map [DATA_TYPE] of [LIST_ID] to [NEW_MIN] [NEW_MAX]'
+                    default: '[DATA_TYPE] of [LIST_ID] mapped from [NEW_MIN] to [NEW_MAX]'
                 }),
                 blockType: BlockType.REPORTER,
                 disableMonitor: true,

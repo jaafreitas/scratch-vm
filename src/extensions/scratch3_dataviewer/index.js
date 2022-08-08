@@ -871,17 +871,17 @@ class Scratch3DataViewerBlocks {
         const json = JSON.parse(body.toString());
 
         const rows = json.sheets[0].data[0].rowData;
+        const maxColumns = rows[0].values.length;
         const lists = {};
         for (let row = 0; row < rows.length; row++) {
-            for (let col = 0; col < rows[row].values.length; col++) {
+            for (let col = 0; col < maxColumns; col++) {
                 let value;
                 const colValue = rows[row].values[col];
                 if (colValue.effectiveValue) {
-                    const effectiveValue = rows[row].values[col].effectiveValue;
-                    if (effectiveValue.numberValue) {
-                        value = effectiveValue.numberValue;
+                    if (colValue.effectiveValue.hasOwnProperty('numberValue')) {
+                        value = colValue.effectiveValue.numberValue;
                     } else {
-                        value = effectiveValue.stringValue;
+                        value = colValue.effectiveValue.stringValue;
                     }
                 } else {
                     value = '';

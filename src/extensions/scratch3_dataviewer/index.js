@@ -577,14 +577,14 @@ class Scratch3DataViewerBlocks {
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.orderList.ascendant',
-                        default: 'ascendant'
+                        default: 'ascendanting'
                     }),
                     value: this.ORDER_ASC
                 },
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.orderList.descendent',
-                        default: 'descendent'
+                        default: 'descendenting'
                     }),
                     value: this.ORDER_DESC
                 }
@@ -594,14 +594,14 @@ class Scratch3DataViewerBlocks {
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.dataType.value',
-                        default: 'values'
+                        default: 'value'
                     }),
                     value: this.DATA_TYPE_VALUE
                 },
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.dataType.index',
-                        default: 'indexes'
+                        default: 'index'
                     }),
                     value: this.DATA_TYPE_INDEX
                 }

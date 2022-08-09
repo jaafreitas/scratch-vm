@@ -28,7 +28,7 @@
         "dataviewer.deleteOfListAllLists": "apague valores [OP] [VALUE] de [LIST_ID]",
         "dataviewer.orderList": "ordene valores de [LIST_ID] [ORDER] de [DATASET]",
         "dataviewer.orderListAllLists": "ordene valores de [LIST_ID] [ORDER]",
-        "dataviewer.changeDataScale": "mude a escala de [LIST_ID] para [NEW_MIN] [NEW_MAX]",
+        "dataviewer.changeDataScale": "mude [LIST_ID] para a escala de [NEW_MIN] a [NEW_MAX]",
         "dataviewer.mapData": "[DATA_TYPE] de [LIST_ID] na escala de [NEW_MIN] a [NEW_MAX]",
 
         "dataviewer.menu.statisticFunctions.mean": "média",

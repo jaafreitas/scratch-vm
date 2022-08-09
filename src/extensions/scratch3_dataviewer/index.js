@@ -405,7 +405,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'changeDataScale',
                 text: formatMessage({
                     id: 'dataviewer.changeDataScale',
-                    default: 'change [LIST_ID] scale to [NEW_MIN] [NEW_MAX]'
+                    default: 'change [LIST_ID] to scale from [NEW_MIN] to [NEW_MAX]'
                 }),
                 blockType: BlockType.COMMAND,
                 arguments: {

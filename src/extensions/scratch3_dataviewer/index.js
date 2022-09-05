@@ -878,7 +878,7 @@ class Scratch3DataViewerBlocks {
         const json = JSON.parse(body.toString());
 
         const rows = json.sheets[0].data[0].rowData;
-        const maxColumns = rows[0].values.length;
+        let maxColumns = rows[0].values.length;
         const lists = {};
         for (let row = 0; row < rows.length; row++) {
             for (let col = 0; col < maxColumns; col++) {
@@ -894,7 +894,13 @@ class Scratch3DataViewerBlocks {
                     value = '';
                 }
                 if (row === 0) {
-                    lists[value] = [];
+                    // eslint-disable-next-line no-negated-condition
+                    if (value !== '') {
+                        lists[value] = [];
+                    // Ignore values starting from the first unamed column
+                    } else {
+                        maxColumns = col;
+                    }
                 } else {
                     lists[Object.keys(lists)[col]][row - 1] = value;
                 }
@@ -906,11 +912,22 @@ class Scratch3DataViewerBlocks {
     _convertCSVToLists (body) {
         const lines = body.toString().split('\n');
         const lists = {};
+        let maxColumns;
         for (let line = 0; line < lines.length; line += 1) {
             const columns = lines[line].trim().split(',');
-            for (let column = 0; column < columns.length; column += 1) {
+            // maxColumns might be overwrite if there are any unamed column.
+            if (line === 0) {
+                maxColumns = columns.length;
+            }
+            for (let column = 0; column < maxColumns; column += 1) {
                 if (line === 0) {
-                    lists[columns[column]] = [];
+                    // eslint-disable-next-line no-negated-condition
+                    if (columns[column] !== '') {
+                        lists[columns[column]] = [];
+                    // Ignore values starting from the first unamed column
+                    } else {
+                        maxColumns = column;
+                    }
                 } else {
                     lists[Object.keys(lists)[column]][line - 1] = columns[column];
                 }

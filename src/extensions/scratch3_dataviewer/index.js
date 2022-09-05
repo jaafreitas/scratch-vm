@@ -20,15 +20,18 @@ const serverTimeoutMs = 10000; // 10 seconds (chosen arbitrarily).
 
 class Scratch3DataViewerBlocks {
     static get EXTENSION_INFO_COLOR1 () {
-        return '#0ABAB5'; // rgb(10,186,181)
+        // rgb(10,186,181)
+        return '#0ABAB5';
     }
 
     static get EXTENSION_INFO_COLOR2 () {
+        // rgb(255,255,255)
         return '#FFFFFF';
     }
 
     static get EXTENSION_INFO_COLOR3 () {
-        return '#078A86'; // rgb(7,138,134)
+        // rgb(7,138,134)
+        return '#078A86';
     }
 
     get READ_ALL_LISTS_ID () {

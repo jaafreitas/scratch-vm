@@ -611,6 +611,14 @@ test('changeDataScale Numbers with null values', t => {
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 4}), null);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 5}), 100);
 
+    setup.dv._data('dataviewer#list#4').value[0] = '1';
+    setup.dv._data('dataviewer#list#4').value[1] = '';
+    setup.dv._data('dataviewer#list#4').value[4] = '5';
+    setup.dv.changeDataScale({LIST_ID: 'dataviewer#list#3', NEW_MIN: 0, NEW_MAX: 100});
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 1}), 0);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 2}), '');
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 5}), 100);
+
     t.end();
 });
 

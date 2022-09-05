@@ -780,7 +780,9 @@ class Scratch3DataViewerBlocks {
 
     _getMin (args) {
         if (this.getDataLength(args) > 0) {
-            const value = this._data(args.LIST_ID).value.reduce((a, b) => Math.min(a, b));
+            const value = this._data(args.LIST_ID).value
+                .filter(i => i !== '')
+                .reduce((a, b) => Math.min(a, b));
             if (!isNaN(value)) {
                 return value;
             }
@@ -789,7 +791,9 @@ class Scratch3DataViewerBlocks {
 
     _getMax (args) {
         if (this.getDataLength(args) > 0) {
-            const value = this._data(args.LIST_ID).value.reduce((a, b) => Math.max(a, b));
+            const value = this._data(args.LIST_ID).value
+                .filter(i => i !== '')
+                .reduce((a, b) => Math.max(a, b));
             if (!isNaN(value)) {
                 return value;
             }

@@ -881,7 +881,7 @@ class Scratch3DataViewerBlocks {
             for (let col = 0; col < maxColumns; col++) {
                 let value;
                 const colValue = rows[row].values[col];
-                if (colValue.effectiveValue) {
+                if (typeof colValue !== 'undefined' && colValue.effectiveValue) {
                     if (colValue.effectiveValue.hasOwnProperty('numberValue')) {
                         value = colValue.effectiveValue.numberValue;
                     } else {

@@ -488,8 +488,8 @@ class Scratch3DataViewerBlocks {
             }
         };
         const blocks = [
-            allBlocks.setData,
             allBlocks.createListsFromURL,
+            allBlocks.setData,
             allBlocks.changeDataScale,
             allBlocks.dataLoop,
             allBlocks.getValue,

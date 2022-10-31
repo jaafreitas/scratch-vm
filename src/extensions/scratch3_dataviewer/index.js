@@ -122,8 +122,8 @@ class Scratch3DataViewerBlocks {
             color3: Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR3,
             name: formatMessage({
                 id: 'dataviewer.categoryName',
-                default: 'Data Viewer',
-                description: 'Label for the Data Viewer extension category'
+                default: 'PlayData',
+                description: 'Label for the PlayData extension category'
             }),
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,

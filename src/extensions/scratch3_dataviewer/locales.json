@@ -1,13 +1,13 @@
 {
     "pt-br": {
-        "gui.extension.dataviewer.name": "Visualizador de Dados",
-        "gui.extension.dataviewer.description": "Brinque com seus dados",
+        "gui.extension.dataviewer.name": "PlayData",
+        "gui.extension.dataviewer.description": "Crie representações para dados.",
         "gui.extension.dataviewer.index": "índice",
 
-        "gui.stageHeader.dataviewerTable": "Visualizador de Dados em Tabela",
+        "gui.stageHeader.dataviewerTable": "Visualização dos dado",
         "gui.stageHeader.dataviewerChart": "Visualizador de Dados em Gráfico",
 
-        "dataviewer.categoryName": "Visualizador de Dados",
+        "dataviewer.categoryName": "PlayData",
 
         "dataviewer.showMoreBlocks": "Mostrar Mais Blocos",
         "dataviewer.showLessBlocks": "Mostrar Menos Blocos",

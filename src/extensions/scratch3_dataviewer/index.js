@@ -297,7 +297,7 @@ class Scratch3DataViewerBlocks {
                     FNC: {
                         type: ArgumentType.STRING,
                         menu: 'statisticFunctions',
-                        defaultValue: 'mean'
+                        defaultValue: 'average'
                     }
                 }
             },
@@ -536,10 +536,10 @@ class Scratch3DataViewerBlocks {
             statisticFunctions: [
                 {
                     text: formatMessage({
-                        id: 'dataviewer.menu.statisticFunctions.mean',
-                        default: 'mean'
+                        id: 'dataviewer.menu.statisticFunctions.average',
+                        default: 'average'
                     }),
-                    value: 'mean'
+                    value: 'average'
                 },
                 {
                     text: formatMessage({
@@ -769,7 +769,7 @@ class Scratch3DataViewerBlocks {
         return newMin + ((value - oldMin) * (newMax - newMin) / (oldMax - oldMin));
     }
 
-    _getMean (args) {
+    _getAverage (args) {
         if (this.getDataLength(args) > 0) {
             let total = 0.0;
             for (let i = 0; i < this.getDataLength(args); i += 1) {
@@ -1021,8 +1021,8 @@ class Scratch3DataViewerBlocks {
     getStatistic (args) {
         let value;
         switch (args.FNC) {
-        case 'mean':
-            value = this._getMean(args);
+        case 'average':
+            value = this._getAverage(args);
             break;
         case 'min':
             value = this._getMin(args);

@@ -31,7 +31,7 @@
         "dataviewer.changeDataScale": "mude [LIST_ID] para a escala de [NEW_MIN] a [NEW_MAX]",
         "dataviewer.mapData": "[DATA_TYPE] de [LIST_ID] na escala de [NEW_MIN] a [NEW_MAX]",
 
-        "dataviewer.menu.statisticFunctions.mean": "média",
+        "dataviewer.menu.statisticFunctions.average": "média",
         "dataviewer.menu.statisticFunctions.min": "mínimo",
         "dataviewer.menu.statisticFunctions.max": "máximo",
         "dataviewer.menu.dataType.value": "valor",
@@ -74,7 +74,7 @@
        "dataviewer.changeDataScale": "[LIST_ID]スケールを[NEW_MIN][NEW_MAX]に変更する",
        "dataviewer.mapData": "[LIST_ID]の[DATA_TYPE]を[NEW_MIN][NEW_MAX]にマップする",
 
-       "dataviewer.menu.statisticFunctions.mean": "平均",
+       "dataviewer.menu.statisticFunctions.average": "平均",
        "dataviewer.menu.statisticFunctions.min": "最小",
        "dataviewer.menu.statisticFunctions.max": "最大",
        "dataviewer.menu.dataType.value": "値",

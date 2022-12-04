@@ -543,6 +543,13 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     text: formatMessage({
+                        id: 'dataviewer.menu.statisticFunctions.sum',
+                        default: 'sum'
+                    }),
+                    value: 'sum'
+                },
+                {
+                    text: formatMessage({
                         id: 'dataviewer.menu.statisticFunctions.min',
                         default: 'min'
                     }),
@@ -769,12 +776,21 @@ class Scratch3DataViewerBlocks {
         return newMin + ((value - oldMin) * (newMax - newMin) / (oldMax - oldMin));
     }
 
-    _getAverage (args) {
+    _getSum (args) {
         if (this.getDataLength(args) > 0) {
             let total = 0.0;
             for (let i = 0; i < this.getDataLength(args); i += 1) {
                 total = total + this._data(args.LIST_ID).value[i];
             }
+            if (!isNaN(total)) {
+                return total;
+            }
+        }
+    }
+
+    _getAverage (args) {
+        if (this.getDataLength(args) > 0) {
+            const total = this._getSum(args);
             if (!isNaN(total)) {
                 return total / this.getDataLength(args);
             }
@@ -1023,6 +1039,9 @@ class Scratch3DataViewerBlocks {
         switch (args.FNC) {
         case 'average':
             value = this._getAverage(args);
+            break;
+        case 'sum':
+            value = this._getSum(args);
             break;
         case 'min':
             value = this._getMin(args);

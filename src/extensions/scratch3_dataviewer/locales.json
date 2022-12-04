@@ -32,6 +32,7 @@
         "dataviewer.mapData": "[DATA_TYPE] de [LIST_ID] na escala de [NEW_MIN] a [NEW_MAX]",
 
         "dataviewer.menu.statisticFunctions.average": "média",
+        "dataviewer.menu.statisticFunctions.sum": "soma",
         "dataviewer.menu.statisticFunctions.min": "mínimo",
         "dataviewer.menu.statisticFunctions.max": "máximo",
         "dataviewer.menu.dataType.value": "valor",
@@ -75,6 +76,7 @@
        "dataviewer.mapData": "[LIST_ID]の[DATA_TYPE]を[NEW_MIN][NEW_MAX]にマップする",
 
        "dataviewer.menu.statisticFunctions.average": "平均",
+       "dataviewer.menu.statisticFunctions.sum": "sum",
        "dataviewer.menu.statisticFunctions.min": "最小",
        "dataviewer.menu.statisticFunctions.max": "最大",
        "dataviewer.menu.dataType.value": "値",

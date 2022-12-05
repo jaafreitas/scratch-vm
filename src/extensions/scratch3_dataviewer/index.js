@@ -38,6 +38,10 @@ class Scratch3DataViewerBlocks {
         return 'dataviewer#read#all#lists';
     }
 
+    get MY_LIST_ID () {
+        return 'dataviewer#my#list';
+    }
+
     get DATA_TYPE_INDEX () {
         return 'index';
     }
@@ -90,11 +94,10 @@ class Scratch3DataViewerBlocks {
         // Create the initial list.
         const stage = this._runtime.getTargetForStage();
         if (stage) {
-            const varID = 'my#list';
             const varName = formatMessage({
                 id: 'dataviewer.list',
                 default: 'my list'});
-            const variable = stage.lookupOrCreateList(`dataviewer#${varID}`, varName);
+            const variable = stage.lookupOrCreateList(this.MY_LIST_ID, varName);
             variable._monitorUpToDate = false;
 
             // Show the new variable on toolbox
@@ -187,6 +190,16 @@ class Scratch3DataViewerBlocks {
                         defaultValue: ' '
                     }
                 }
+            },
+            deleteAllLists: {
+                opcode: 'deleteAllLists',
+                text: formatMessage({
+                    id: 'dataviewer.deleteAllLists',
+                    default: 'delete all lists'
+                }),
+                blockType: BlockType.COMMAND,
+                disableMonitor: true,
+                arguments: {}
             },
             readCSVDataFromURL: {
                 opcode: 'readCSVDataFromURL',
@@ -496,6 +509,8 @@ class Scratch3DataViewerBlocks {
             allBlocks.getIndex,
             allBlocks.getStatistic,
             '---',
+            allBlocks.deleteAllLists,
+            '---',
             allBlocks.setScaleX,
             allBlocks.setScaleY,
             '---'
@@ -718,7 +733,7 @@ class Scratch3DataViewerBlocks {
             return this._getMaxDataLengthReadAll();
         }
         return this.dataBlocks.lengthOfList(
-            {LIST: {id: args.LIST_ID}},
+            {LIST: {id: args.LIST_ID, name: args.LIST_ID}},
             {target: this._runtime.getTargetForStage()}
         );
     }
@@ -1073,6 +1088,26 @@ class Scratch3DataViewerBlocks {
         default:
             return false;
         }
+    }
+
+    deleteAllLists () {
+        const lists = this.getDataMenu();
+        const stage = this._runtime.getTargetForStage();
+
+        // BUG: We need to wait for the changeMonitorVisibility event to finish before delete variables
+        // that are monitored, otherwise the thread that list monitor content will recreate
+        // the lists for the sprite.
+        lists.forEach(item => {
+            if (item.value === this.MY_LIST_ID) {
+                this._data(item.value).value = [];
+
+            } else {
+                this.dataBlocks.hideList({LIST: {id: item.value}});
+                stage.deleteVariable(item.value);
+            }
+        });
+        // Show new variables on toolbox.
+        this._runtime.requestToolboxExtensionsUpdate();
     }
 
     deleteOfList (args) {

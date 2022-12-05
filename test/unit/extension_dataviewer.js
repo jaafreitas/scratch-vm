@@ -61,14 +61,14 @@ test('spec', t => {
 test('Data', t => {
     const setup = setupDataViewer();
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 0);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 0);
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 0);
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#3'}), 0);
 
     // Adding initial data.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1'});
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 1);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 1);
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1'});
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 1);
 
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: '1, 2'});
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 2);
@@ -83,22 +83,27 @@ test('Data', t => {
 
     // Adding more data.
     setup.dv.dataBlocks.addToList(
-        {LIST: {id: 'dataviewer#my#list', name: 'my list'}, ITEM: 2},
+        {LIST: {id: setup.dv.MY_LIST_ID}, ITEM: 2},
         {target: setup.dv._runtime.getEditingTarget()});
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 2);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 2);
 
     setup.dv.dataBlocks.addToList(
-        {LIST: {id: 'dataviewer#list#2', name: 'list 2'}, ITEM: 3},
+        {LIST: {id: 'dataviewer#list#2'}, ITEM: 3},
         {target: setup.dv._runtime.getEditingTarget()});
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 3);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 3}), 3);
 
     setup.dv.dataBlocks.addToList(
-        {LIST: {id: 'dataviewer#list#3', name: 'list 3'}, ITEM: 'dddd'},
+        {LIST: {id: 'dataviewer#list#3'}, ITEM: 'dddd'},
         {target: setup.dv._runtime.getEditingTarget()});
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#3'}), 4);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 4}), 'dddd');
+
+    // Delete lists
+    t.equal(setup.dv.getDataMenu().length, 3);
+    setup.dv.deleteAllLists();
+    t.equal(setup.dv.getDataMenu().length, 1);
 
     t.end();
 });
@@ -111,68 +116,68 @@ test('Data Loop', t => {
     const utilList2 = util();
 
     // Adding initial data.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '10 20 30'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '10 20 30'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: '1.1 2.22 3.333'});
 
     // Initial state.
-    t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1), null);
-    t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#my#list'}, utilList1), null);
-    t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), null);
-    t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), null);
+    t.equivalent(setup.dv._getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), null);
+    t.equivalent(setup.dv._getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), null);
+    t.equivalent(setup.dv._getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), null);
+    t.equivalent(setup.dv._getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), null);
     t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), null);
     t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), null);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1), '');
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1), '');
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), '');
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), '');
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), '');
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), '');
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), '');
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), '');
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), '');
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), '');
 
     // First data loop
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
-    // Skip this one in the first loop // setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
+    // Skip this one in the first loop // setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop);
     setup.dv.dataLoop({LIST_ID: 'dataviewer#list#2'}, utilList2);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1), 1);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1), 10);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 1);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 10);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), 1);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), 1.1);
 
     // Second data loop
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop);
     setup.dv.dataLoop({LIST_ID: 'dataviewer#list#2'}, utilList2);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1), 2);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1), 20);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), 1);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), 10);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 2);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 20);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), 1);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), 10);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), 2);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), 2.22);
 
     // Third data loop
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop);
     setup.dv.dataLoop({LIST_ID: 'dataviewer#list#2'}, utilList2);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1), 3);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1), 30);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), 2);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), 20);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 3);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 30);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), 2);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), 20);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), 3);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), 3.333);
 
     // Going beyond data length with utilList1 and utilList2
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop);
     setup.dv.dataLoop({LIST_ID: 'dataviewer#list#2'}, utilList2);
-    t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1), null);
-    t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#my#list'}, utilList1), null);
-    t.equal(setup.dv._getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), 3);
-    t.equal(setup.dv._getValue({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), 30);
+    t.equivalent(setup.dv._getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), null);
+    t.equivalent(setup.dv._getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), null);
+    t.equal(setup.dv._getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), 3);
+    t.equal(setup.dv._getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), 30);
     t.equivalent(setup.dv._getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), null);
     t.equivalent(setup.dv._getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), null);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1), '');
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1), '');
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), 3);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1AnotherLoop), 30);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), '');
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), '');
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), 3);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1AnotherLoop), 30);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilList2), '');
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilList2), '');
 
@@ -184,24 +189,24 @@ test('Data Loop Read All', t => {
     const utilReadAll = util();
 
     // Adding initial data.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '10 20 30'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '10 20 30'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: '1.1 2.22 3.333'});
 
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilReadAll);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilReadAll), 1);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilReadAll), 10);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 1);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 10);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 1);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 1.1);
 
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilReadAll);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilReadAll), 2);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilReadAll), 20);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 2);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 20);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 2);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 2.22);
 
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilReadAll);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilReadAll), 3);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilReadAll), 30);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 3);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 30);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 3);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 3.333);
 
@@ -213,26 +218,26 @@ test('Data Loop Read All Different Lengths', t => {
     const utilReadAllDifferentLengths = util();
 
     // Adding initial data.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '10 30'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '10 30'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: '1.1 2.22 3.333'});
 
     t.equal(setup.dv._getMaxDataLengthReadAll(), 3);
 
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilReadAllDifferentLengths);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilReadAllDifferentLengths), 1);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilReadAllDifferentLengths), 10);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAllDifferentLengths), 1);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAllDifferentLengths), 10);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAllDifferentLengths), 1);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAllDifferentLengths), 1.1);
 
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilReadAllDifferentLengths);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilReadAllDifferentLengths), 2);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilReadAllDifferentLengths), 30);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAllDifferentLengths), 2);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAllDifferentLengths), 30);
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAllDifferentLengths), 2);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAllDifferentLengths), 2.22);
 
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilReadAllDifferentLengths);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilReadAllDifferentLengths), '');
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilReadAllDifferentLengths), '');
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAllDifferentLengths), '');
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAllDifferentLengths), '');
     t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAllDifferentLengths), 3);
     t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAllDifferentLengths), 3.333);
 
@@ -243,19 +248,19 @@ test('Data Loop Strings', t => {
     const setup = setupDataViewer();
     const utilList1 = util();
 
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: 'A 2 CCC'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: 'A 2 CCC'});
 
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilList1);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1), 1);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1), 'A');
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 1);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 'A');
 
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilList1);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1), 2);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1), 2);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 2);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 2);
 
     setup.dv.dataLoop({LIST_ID: setup.dv.READ_ALL_LISTS_ID}, utilList1);
-    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#my#list'}, utilList1), 3);
-    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#my#list'}, utilList1), 'CCC');
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 3);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilList1), 'CCC');
 
     t.end();
 });
@@ -264,24 +269,24 @@ test('Min / Max / Average / Sum Numbers', t => {
     const setup = setupDataViewer();
 
     // Initial state.
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'min'}), '');
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'max'}), '');
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'sum'}), '');
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'average'}), '');
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'min'}), '');
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'max'}), '');
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'sum'}), '');
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'average'}), '');
 
 
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3 4 5'});
-    t.equal(setup.dv._getMin({LIST_ID: 'dataviewer#my#list'}), 1);
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'min'}), 1);
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3 4 5'});
+    t.equal(setup.dv._getMin({LIST_ID: setup.dv.MY_LIST_ID}), 1);
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'min'}), 1);
 
-    t.equal(setup.dv._getMax({LIST_ID: 'dataviewer#my#list'}), 5);
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'max'}), 5);
+    t.equal(setup.dv._getMax({LIST_ID: setup.dv.MY_LIST_ID}), 5);
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'max'}), 5);
 
-    t.equal(setup.dv._getSum({LIST_ID: 'dataviewer#my#list'}), 15);
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'sum'}), 15);
+    t.equal(setup.dv._getSum({LIST_ID: setup.dv.MY_LIST_ID}), 15);
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'sum'}), 15);
 
-    t.equal(setup.dv._getAverage({LIST_ID: 'dataviewer#my#list'}), 3);
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'average'}), 3);
+    t.equal(setup.dv._getAverage({LIST_ID: setup.dv.MY_LIST_ID}), 3);
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'average'}), 3);
 
 
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: '-10 10'});
@@ -296,19 +301,19 @@ test('Min / Max / Average / Sum Numbers', t => {
 test('Min / Max / Average / Sum Strings', t => {
     const setup = setupDataViewer();
 
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 CCC aaaa'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 CCC aaaa'});
 
-    t.equivalent(setup.dv._getMin({LIST_ID: 'dataviewer#my#list'}), null);
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'min'}), '');
+    t.equivalent(setup.dv._getMin({LIST_ID: setup.dv.MY_LIST_ID}), null);
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'min'}), '');
 
-    t.equivalent(setup.dv._getMax({LIST_ID: 'dataviewer#my#list'}), null);
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'max'}), '');
+    t.equivalent(setup.dv._getMax({LIST_ID: setup.dv.MY_LIST_ID}), null);
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'max'}), '');
 
-    t.equivalent(setup.dv._getSum({LIST_ID: 'dataviewer#my#list'}), null);
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'sum'}), '');
+    t.equivalent(setup.dv._getSum({LIST_ID: setup.dv.MY_LIST_ID}), null);
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'sum'}), '');
 
-    t.equivalent(setup.dv._getAverage({LIST_ID: 'dataviewer#my#list'}), null);
-    t.equal(setup.dv.getStatistic({LIST_ID: 'dataviewer#my#list', FNC: 'average'}), '');
+    t.equivalent(setup.dv._getAverage({LIST_ID: setup.dv.MY_LIST_ID}), null);
+    t.equal(setup.dv.getStatistic({LIST_ID: setup.dv.MY_LIST_ID, FNC: 'average'}), '');
 
     t.end();
 });
@@ -317,44 +322,44 @@ test('Data delete value', t => {
     const setup = setupDataViewer();
 
     // greater than.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#my#list', OP: '>', VALUE: '1', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: setup.dv.MY_LIST_ID, OP: '>', VALUE: '1', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 1);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 1);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 1);
 
     // less than.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#my#list', OP: '<', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: setup.dv.MY_LIST_ID, OP: '<', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 1);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 3);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 3);
 
     // equals to.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#my#list', OP: '=', VALUE: '2', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: setup.dv.MY_LIST_ID, OP: '=', VALUE: '2', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 1);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 1);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 1);
 
     // equals to 'defaultValue'.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#my#list', OP: '=', VALUE: ' ', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 5);
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: setup.dv.MY_LIST_ID, OP: '=', VALUE: ' ', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 5);
 
     // // All lists
-    // setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: 'a bb ccc bb d'});
+    // setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: 'a bb ccc bb d'});
     // setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'd bb bbb'});
     // setup.dv.deleteOfList(
     //     {LIST_ID: setup.dv.READ_ALL_LISTS_ID, OP: '=', VALUE: 'bb', DATA_TYPE: setup.dv.DATA_TYPE_VALUE});
 
-    // t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 3);
-    // t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 'a');
-    // t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 'ccc');
-    // t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 'd');
+    // t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 3);
+    // t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 'a');
+    // t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 'ccc');
+    // t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 'd');
 
     // t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 2);
     // t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 1}), 'd');
@@ -366,47 +371,47 @@ test('Data delete value', t => {
 test('Data delete index', t => {
     const setup = setupDataViewer();
 
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#my#list', OP: '>', VALUE: '2', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: setup.dv.MY_LIST_ID, OP: '>', VALUE: '2', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 1);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 2);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 2);
 
     // less than.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#my#list', OP: '<', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: setup.dv.MY_LIST_ID, OP: '<', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 1);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 1);
 
     // equals to.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#my#list', OP: '=', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: setup.dv.MY_LIST_ID, OP: '=', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 4);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 1);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 4}), 1);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 4);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 4}), 1);
 
     // equals to 'defaultValue'.
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3 2 1'});
-    setup.dv.deleteOfList({LIST_ID: 'dataviewer#my#list', OP: '=', VALUE: ' ', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 5);
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3 2 1'});
+    setup.dv.deleteOfList({LIST_ID: setup.dv.MY_LIST_ID, OP: '=', VALUE: ' ', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 5);
 
     //     // All lists
-    //     setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: 'a bb ccc bb d'});
+    //     setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: 'a bb ccc bb d'});
     //     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'd bb bbb'});
     //     setup.dv.deleteOfList({
     //         LIST_ID: setup.dv.READ_ALL_LISTS_ID, OP: '>', VALUE: '3', DATA_TYPE: setup.dv.DATA_TYPE_INDEX});
 
-    //     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 3);
-    //     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 'a');
-    //     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 'bb');
-    //     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 'ccc');
+    //     t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 3);
+    //     t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 'a');
+    //     t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 'bb');
+    //     t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 'ccc');
 
     //     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 3);
     //     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 1}), 'd');
@@ -420,7 +425,7 @@ test('Data delete value from all lists', t => {
     const setup = setupDataViewer();
 
     // DATASET = all lists
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '2 3 4 3 2'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '2 3 4 3 2'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'II III IV III II I'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#3', DATA: 'B c D C'});
 
@@ -428,13 +433,13 @@ test('Data delete value from all lists', t => {
         DATA_TYPE: setup.dv.DATA_TYPE_VALUE,
         OP: '>',
         VALUE: '2',
-        LIST_ID: 'dataviewer#my#list',
+        LIST_ID: setup.dv.MY_LIST_ID,
         DATASET: setup.dv.READ_ALL_LISTS_ID
     });
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 2);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 2);
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 3);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 1}), 'II');
@@ -445,18 +450,18 @@ test('Data delete value from all lists', t => {
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 1}), 'B');
 
     // DATASET = specific list
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '2 3 4 3 2'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '2 3 4 3 2'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'II III IV III II'});
 
     setup.dv.deleteOfList({
         DATA_TYPE: setup.dv.DATA_TYPE_VALUE,
         OP: '>',
         VALUE: '2',
-        LIST_ID: 'dataviewer#my#list',
+        LIST_ID: setup.dv.MY_LIST_ID,
         DATASET: 'dataviewer#list#2'
     });
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 5);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 5);
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 2);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 1}), 'II');
@@ -469,27 +474,27 @@ test('all lists to dataset to lists', t => {
     const setup = setupDataViewer();
 
     // DATASET = all lists
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'A B C'});
 
     const dataset = setup.dv._listsToDataset();
 
     t.equal(dataset.length, 3);
-    t.equal(dataset[0]['dataviewer#my#list'], 1);
+    t.equal(dataset[0][setup.dv.MY_LIST_ID], 1);
     t.equal(dataset[0]['dataviewer#list#2'], 'A');
-    t.equal(dataset[1]['dataviewer#my#list'], 2);
+    t.equal(dataset[1][setup.dv.MY_LIST_ID], 2);
     t.equal(dataset[1]['dataviewer#list#2'], 'B');
-    t.equal(dataset[2]['dataviewer#my#list'], 3);
+    t.equal(dataset[2][setup.dv.MY_LIST_ID], 3);
     t.equal(dataset[2]['dataviewer#list#2'], 'C');
 
     const lists = setup.dv._datasetToLists(dataset);
     t.equal(Object.keys(lists).length, 2);
-    t.equal(lists['dataviewer#my#list'].length, 3);
+    t.equal(lists[setup.dv.MY_LIST_ID].length, 3);
     t.equal(lists['dataviewer#list#2'].length, 3);
 
-    t.equal(lists['dataviewer#my#list'][0], 1);
-    t.equal(lists['dataviewer#my#list'][1], 2);
-    t.equal(lists['dataviewer#my#list'][2], 3);
+    t.equal(lists[setup.dv.MY_LIST_ID][0], 1);
+    t.equal(lists[setup.dv.MY_LIST_ID][1], 2);
+    t.equal(lists[setup.dv.MY_LIST_ID][2], 3);
     t.equal(lists['dataviewer#list#2'][0], 'A');
     t.equal(lists['dataviewer#list#2'][1], 'B');
     t.equal(lists['dataviewer#list#2'][2], 'C');
@@ -503,21 +508,21 @@ test('Order data value from all lists', t => {
     const setup = setupDataViewer();
 
     // DATASET = all lists ASC
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '3 2 1 2 3'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '3 2 1 2 3'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'IId IIIa IV IIIb IIc'});
 
     setup.dv.orderList({
-        LIST_ID: 'dataviewer#my#list',
+        LIST_ID: setup.dv.MY_LIST_ID,
         DATASET: setup.dv.READ_ALL_LISTS_ID,
         ORDER: setup.dv.ORDER_ASC
     });
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 5);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 1);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 4}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 5}), 3);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 5);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 4}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 5}), 3);
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 5);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 1}), 'IV');
@@ -527,37 +532,37 @@ test('Order data value from all lists', t => {
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 5}), 'IIc');
 
     // // DATASET = all lists DESC
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: ''});
 
     setup.dv.orderList({
-        LIST_ID: 'dataviewer#my#list',
+        LIST_ID: setup.dv.MY_LIST_ID,
         DATASET: setup.dv.READ_ALL_LISTS_ID,
         ORDER: setup.dv.ORDER_DESC
     });
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 1);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 1);
 
 
     // DATASET = specific list ASC
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '2 3 4 3 2'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '2 3 4 3 2'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: 'II III IV III II'});
 
     setup.dv.orderList({
-        LIST_ID: 'dataviewer#my#list',
-        DATASET: 'dataviewer#my#list',
+        LIST_ID: setup.dv.MY_LIST_ID,
+        DATASET: setup.dv.MY_LIST_ID,
         ORDER: setup.dv.ORDER_ASC
     });
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 5);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 4}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 5}), 4);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 5);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 4}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 5}), 4);
 
     t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#list#2'}), 5);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 1}), 'II');
@@ -567,19 +572,19 @@ test('Order data value from all lists', t => {
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#2', INDEX: 5}), 'II');
 
     // DATASET = specific list DESC
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3'});
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: ''});
 
     setup.dv.orderList({
-        LIST_ID: 'dataviewer#my#list',
-        DATASET: 'dataviewer#my#list',
+        LIST_ID: setup.dv.MY_LIST_ID,
+        DATASET: setup.dv.MY_LIST_ID,
         ORDER: setup.dv.ORDER_DESC
     });
 
-    t.equal(setup.dv.getDataLength({LIST_ID: 'dataviewer#my#list'}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 3);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 1);
+    t.equal(setup.dv.getDataLength({LIST_ID: setup.dv.MY_LIST_ID}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 3);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 1);
 
 
     t.end();
@@ -589,13 +594,13 @@ test('Order data value from all lists', t => {
 test('changeDataScale Numbers', t => {
     const setup = setupDataViewer();
 
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 3 4 5'});
-    setup.dv.changeDataScale({LIST_ID: 'dataviewer#my#list', NEW_MIN: 0, NEW_MAX: 100});
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 0);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 25);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 50);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 4}), 75);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 5}), 100);
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3 4 5'});
+    setup.dv.changeDataScale({LIST_ID: setup.dv.MY_LIST_ID, NEW_MIN: 0, NEW_MAX: 100});
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 0);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 25);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 50);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 4}), 75);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 5}), 100);
 
     setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: '5 4 3 2 1'});
     setup.dv.changeDataScale({LIST_ID: 'dataviewer#list#2', NEW_MIN: 0, NEW_MAX: 0.9});
@@ -637,11 +642,11 @@ test('changeDataScale Numbers with null values', t => {
 test('changeDataScale Strings', t => {
     const setup = setupDataViewer();
 
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: 'A BB CCC'});
-    setup.dv.changeDataScale({LIST_ID: 'dataviewer#my#list', NEW_MIN: 0, NEW_MAX: 100});
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 'A');
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 'BB');
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 'CCC');
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: 'A BB CCC'});
+    setup.dv.changeDataScale({LIST_ID: setup.dv.MY_LIST_ID, NEW_MIN: 0, NEW_MAX: 100});
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 'A');
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 'BB');
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 'CCC');
 
     t.end();
 });
@@ -649,11 +654,11 @@ test('changeDataScale Strings', t => {
 test('changeDataScale Numbers + Strings', t => {
     const setup = setupDataViewer();
 
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 CCC'});
-    setup.dv.changeDataScale({LIST_ID: 'dataviewer#my#list', NEW_MIN: 0, NEW_MAX: 100});
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 1}), 1);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 2}), 2);
-    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#my#list', INDEX: 3}), 'CCC');
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 CCC'});
+    setup.dv.changeDataScale({LIST_ID: setup.dv.MY_LIST_ID, NEW_MIN: 0, NEW_MAX: 100});
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 1}), 1);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 2}), 2);
+    t.equal(setup.dv.getDataIndex({LIST_ID: setup.dv.MY_LIST_ID, INDEX: 3}), 'CCC');
 
     t.end();
 });
@@ -662,10 +667,10 @@ test('Data Loop Map Numbers', t => {
     const setup = setupDataViewer();
     const utilList1 = util();
 
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '10 20 30 40 50'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '10 20 30 40 50'});
 
-    const argValue = {LIST_ID: 'dataviewer#my#list', DATA_TYPE: setup.dv.DATA_TYPE_VALUE, NEW_MIN: 0, NEW_MAX: 100};
-    const argIndex = {LIST_ID: 'dataviewer#my#list', DATA_TYPE: setup.dv.DATA_TYPE_INDEX, NEW_MIN: 0, NEW_MAX: 0.9};
+    const argValue = {LIST_ID: setup.dv.MY_LIST_ID, DATA_TYPE: setup.dv.DATA_TYPE_VALUE, NEW_MIN: 0, NEW_MAX: 100};
+    const argIndex = {LIST_ID: setup.dv.MY_LIST_ID, DATA_TYPE: setup.dv.DATA_TYPE_INDEX, NEW_MIN: 0, NEW_MAX: 0.9};
 
     // Initial state.
     t.equivalent(setup.dv._mapData(argValue, utilList1), null);
@@ -673,23 +678,23 @@ test('Data Loop Map Numbers', t => {
     t.equal(setup.dv.mapData(argValue, utilList1), '');
     t.equal(setup.dv.mapData(argIndex, utilList1), '');
 
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
     t.equal(setup.dv.mapData(argValue, utilList1), 0);
     t.equal(setup.dv.mapData(argIndex, utilList1), 0);
 
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
     t.equal(setup.dv.mapData(argValue, utilList1), 25);
     t.equal(setup.dv.mapData(argIndex, utilList1), 0.23);
 
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
     t.equal(setup.dv.mapData(argValue, utilList1), 50);
     t.equal(setup.dv.mapData(argIndex, utilList1), 0.45);
 
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
     t.equal(setup.dv.mapData(argValue, utilList1), 75);
     t.equal(setup.dv.mapData(argIndex, utilList1), 0.68);
 
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
     t.equal(setup.dv.mapData(argValue, utilList1), 100);
     t.equal(setup.dv.mapData(argIndex, utilList1), 0.9);
 
@@ -700,20 +705,20 @@ test('Data Loop Map Numbers + Strings', t => {
     const setup = setupDataViewer();
     const utilList1 = util();
 
-    setup.dv.setData({LIST_ID: 'dataviewer#my#list', DATA: '1 2 CCC'});
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 CCC'});
 
-    const argValue = {LIST_ID: 'dataviewer#my#list', DATA_TYPE: setup.dv.DATA_TYPE_VALUE, NEW_MIN: 0, NEW_MAX: 100};
-    const argIndex = {LIST_ID: 'dataviewer#my#list', DATA_TYPE: setup.dv.DATA_TYPE_INDEX, NEW_MIN: 0, NEW_MAX: 100};
+    const argValue = {LIST_ID: setup.dv.MY_LIST_ID, DATA_TYPE: setup.dv.DATA_TYPE_VALUE, NEW_MIN: 0, NEW_MAX: 100};
+    const argIndex = {LIST_ID: setup.dv.MY_LIST_ID, DATA_TYPE: setup.dv.DATA_TYPE_INDEX, NEW_MIN: 0, NEW_MAX: 100};
 
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
     t.equal(setup.dv.mapData(argValue, utilList1), '');
     t.equal(setup.dv.mapData(argIndex, utilList1), 0);
 
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
     t.equal(setup.dv.mapData(argValue, utilList1), '');
     t.equal(setup.dv.mapData(argIndex, utilList1), 50);
 
-    setup.dv.dataLoop({LIST_ID: 'dataviewer#my#list'}, utilList1);
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
     t.equal(setup.dv.mapData(argValue, utilList1), '');
     t.equal(setup.dv.mapData(argIndex, utilList1), 100);
 
@@ -727,8 +732,8 @@ test('Data Menu', t => {
     let items = setup.dv.getDataMenu();
     t.equal(items.length, 1);
     t.equal(items[0].text, 'my list');
-    t.equal(items[0].value, 'dataviewer#my#list');
-    t.equal(setup.dv.getDataMenuDefaultValue(), 'dataviewer#my#list');
+    t.equal(items[0].value, setup.dv.MY_LIST_ID);
+    t.equal(setup.dv.getDataMenuDefaultValue(), setup.dv.MY_LIST_ID);
 
     // Add another variables that should appear before others
     const stage = setup.dv._runtime.getTargetForStage();
@@ -741,7 +746,7 @@ test('Data Menu', t => {
     t.equal(items[1].text, 'Aaa2');
     t.equal(items[1].value, 'A2');
     t.equal(items[2].text, 'my list');
-    t.equal(items[2].value, 'dataviewer#my#list');
+    t.equal(items[2].value, setup.dv.MY_LIST_ID);
     t.equal(setup.dv.getDataMenuDefaultValue(), 'a1');
 
     // Delete the default menu list
@@ -751,7 +756,7 @@ test('Data Menu', t => {
     t.equal(items[0].text, 'Aaa2');
     t.equal(items[0].value, 'A2');
     t.equal(items[1].text, 'my list');
-    t.equal(items[1].value, 'dataviewer#my#list');
+    t.equal(items[1].value, setup.dv.MY_LIST_ID);
     t.equal(setup.dv.getDataMenuDefaultValue(), 'A2');
 
     t.end();
@@ -764,10 +769,10 @@ test('Data Loop Menu', t => {
     t.equal(items.length, 2);
     t.equal(items[0].text, setup.dv.READ_ALL_LISTS_VALUE);
     t.equal(items[0].value, setup.dv.READ_ALL_LISTS_ID);
-    t.equal(items[1].value, 'dataviewer#my#list');
+    t.equal(items[1].value, setup.dv.MY_LIST_ID);
 
     const stage = setup.dv._runtime.getTargetForStage();
-    stage.deleteVariable('dataviewer#my#list');
+    stage.deleteVariable(setup.dv.MY_LIST_ID);
     items = setup.dv.getDataLoopMenu();
     t.equal(items.length, 1);
     t.equal(items[0].text, setup.dv.READ_ALL_LISTS_VALUE);

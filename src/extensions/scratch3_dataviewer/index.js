@@ -161,7 +161,6 @@ class Scratch3DataViewerBlocks {
                     default: 'create lists from [URL]'
                 }),
                 blockType: BlockType.COMMAND,
-                disableMonitor: true,
                 arguments: {
                     URL: {
                         type: ArgumentType.STRING,
@@ -197,9 +196,7 @@ class Scratch3DataViewerBlocks {
                     id: 'dataviewer.deleteAllLists',
                     default: 'delete all lists'
                 }),
-                blockType: BlockType.COMMAND,
-                disableMonitor: true,
-                arguments: {}
+                blockType: BlockType.COMMAND
             },
             readCSVDataFromURL: {
                 opcode: 'readCSVDataFromURL',
@@ -260,6 +257,14 @@ class Scratch3DataViewerBlocks {
                         defaultValue: this.getDataMenuDefaultValue(true)
                     }
                 }
+            },
+            dataLoopAllLists: {
+                opcode: 'dataLoopAllLists',
+                text: formatMessage({
+                    id: 'dataviewer.dataLoopAllLists',
+                    default: 'for each value'
+                }),
+                blockType: BlockType.LOOP
             },
             getValue: {
                 opcode: 'getValue',
@@ -504,7 +509,7 @@ class Scratch3DataViewerBlocks {
             allBlocks.createListsFromURL,
             allBlocks.setData,
             allBlocks.changeDataScale,
-            allBlocks.dataLoop,
+            allBlocks.dataLoopAllLists,
             allBlocks.getValue,
             allBlocks.getIndex,
             allBlocks.getStatistic,
@@ -1047,6 +1052,11 @@ class Scratch3DataViewerBlocks {
         if (util.stackFrame.loopLength - util.stackFrame.loopCounter > 0) {
             util.startBranch(1, true);
         }
+    }
+
+    dataLoopAllLists (args, util) {
+        args.LIST_ID = this.READ_ALL_LISTS_ID;
+        this.dataLoop(args, util);
     }
 
     getStatistic (args) {

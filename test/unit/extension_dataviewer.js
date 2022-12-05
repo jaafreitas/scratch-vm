@@ -184,6 +184,35 @@ test('Data Loop', t => {
     t.end();
 });
 
+test('Data Loop All Lists', t => {
+    const setup = setupDataViewer();
+    const utilReadAll = util();
+
+    // Adding initial data.
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '10 20 30'});
+    setup.dv.setData({LIST_ID: 'dataviewer#list#2', DATA: '1.1 2.22 3.333'});
+
+    setup.dv.dataLoopAllLists({}, utilReadAll);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 1);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 10);
+    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 1);
+    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 1.1);
+
+    setup.dv.dataLoopAllLists({}, utilReadAll);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 2);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 20);
+    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 2);
+    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 2.22);
+
+    setup.dv.dataLoopAllLists({}, utilReadAll);
+    t.equal(setup.dv.getIndex({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 3);
+    t.equal(setup.dv.getValue({LIST_ID: setup.dv.MY_LIST_ID}, utilReadAll), 30);
+    t.equal(setup.dv.getIndex({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 3);
+    t.equal(setup.dv.getValue({LIST_ID: 'dataviewer#list#2'}, utilReadAll), 3.333);
+
+    t.end();
+});
+
 test('Data Loop Read All', t => {
     const setup = setupDataViewer();
     const utilReadAll = util();

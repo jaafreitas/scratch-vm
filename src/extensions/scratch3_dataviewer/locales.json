@@ -19,7 +19,7 @@
         "dataviewer.readCSVDataFromURL.default": "link",
         "dataviewer.createListsFromURL": "crie listas de [URL]",
         "dataviewer.createListsFromURL.default": "link",
-        "dataviewer.deleteAllLists": "apague todas as listas",
+        "dataviewer.deleteAllLists": "exclua todas as listas",
         "dataviewer.readThingSpeakData": "leia ThingSpeak canal: [CHANNEL] campo: [FIELD]",
         "dataviewer.dataLoop": "para cada valor de [LIST_ID]",
         "dataviewer.dataLoopAllLists": "para cada valor",

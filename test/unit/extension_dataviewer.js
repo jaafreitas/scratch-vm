@@ -642,7 +642,7 @@ test('changeDataScale Numbers', t => {
     t.end();
 });
 
-test('changeDataScale Numbers with null values', t => {
+test('changeDataScale Numbers with null values or zeros', t => {
     const setup = setupDataViewer();
 
     setup.dv._data('dataviewer#list#3').value[0] = '0';
@@ -664,6 +664,30 @@ test('changeDataScale Numbers with null values', t => {
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 1}), 0);
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 2}), '');
     t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 5}), 100);
+
+    setup.dv._data('dataviewer#list#3').value[0] = '-1';
+    setup.dv._data('dataviewer#list#3').value[1] = '0';
+    setup.dv._data('dataviewer#list#3').value[2] = '1';
+    setup.dv._data('dataviewer#list#3').value[3] = null;
+    setup.dv._data('dataviewer#list#3').value[4] = null;
+    setup.dv.changeDataScale({LIST_ID: 'dataviewer#list#3', NEW_MIN: 0, NEW_MAX: 100});
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 1}), 0);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 2}), 50);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 3}), 100);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 4}), null);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 5}), null);
+
+    setup.dv._data('dataviewer#list#3').value[0] = '-1';
+    setup.dv._data('dataviewer#list#3').value[1] = 0;
+    setup.dv._data('dataviewer#list#3').value[2] = '1';
+    setup.dv._data('dataviewer#list#3').value[3] = null;
+    setup.dv._data('dataviewer#list#3').value[4] = null;
+    setup.dv.changeDataScale({LIST_ID: 'dataviewer#list#3', NEW_MIN: 0, NEW_MAX: 100});
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 1}), 0);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 2}), 50);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 3}), 100);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 4}), null);
+    t.equal(setup.dv.getDataIndex({LIST_ID: 'dataviewer#list#3', INDEX: 5}), null);
 
     t.end();
 });

@@ -508,11 +508,11 @@ class Scratch3DataViewerBlocks {
         const blocks = [
             allBlocks.createListsFromURL,
             allBlocks.setData,
-            allBlocks.changeDataScale,
             allBlocks.dataLoopAllLists,
             allBlocks.getValue,
-            allBlocks.getIndex,
+            allBlocks.mapData,
             allBlocks.getStatistic,
+            allBlocks.getIndex,
             '---',
             allBlocks.deleteAllLists,
             '---',
@@ -532,9 +532,7 @@ class Scratch3DataViewerBlocks {
                 allBlocks.deleteOfListAllLists,
                 '---',
                 allBlocks.readCSVDataFromURL,
-                allBlocks.readThingSpeakData,
-                '---',
-                allBlocks.mapData
+                allBlocks.readThingSpeakData
             );
         }
         // if we try load a project with the extra blocks using the minimal-block version,
@@ -866,7 +864,7 @@ class Scratch3DataViewerBlocks {
     }
 
     _resolveURLBase (URL) {
-        const googleSheets = URL.match('docs.google.com/spreadsheets/d/(.*)/edit');
+        const googleSheets = URL.match('docs.google.com/spreadsheets/d/(.*)/edit') || false;
         let urlBase = URL;
         if (googleSheets) {
             const spreadsheetId = googleSheets[1];
@@ -1209,7 +1207,7 @@ class Scratch3DataViewerBlocks {
                 if (typeof oldValue === 'string') {
                     oldValue = oldValue.trim();
                 }
-                if (oldValue && !isNaN(oldValue)) {
+                if (oldValue !== null && oldValue !== '' && !isNaN(oldValue)) {
                     const newValue = this._mapValue(oldValue, oldMin, oldMax, newMin, newMax);
                     if (oldValue !== newValue) {
                         // Two decimal points is a trade-off between precision and legibility

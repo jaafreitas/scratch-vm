@@ -474,6 +474,37 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
+            mapDataFromTo: {
+                opcode: 'mapDataFromTo',
+                text: formatMessage({
+                    id: 'dataviewer.mapDataFromTo',
+                    default: 'map [VALUE] from [OLD_MIN] ⇔ [OLD_MAX] to [NEW_MIN] ⇔ [NEW_MAX]'
+                }),
+                blockType: BlockType.REPORTER,
+                disableMonitor: true,
+                arguments: {
+                    VALUE: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 75
+                    },
+                    OLD_MIN: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 0
+                    },
+                    OLD_MAX: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 100
+                    },
+                    NEW_MIN: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: -240
+                    },
+                    NEW_MAX: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 240
+                    }
+                }
+            },
             setScaleX: {
                 opcode: 'setScaleX',
                 blockType: BlockType.COMMAND,
@@ -511,6 +542,7 @@ class Scratch3DataViewerBlocks {
             allBlocks.dataLoopAllLists,
             allBlocks.getValue,
             allBlocks.mapData,
+            allBlocks.mapDataFromTo,
             allBlocks.getStatistic,
             allBlocks.getIndex,
             '---',
@@ -656,7 +688,7 @@ class Scratch3DataViewerBlocks {
         if (stage) {
             for (const varId in stage.variables) {
                 const currVar = stage.variables[varId];
-                if (currVar.type === Variable.LIST_TYPE) {
+                if (currVar.type === Variable.LIST_TYPE && currVar.name) {
                     items.push(({text: currVar.name, value: currVar.id}));
                 }
             }
@@ -1226,19 +1258,25 @@ class Scratch3DataViewerBlocks {
         let oldValue;
         const newMin = Cast.toNumber(args.NEW_MIN);
         const newMax = Cast.toNumber(args.NEW_MAX);
-        switch (args.DATA_TYPE) {
-        case this.DATA_TYPE_INDEX:
-            oldMin = 0;
-            oldMax = this.getDataLength(args) - 1;
-            oldValue = this._getInternalIndex(args, util);
-            break;
-        case this.DATA_TYPE_VALUE:
-            oldMin = this._getMin(args);
-            oldMax = this._getMax(args);
-            oldValue = this._getValue(args, util);
-            break;
+        if (this.getDataLength(args) > 0 && args.DATA_TYPE) {
+            switch (args.DATA_TYPE) {
+            case this.DATA_TYPE_INDEX:
+                oldMin = 0;
+                oldMax = this.getDataLength(args) - 1;
+                oldValue = this._getInternalIndex(args, util);
+                break;
+            case this.DATA_TYPE_VALUE:
+                oldMin = this._getMin(args);
+                oldMax = this._getMax(args);
+                oldValue = this._getValue(args, util);
+                break;
+            }
+        } else {
+            oldMin = Cast.toNumber(args.OLD_MIN);
+            oldMax = Cast.toNumber(args.OLD_MAX);
+            oldValue = Cast.toNumber(args.VALUE);
         }
-        if (this.getDataLength(args) > 0 && !isNaN(oldValue)) {
+        if (!isNaN(oldValue)) {
             return this._mapValue(oldValue, oldMin, oldMax, newMin, newMax);
         }
     }
@@ -1249,6 +1287,10 @@ class Scratch3DataViewerBlocks {
             return Cast.toNumber(value.toFixed(2));
         }
         return '';
+    }
+
+    mapDataFromTo (args, util) {
+        return this.mapData(args, util);
     }
 
     getDataIndex (args) {

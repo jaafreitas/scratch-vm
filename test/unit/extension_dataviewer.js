@@ -716,6 +716,18 @@ test('changeDataScale Numbers + Strings', t => {
     t.end();
 });
 
+
+test('mapDataFromTo', t => {
+    const setup = setupDataViewer();
+
+    t.equal(setup.dv.mapDataFromTo({VALUE: 75, OLD_MIN: 0, OLD_MAX: 100, NEW_MIN: -240, NEW_MAX: 240}), 120);
+    t.equal(setup.dv.mapDataFromTo({VALUE: 0, OLD_MIN: -1, OLD_MAX: 1, NEW_MIN: 0, NEW_MAX: 100}), 50);
+    t.equal(setup.dv.mapDataFromTo({VALUE: '0', OLD_MIN: -1, OLD_MAX: 1, NEW_MIN: 0, NEW_MAX: 100}), 50);
+
+    t.end();
+});
+
+
 test('Data Loop Map Numbers', t => {
     const setup = setupDataViewer();
     const utilList1 = util();

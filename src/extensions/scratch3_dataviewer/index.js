@@ -474,30 +474,6 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
-            mapDataValue: {
-                opcode: 'mapDataValue',
-                text: formatMessage({
-                    id: 'dataviewer.mapDataValue',
-                    default: 'value of [LIST_ID] to [NEW_MIN] ⇔ [NEW_MAX]'
-                }),
-                blockType: BlockType.REPORTER,
-                disableMonitor: true,
-                arguments: {
-                    LIST_ID: {
-                        type: ArgumentType.STRING,
-                        menu: 'dataMenu',
-                        defaultValue: this.getDataMenuDefaultValue()
-                    },
-                    NEW_MIN: {
-                        type: ArgumentType.NUMBER,
-                        defaultValue: 0
-                    },
-                    NEW_MAX: {
-                        type: ArgumentType.NUMBER,
-                        defaultValue: 100
-                    }
-                }
-            },
             mapDataFromTo: {
                 opcode: 'mapDataFromTo',
                 text: formatMessage({
@@ -572,7 +548,7 @@ class Scratch3DataViewerBlocks {
             allBlocks.setData,
             allBlocks.dataLoopAllLists,
             allBlocks.getValue,
-            allBlocks.mapDataValue,
+            allBlocks.mapData,
             '---',
             allBlocks.getStatistic,
             '---',
@@ -1321,10 +1297,6 @@ class Scratch3DataViewerBlocks {
             return Cast.toNumber(value.toFixed(2));
         }
         return '';
-    }
-
-    mapDataValue (args, util) {
-        return this.mapData(args, util);
     }
 
     mapDataFromTo (args, util) {

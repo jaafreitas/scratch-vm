@@ -716,19 +716,7 @@ test('changeDataScale Numbers + Strings', t => {
     t.end();
 });
 
-
-test('mapDataFromTo', t => {
-    const setup = setupDataViewer();
-
-    t.equal(setup.dv.mapDataFromTo({VALUE: 75, OLD_MIN: 0, OLD_MAX: 100, NEW_MIN: -240, NEW_MAX: 240}), 120);
-    t.equal(setup.dv.mapDataFromTo({VALUE: 0, OLD_MIN: -1, OLD_MAX: 1, NEW_MIN: 0, NEW_MAX: 100}), 50);
-    t.equal(setup.dv.mapDataFromTo({VALUE: '0', OLD_MIN: -1, OLD_MAX: 1, NEW_MIN: 0, NEW_MAX: 100}), 50);
-
-    t.end();
-});
-
-
-test('Data Loop Map Numbers', t => {
+test('Data Loop mapData Numbers', t => {
     const setup = setupDataViewer();
     const utilList1 = util();
 
@@ -766,6 +754,46 @@ test('Data Loop Map Numbers', t => {
     t.end();
 });
 
+
+test('Data Loop mapDataFromTo Numbers', t => {
+    const setup = setupDataViewer();
+    const utilList1 = util();
+
+    setup.dv.setData({LIST_ID: setup.dv.MY_LIST_ID, DATA: '1 2 3'});
+
+    const argValue = {LIST_ID: setup.dv.MY_LIST_ID,
+        DATA_TYPE: setup.dv.DATA_TYPE_VALUE,
+        OLD_MIN: 0,
+        OLD_MAX: 5,
+        NEW_MIN: 0,
+        NEW_MAX: 100};
+    const argIndex = {LIST_ID: setup.dv.MY_LIST_ID,
+        DATA_TYPE: setup.dv.DATA_TYPE_INDEX,
+        OLD_MIN: 0,
+        OLD_MAX: 4,
+        NEW_MIN: -240,
+        NEW_MAX: 240};
+
+    // Initial state.
+    t.equivalent(setup.dv._mapData(argValue, utilList1), null);
+    t.equivalent(setup.dv._mapData(argIndex, utilList1), null);
+    t.equal(setup.dv.mapData(argValue, utilList1), '');
+    t.equal(setup.dv.mapData(argIndex, utilList1), '');
+
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), 20);
+    t.equal(setup.dv.mapData(argIndex, utilList1), -240);
+
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), 40);
+    t.equal(setup.dv.mapData(argIndex, utilList1), -120);
+
+    setup.dv.dataLoop({LIST_ID: setup.dv.MY_LIST_ID}, utilList1);
+    t.equal(setup.dv.mapData(argValue, utilList1), 60);
+    t.equal(setup.dv.mapData(argIndex, utilList1), 0);
+
+    t.end();
+});
 test('Data Loop Map Numbers + Strings', t => {
     const setup = setupDataViewer();
     const utilList1 = util();

@@ -449,20 +449,20 @@ class Scratch3DataViewerBlocks {
                 opcode: 'mapData',
                 text: formatMessage({
                     id: 'dataviewer.mapData',
-                    default: '[DATA_TYPE] of [LIST_ID] mapped from [NEW_MIN] to [NEW_MAX]'
+                    default: '[DATA_TYPE] of [LIST_ID] to [NEW_MIN] ⇔ [NEW_MAX]'
                 }),
                 blockType: BlockType.REPORTER,
                 disableMonitor: true,
                 arguments: {
-                    LIST_ID: {
-                        type: ArgumentType.STRING,
-                        menu: 'dataMenu',
-                        defaultValue: this.getDataMenuDefaultValue()
-                    },
                     DATA_TYPE: {
                         type: ArgumentType.STRING,
                         menu: 'dataType',
                         defaultValue: 'value'
+                    },
+                    LIST_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataMenu',
+                        defaultValue: this.getDataMenuDefaultValue()
                     },
                     NEW_MIN: {
                         type: ArgumentType.NUMBER,
@@ -478,15 +478,22 @@ class Scratch3DataViewerBlocks {
                 opcode: 'mapDataFromTo',
                 text: formatMessage({
                     id: 'dataviewer.mapDataFromTo',
-                    default: 'map [VALUE] from [OLD_MIN] ⇔ [OLD_MAX] to [NEW_MIN] ⇔ [NEW_MAX]'
+                    default: '[DATA_TYPE] of [LIST_ID] from [OLD_MIN] ⇔ [OLD_MAX] to [NEW_MIN] ⇔ [NEW_MAX]'
                 }),
                 blockType: BlockType.REPORTER,
                 disableMonitor: true,
                 arguments: {
-                    VALUE: {
-                        type: ArgumentType.NUMBER,
-                        defaultValue: 75
+                    DATA_TYPE: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataType',
+                        defaultValue: 'value'
                     },
+                    LIST_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataMenu',
+                        defaultValue: this.getDataMenuDefaultValue()
+                    },
+
                     OLD_MIN: {
                         type: ArgumentType.NUMBER,
                         defaultValue: 0
@@ -1258,23 +1265,23 @@ class Scratch3DataViewerBlocks {
         let oldValue;
         const newMin = Cast.toNumber(args.NEW_MIN);
         const newMax = Cast.toNumber(args.NEW_MAX);
-        if (this.getDataLength(args) > 0 && args.DATA_TYPE) {
-            switch (args.DATA_TYPE) {
-            case this.DATA_TYPE_INDEX:
-                oldMin = 0;
-                oldMax = this.getDataLength(args) - 1;
-                oldValue = this._getInternalIndex(args, util);
-                break;
-            case this.DATA_TYPE_VALUE:
-                oldMin = this._getMin(args);
-                oldMax = this._getMax(args);
-                oldValue = this._getValue(args, util);
-                break;
-            }
-        } else {
+        switch (args.DATA_TYPE) {
+        case this.DATA_TYPE_INDEX:
+            oldMin = 0;
+            oldMax = this.getDataLength(args) - 1;
+            oldValue = this._getInternalIndex(args, util);
+            break;
+        case this.DATA_TYPE_VALUE:
+            oldMin = this._getMin(args);
+            oldMax = this._getMax(args);
+            oldValue = this._getValue(args, util);
+            break;
+        }
+        if (typeof args.OLD_MIN !== 'undefined') {
             oldMin = Cast.toNumber(args.OLD_MIN);
+        }
+        if (typeof args.OLD_MAX !== 'undefined') {
             oldMax = Cast.toNumber(args.OLD_MAX);
-            oldValue = Cast.toNumber(args.VALUE);
         }
         if (!isNaN(oldValue)) {
             return this._mapValue(oldValue, oldMin, oldMax, newMin, newMax);

@@ -457,8 +457,32 @@ class Scratch3DataViewerBlocks {
                     DATA_TYPE: {
                         type: ArgumentType.STRING,
                         menu: 'dataType',
-                        defaultValue: 'value'
+                        defaultValue: this.DATA_TYPE_VALUE
                     },
+                    LIST_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataMenu',
+                        defaultValue: this.getDataMenuDefaultValue()
+                    },
+                    NEW_MIN: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 0
+                    },
+                    NEW_MAX: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 100
+                    }
+                }
+            },
+            mapDataValue: {
+                opcode: 'mapDataValue',
+                text: formatMessage({
+                    id: 'dataviewer.mapDataValue',
+                    default: 'value of [LIST_ID] to [NEW_MIN] ⇔ [NEW_MAX]'
+                }),
+                blockType: BlockType.REPORTER,
+                disableMonitor: true,
+                arguments: {
                     LIST_ID: {
                         type: ArgumentType.STRING,
                         menu: 'dataMenu',
@@ -486,7 +510,7 @@ class Scratch3DataViewerBlocks {
                     DATA_TYPE: {
                         type: ArgumentType.STRING,
                         menu: 'dataType',
-                        defaultValue: 'value'
+                        defaultValue: this.DATA_TYPE_VALUE
                     },
                     LIST_ID: {
                         type: ArgumentType.STRING,
@@ -548,10 +572,9 @@ class Scratch3DataViewerBlocks {
             allBlocks.setData,
             allBlocks.dataLoopAllLists,
             allBlocks.getValue,
-            allBlocks.mapData,
-            allBlocks.mapDataFromTo,
+            allBlocks.mapDataValue,
+            '---',
             allBlocks.getStatistic,
-            allBlocks.getIndex,
             '---',
             allBlocks.deleteAllLists,
             '---',
@@ -570,8 +593,9 @@ class Scratch3DataViewerBlocks {
                 allBlocks.orderListAllLists,
                 allBlocks.deleteOfListAllLists,
                 '---',
-                allBlocks.readCSVDataFromURL,
-                allBlocks.readThingSpeakData
+                allBlocks.mapDataFromTo,
+                '---',
+                allBlocks.getIndex
             );
         }
         // if we try load a project with the extra blocks using the minimal-block version,
@@ -1265,6 +1289,9 @@ class Scratch3DataViewerBlocks {
         let oldValue;
         const newMin = Cast.toNumber(args.NEW_MIN);
         const newMax = Cast.toNumber(args.NEW_MAX);
+        if (typeof args.DATA_TYPE === 'undefined') {
+            args.DATA_TYPE = this.DATA_TYPE_VALUE;
+        }
         switch (args.DATA_TYPE) {
         case this.DATA_TYPE_INDEX:
             oldMin = 0;
@@ -1294,6 +1321,10 @@ class Scratch3DataViewerBlocks {
             return Cast.toNumber(value.toFixed(2));
         }
         return '';
+    }
+
+    mapDataValue (args, util) {
+        return this.mapData(args, util);
     }
 
     mapDataFromTo (args, util) {

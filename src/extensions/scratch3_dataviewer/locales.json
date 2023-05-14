@@ -33,6 +33,8 @@
         "dataviewer.changeDataScale": "mude [LIST_ID] para a escala de [NEW_MIN] a [NEW_MAX]",
         "dataviewer.mapData": "[DATA_TYPE] de [LIST_ID] para [NEW_MIN] ⇔ [NEW_MAX]",
         "dataviewer.mapDataFromTo": "[DATA_TYPE] de [LIST_ID] de [OLD_MIN] ⇔ [OLD_MAX] para [NEW_MIN] ⇔ [NEW_MAX]",
+        "dataviewer.stampText": "carimbe o texto [TEXT]",
+        "dataviewer.clearText": "apague todos os textos",
 
         "dataviewer.menu.statisticFunctions.average": "média",
         "dataviewer.menu.statisticFunctions.sum": "soma",
@@ -80,6 +82,8 @@
        "dataviewer.changeDataScale": "[LIST_ID]スケールを[NEW_MIN][NEW_MAX]に変更する",
        "dataviewer.mapData": "[LIST_ID]の[DATA_TYPE]を[NEW_MIN][NEW_MAX]にマップする",
        "dataviewer.mapDataFromTo": "[DATA_TYPE] of [LIST_ID] from [OLD_MIN] ⇔ [OLD_MAX] to [NEW_MIN] ⇔ [NEW_MAX]",
+       "dataviewer.stampText": "stamp text [TEXT]",
+       "dataviewer.clearText": "erase all texts",
 
        "dataviewer.menu.statisticFunctions.average": "平均",
        "dataviewer.menu.statisticFunctions.sum": "合計",

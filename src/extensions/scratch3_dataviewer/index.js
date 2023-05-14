@@ -950,7 +950,7 @@ class Scratch3DataViewerBlocks {
         if (args.URL.trim() && args.COLUMN && args.LINE) {
             const [urlBase, isGoogleSpreadsheet] = this._resolveURLBase(args.URL.trim());
             const column = args.COLUMN - 1;
-            const line = args.LINE;
+            // const line = args.LINE;
             return new Promise((resolve, reject) => {
                 nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
                     if (err) {

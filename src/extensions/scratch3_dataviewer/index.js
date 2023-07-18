@@ -67,6 +67,26 @@ class Scratch3DataViewerBlocks {
             default: 'all lists'});
     }
 
+    get STATISTIC_AVERAGE () {
+        return 'average';
+    }
+
+    get STATISTIC_LENGTH () {
+        return 'length';
+    }
+
+    get STATISTIC_SUM () {
+        return 'sum';
+    }
+
+    get STATISTIC_MIN () {
+        return 'min';
+    }
+
+    get STATISTIC_MAX () {
+        return 'max';
+    }
+
     constructor (runtime) {
         this._runtime = runtime;
 
@@ -320,7 +340,7 @@ class Scratch3DataViewerBlocks {
                     FNC: {
                         type: ArgumentType.STRING,
                         menu: 'statisticFunctions',
-                        defaultValue: 'average'
+                        defaultValue: this.STATISTIC_AVERAGE
                     }
                 }
             },
@@ -517,6 +537,27 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
+            groupBy: {
+                opcode: 'groupBy',
+                text: formatMessage({
+                    id: 'dataviewer.groupBy',
+                    default: 'calculate [FNC] group by [LIST_ID]'
+                }),
+                blockType: BlockType.COMMAND,
+                disableMonitor: true,
+                arguments: {
+                    LIST_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataMenu',
+                        defaultValue: this.getDataMenuDefaultValue()
+                    },
+                    FNC: {
+                        type: ArgumentType.STRING,
+                        menu: 'statisticFunctions',
+                        defaultValue: this.STATISTIC_AVERAGE
+                    }
+                }
+            },
             setScaleX: {
                 opcode: 'setScaleX',
                 blockType: BlockType.COMMAND,
@@ -573,6 +614,7 @@ class Scratch3DataViewerBlocks {
         const blocks = [
             allBlocks.createListsFromURL,
             allBlocks.setData,
+            allBlocks.groupBy,
             allBlocks.dataLoopAllLists,
             allBlocks.getValue,
             allBlocks.mapData,
@@ -624,30 +666,37 @@ class Scratch3DataViewerBlocks {
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.statisticFunctions.average',
-                        default: 'average'
+                        default: this.STATISTIC_AVERAGE
                     }),
-                    value: 'average'
+                    value: this.STATISTIC_AVERAGE
+                },
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.statisticFunctions.length',
+                        default: this.STATISTIC_LENGTH
+                    }),
+                    value: this.STATISTIC_LENGTH
                 },
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.statisticFunctions.sum',
-                        default: 'sum'
+                        default: this.STATISTIC_SUM
                     }),
-                    value: 'sum'
+                    value: this.STATISTIC_SUM
                 },
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.statisticFunctions.min',
-                        default: 'min'
+                        default: this.STATISTIC_MIN
                     }),
-                    value: 'min'
+                    value: this.STATISTIC_MIN
                 },
                 {
                     text: formatMessage({
                         id: 'dataviewer.menu.statisticFunctions.max',
-                        default: 'max'
+                        default: this.STATISTIC_MAX
                     }),
-                    value: 'max'
+                    value: this.STATISTIC_MAX
                 }
             ],
             deleteListOpMenu: [
@@ -1129,16 +1178,19 @@ class Scratch3DataViewerBlocks {
     getStatistic (args) {
         let value;
         switch (args.FNC) {
-        case 'average':
+        case this.STATISTIC_AVERAGE:
             value = this._getAverage(args);
             break;
-        case 'sum':
+        case this.STATISTIC_LENGTH:
+            value = this.getDataLength(args);
+            break;
+        case this.STATISTIC_SUM:
             value = this._getSum(args);
             break;
-        case 'min':
+        case this.STATISTIC_MIN:
             value = this._getMin(args);
             break;
-        case 'max':
+        case this.STATISTIC_MAX:
             value = this._getMax(args);
             break;
         }
@@ -1331,6 +1383,99 @@ class Scratch3DataViewerBlocks {
 
     mapDataFromTo (args, util) {
         return this.mapData(args, util);
+    }
+
+    groupBy (args) {
+        const dataset = this._listsToDataset();
+
+        const datasetGroupBy = dataset.reduce((groups, data) => {
+            const key = data[args.LIST_ID];
+            const group = groups[key] ?? [];
+            return {...groups, [key]: [...group, data]};
+        }, {});
+
+        const newDataset = [];
+        for (const [group, items] of Object.entries(datasetGroupBy)) {
+            const data = {};
+            newDataset.push(data);
+            data[args.LIST_ID] = group;
+            switch (args.FNC) {
+            case this.STATISTIC_AVERAGE:
+                items.forEach(item => {
+                    for (const [key, value] of Object.entries(item)) {
+                        if (!isNaN(value)) {
+                            if (!data[key]) {
+                                data[key] = 0;
+                            }
+                            if (key !== args.LIST_ID) {
+                                data[key] += value;
+                            }
+                        }
+                    }
+                });
+                for (const [key, value] of Object.entries(data)) {
+                    if ((key !== args.LIST_ID) && (!isNaN(value))) {
+                        data[key] /= items.length;
+                    }
+                }
+                break;
+            case this.STATISTIC_LENGTH:
+                data[args.FNC] = items.length;
+                break;
+            case this.STATISTIC_SUM:
+                items.forEach(item => {
+                    for (const [key, value] of Object.entries(item)) {
+                        if (!isNaN(value)) {
+                            if (!data[`${key} ${args.FNC}`]) {
+                                data[`${key} ${args.FNC}`] = 0;
+                            }
+                            if (key !== args.LIST_ID) {
+                                data[`${key} ${args.FNC}`] += value;
+                            }
+                        }
+                    }
+                });
+                break;
+            case this.STATISTIC_MIN:
+                items.forEach(item => {
+                    for (const [key, value] of Object.entries(item)) {
+                        if (!isNaN(value)) {
+                            if (!data[`${key} ${args.FNC}`]) {
+                                data[`${key} ${args.FNC}`] = value;
+                            }
+                            if (key !== args.LIST_ID) {
+                                data[`${key} ${args.FNC}`] = Math.min(value, data[`${key} ${args.FNC}`]);
+                            }
+                        }
+                    }
+                });
+                break;
+            case this.STATISTIC_MAX:
+                items.forEach(item => {
+                    for (const [key, value] of Object.entries(item)) {
+                        if (!isNaN(value)) {
+                            if (!data[`${key} ${args.FNC}`]) {
+                                data[`${key} ${args.FNC}`] = value;
+                            }
+                            if (key !== args.LIST_ID) {
+                                data[`${key} ${args.FNC}`] = Math.max(value, data[`${key} ${args.FNC}`]);
+                            }
+                        }
+                    }
+                });
+                break;
+            }
+        }
+
+        const lists = this._datasetToLists(newDataset);
+        this.deleteAllLists();
+        Object.keys(lists).forEach(listID => {
+            this._data(listID).value = lists[listID];
+            this._data(listID)._monitorUpToDate = false;
+        });
+
+        // Show new variables on toolbox.
+        this._runtime.requestToolboxExtensionsUpdate();
     }
 
     getDataIndex (args) {

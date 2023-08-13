@@ -1403,18 +1403,16 @@ class Scratch3DataViewerBlocks {
             case this.STATISTIC_AVERAGE:
                 items.forEach(item => {
                     for (const [key, value] of Object.entries(item)) {
-                        if (!isNaN(value)) {
+                        if (!isNaN(value) && key !== args.LIST_ID) {
                             if (!data[key]) {
                                 data[key] = 0;
                             }
-                            if (key !== args.LIST_ID) {
-                                data[key] += value;
-                            }
+                            data[key] += value;
                         }
                     }
                 });
                 for (const [key, value] of Object.entries(data)) {
-                    if ((key !== args.LIST_ID) && (!isNaN(value))) {
+                    if ((!isNaN(value) && key !== args.LIST_ID)) {
                         data[key] /= items.length;
                     }
                 }
@@ -1425,13 +1423,11 @@ class Scratch3DataViewerBlocks {
             case this.STATISTIC_SUM:
                 items.forEach(item => {
                     for (const [key, value] of Object.entries(item)) {
-                        if (!isNaN(value)) {
+                        if (!isNaN(value) && key !== args.LIST_ID) {
                             if (!data[`${key} ${args.FNC}`]) {
                                 data[`${key} ${args.FNC}`] = 0;
                             }
-                            if (key !== args.LIST_ID) {
-                                data[`${key} ${args.FNC}`] += value;
-                            }
+                            data[`${key} ${args.FNC}`] += value;
                         }
                     }
                 });
@@ -1439,13 +1435,11 @@ class Scratch3DataViewerBlocks {
             case this.STATISTIC_MIN:
                 items.forEach(item => {
                     for (const [key, value] of Object.entries(item)) {
-                        if (!isNaN(value)) {
+                        if (!isNaN(value) && key !== args.LIST_ID) {
                             if (!data[`${key} ${args.FNC}`]) {
                                 data[`${key} ${args.FNC}`] = value;
                             }
-                            if (key !== args.LIST_ID) {
-                                data[`${key} ${args.FNC}`] = Math.min(value, data[`${key} ${args.FNC}`]);
-                            }
+                            data[`${key} ${args.FNC}`] = Math.min(value, data[`${key} ${args.FNC}`]);
                         }
                     }
                 });
@@ -1453,13 +1447,11 @@ class Scratch3DataViewerBlocks {
             case this.STATISTIC_MAX:
                 items.forEach(item => {
                     for (const [key, value] of Object.entries(item)) {
-                        if (!isNaN(value)) {
+                        if (!isNaN(value) && key !== args.LIST_ID) {
                             if (!data[`${key} ${args.FNC}`]) {
                                 data[`${key} ${args.FNC}`] = value;
                             }
-                            if (key !== args.LIST_ID) {
-                                data[`${key} ${args.FNC}`] = Math.max(value, data[`${key} ${args.FNC}`]);
-                            }
+                            data[`${key} ${args.FNC}`] = Math.max(value, data[`${key} ${args.FNC}`]);
                         }
                     }
                 });

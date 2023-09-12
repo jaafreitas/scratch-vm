@@ -4,8 +4,7 @@
         "gui.extension.dataviewer.description": "Crie representações para dados.",
         "gui.extension.dataviewer.index": "índice",
 
-        "gui.stageHeader.dataviewerTable": "Visualização dos dado",
-        "gui.stageHeader.dataviewerChart": "Visualizador de Dados em Gráfico",
+        "gui.stageHeader.dataviewerTable": "Visualização dos dados",
 
         "dataviewer.categoryName": "PlayData",
 
@@ -56,7 +55,6 @@
         "gui.extension.dataviewer.index": "索引",
 
         "gui.stageHeader.dataviewerTable": "PlayDataテーブル",
-        "gui.stageHeader.dataviewerChart": "PlayDataチャート",
 
         "dataviewer.categoryName": "PlayData",
 

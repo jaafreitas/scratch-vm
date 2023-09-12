@@ -348,7 +348,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'deleteOfList',
                 text: formatMessage({
                     id: 'dataviewer.deleteOfList',
-                    default: 'delete [DATA_TYPE] [OP] [VALUE] of [LIST_ID] from [DATASET]'
+                    default: 'select [DATA_TYPE] [OP] [VALUE] of [LIST_ID] from [DATASET]'
                 }),
                 blockType: BlockType.COMMAND,
                 arguments: {
@@ -382,7 +382,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'deleteOfListAllLists',
                 text: formatMessage({
                     id: 'dataviewer.deleteOfListAllLists',
-                    default: 'delete values [OP] [VALUE] of [LIST_ID]'
+                    default: 'select values [OP] [VALUE] of [LIST_ID]'
                 }),
                 blockType: BlockType.COMMAND,
                 arguments: {

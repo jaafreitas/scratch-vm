@@ -348,7 +348,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'deleteOfList',
                 text: formatMessage({
                     id: 'dataviewer.deleteOfList',
-                    default: 'select [DATA_TYPE] [OP] [VALUE] of [LIST_ID] from [DATASET]'
+                    default: 'delete [DATA_TYPE] [OP] [VALUE] of [LIST_ID] from [DATASET]'
                 }),
                 blockType: BlockType.COMMAND,
                 arguments: {
@@ -382,7 +382,7 @@ class Scratch3DataViewerBlocks {
                 opcode: 'deleteOfListAllLists',
                 text: formatMessage({
                     id: 'dataviewer.deleteOfListAllLists',
-                    default: 'select values [OP] [VALUE] of [LIST_ID]'
+                    default: 'delete values [OP] [VALUE] of [LIST_ID]'
                 }),
                 blockType: BlockType.COMMAND,
                 arguments: {
@@ -390,6 +390,30 @@ class Scratch3DataViewerBlocks {
                         type: ArgumentType.STRING,
                         menu: 'deleteListOpMenu',
                         defaultValue: '='
+                    },
+                    VALUE: {
+                        type: ArgumentType.STRING,
+                        defaultValue: ' '
+                    },
+                    LIST_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataMenu',
+                        defaultValue: this.getDataMenuDefaultValue(false)
+                    }
+                }
+            },
+            selectListAllLists: {
+                opcode: 'selectListAllLists',
+                text: formatMessage({
+                    id: 'dataviewer.selectListAllLists',
+                    default: 'select values [OP] [VALUE] of [LIST_ID]'
+                }),
+                blockType: BlockType.COMMAND,
+                arguments: {
+                    OP: {
+                        type: ArgumentType.STRING,
+                        menu: 'selectListOpMenu',
+                        defaultValue: '<'
                     },
                     VALUE: {
                         type: ArgumentType.STRING,
@@ -642,8 +666,8 @@ class Scratch3DataViewerBlocks {
             blocks.push(
                 allBlocks.showLessBlocks,
                 '---',
+                allBlocks.selectListAllLists,
                 allBlocks.orderListAllLists,
-                allBlocks.deleteOfListAllLists,
                 '---',
                 allBlocks.mapDataFromTo,
                 '---',
@@ -721,6 +745,26 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     text: '≠', value: '!='
+                }
+            ],
+            selectListOpMenu: [
+                {
+                    text: '>', value: '<='
+                },
+                {
+                    text: '≥', value: '<'
+                },
+                {
+                    text: '<', value: '>='
+                },
+                {
+                    text: '≤', value: '>'
+                },
+                {
+                    text: '=', value: '!='
+                },
+                {
+                    text: '≠', value: '='
                 }
             ],
             orderListMenu: [
@@ -1286,6 +1330,11 @@ class Scratch3DataViewerBlocks {
         args.DATA_TYPE = this.DATA_TYPE_VALUE;
         args.DATASET = this.READ_ALL_LISTS_ID;
         this.deleteOfList(args);
+    }
+
+    selectListAllLists (args) {
+        // Same implementation of delete, but using inverted operators (selectListOpMenu)
+        this.deleteOfListAllLists(args);
     }
 
     orderList (args) {

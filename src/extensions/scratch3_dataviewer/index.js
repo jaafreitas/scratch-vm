@@ -593,12 +593,16 @@ class Scratch3DataViewerBlocks {
                 blockType: BlockType.COMMAND,
                 text: formatMessage({
                     id: 'dataviewer.stampText',
-                    default: 'stamp text [TEXT]'
+                    default: 'stamp text [TEXT] with color [COLOR]'
                 }),
                 arguments: {
                     TEXT: {
                         type: ArgumentType.STRING,
                         defaultValue: 'PlayData'
+                    },
+                    COLOR: {
+                        type: ArgumentType.COLOR,
+                        defaultValue: Scratch3DataViewerBlocks.EXTENSION_INFO_COLOR3
                     }
                 }
             },
@@ -1601,6 +1605,7 @@ class Scratch3DataViewerBlocks {
         const textState = this._getTextState(util.target);
 
         textState.text = this._formatText(args.TEXT);
+        textState.color = args.COLOR;
         textState.visible = true;
         textState.animating = true;
 

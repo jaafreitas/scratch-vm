@@ -1096,7 +1096,8 @@ class Scratch3DataViewerBlocks {
                 if (row === 0) {
                     // eslint-disable-next-line no-negated-condition
                     if (value !== '') {
-                        lists[value] = [];
+						// Adding a space if the key is numeric to keep the order of the keys
+                        lists[typeof value === 'number' ? ` ${value}` : value] = [];
                     // Ignore values starting from the first unamed column
                     } else {
                         maxColumns = col;

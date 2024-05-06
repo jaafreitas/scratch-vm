@@ -75,6 +75,10 @@ class Scratch3DataViewerBlocks {
         return 'length';
     }
 
+    get STATISTIC_COUNT () {
+        return 'count';
+    }
+
     get STATISTIC_SUM () {
         return 'sum';
     }
@@ -323,11 +327,32 @@ class Scratch3DataViewerBlocks {
                     }
                 }
             },
+            getValueIndex: {
+                opcode: 'getValueIndex',
+                text: formatMessage({
+                    id: 'dataviewer.getValueIndex',
+                    default: '[DATA_TYPE] of [LIST_ID]'
+                }),
+                blockType: BlockType.REPORTER,
+                disableMonitor: true,
+                arguments: {
+                    DATA_TYPE: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataType',
+                        defaultValue: this.DATA_TYPE_VALUE
+                    },
+                    LIST_ID: {
+                        type: ArgumentType.STRING,
+                        menu: 'dataMenu',
+                        defaultValue: this.getDataMenuDefaultValue()
+                    }
+                }
+            },
             getStatistic: {
                 opcode: 'getStatistic',
                 text: formatMessage({
                     id: 'dataviewer.getStatistic',
-                    default: '[FNC] value of [LIST_ID]'
+                    default: '[FNC] of [LIST_ID]'
                 }),
                 blockType: BlockType.REPORTER,
                 disableMonitor: true,
@@ -640,19 +665,19 @@ class Scratch3DataViewerBlocks {
             }
         };
         const blocks = [
+            allBlocks.deleteAllLists,
             allBlocks.createListsFromURL,
+            '---',
             allBlocks.setData,
             allBlocks.groupBy,
             allBlocks.dataLoopAllLists,
-            allBlocks.getValue,
+            allBlocks.getValueIndex,
             allBlocks.mapData,
             '---',
             allBlocks.getStatistic,
             '---',
             allBlocks.stampText,
             allBlocks.clearText,
-            '---',
-            allBlocks.deleteAllLists,
             '---',
             allBlocks.setScaleX,
             allBlocks.setScaleY,
@@ -669,9 +694,7 @@ class Scratch3DataViewerBlocks {
                 allBlocks.selectListAllLists,
                 allBlocks.orderListAllLists,
                 '---',
-                allBlocks.mapDataFromTo,
-                '---',
-                allBlocks.getIndex
+                allBlocks.mapDataFromTo
             );
         }
         // if we try load a project with the extra blocks using the minimal-block version,
@@ -700,10 +723,10 @@ class Scratch3DataViewerBlocks {
                 },
                 {
                     text: formatMessage({
-                        id: 'dataviewer.menu.statisticFunctions.length',
-                        default: this.STATISTIC_LENGTH
+                        id: 'dataviewer.menu.statisticFunctions.count',
+                        default: this.STATISTIC_COUNT
                     }),
-                    value: this.STATISTIC_LENGTH
+                    value: this.STATISTIC_COUNT
                 },
                 {
                     text: formatMessage({
@@ -952,6 +975,25 @@ class Scratch3DataViewerBlocks {
         const index = this._getIndex(args, util);
         if (typeof index !== 'undefined') {
             return index;
+        }
+        return '';
+    }
+
+    _getValueIndex (args, util) {
+        if (typeof args.DATA_TYPE === 'undefined') {
+            args.DATA_TYPE = this.DATA_TYPE_VALUE;
+        }
+        if (args.DATA_TYPE === this.DATA_TYPE_INDEX) {
+            return this._getIndex(args, util);
+        } else {
+            return this._getValue(args, util);
+        }
+    }
+
+    getValueIndex (args, util) {
+        const valueIndex = this._getValueIndex(args, util);
+        if (typeof valueIndex !== 'undefined') {
+            return valueIndex;
         }
         return '';
     }
@@ -1231,6 +1273,7 @@ class Scratch3DataViewerBlocks {
             value = this._getAverage(args);
             break;
         case this.STATISTIC_LENGTH:
+        case this.STATISTIC_COUNT:
             value = this.getDataLength(args);
             break;
         case this.STATISTIC_SUM:
@@ -1472,6 +1515,7 @@ class Scratch3DataViewerBlocks {
                 }
                 break;
             case this.STATISTIC_LENGTH:
+            case this.STATISTIC_COUNT:
                 data[args.FNC] = items.length;
                 break;
             case this.STATISTIC_SUM:

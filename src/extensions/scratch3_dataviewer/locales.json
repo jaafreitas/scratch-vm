@@ -24,6 +24,7 @@
         "dataviewer.dataLoopAllLists": "para cada valor",
         "dataviewer.getValue": "valor de [LIST_ID]",
         "dataviewer.getIndex": "índice de [LIST_ID]",
+        "dataviewer.getValueIndex": "[DATA_TYPE] de [LIST_ID]",
         "dataviewer.getStatistic": "[FNC] de [LIST_ID]",
         "dataviewer.deleteOfList": "apague  [DATA_TYPE] [OP] [VALUE] de [LIST_ID] de [DATASET]",
         "dataviewer.deleteOfListAllLists": "apague  valores [OP] [VALUE] de [LIST_ID]",
@@ -39,7 +40,7 @@
         "dataviewer.clearText": "apague todos os textos",
 
         "dataviewer.menu.statisticFunctions.average": "média",
-        "dataviewer.menu.statisticFunctions.length": "tamanho",
+        "dataviewer.menu.statisticFunctions.count": "tamanho",
         "dataviewer.menu.statisticFunctions.sum": "soma",
         "dataviewer.menu.statisticFunctions.min": "mínimo",
         "dataviewer.menu.statisticFunctions.max": "máximo",
@@ -76,6 +77,7 @@
         "dataviewer.dataLoopAllLists": "それぞれの値について",
         "dataviewer.getValue": "[LIST_ID]の値",
         "dataviewer.getIndex": "[LIST_ID]のインデックス",
+        "dataviewer.getValueIndex": "[LIST_ID]の[DATA_TYPE]",
         "dataviewer.getStatistic": "[LIST_ID]の[FNC]値",
         "dataviewer.deleteOfList": "[DATASET]から[LIST_ID]の[DATA_TYPE][OP][VALUE]を削除する",
         "dataviewer.deleteOfListAllLists": "[LIST_ID]の値[OP][VALUE]を削除する",
@@ -91,7 +93,7 @@
         "dataviewer.clearText": "erase all texts",
 
         "dataviewer.menu.statisticFunctions.average": "平均",
-        "dataviewer.menu.statisticFunctions.length": "length",
+        "dataviewer.menu.statisticFunctions.count": "count",
         "dataviewer.menu.statisticFunctions.sum": "合計",
         "dataviewer.menu.statisticFunctions.min": "最小",
         "dataviewer.menu.statisticFunctions.max": "最大",

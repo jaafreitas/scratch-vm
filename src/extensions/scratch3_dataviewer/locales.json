@@ -206,5 +206,57 @@
 
         "dataviewer.list": "mi lista",
         "dataviewer.allLists": "todas las listas"
+    },
+    "es-419": {
+        "gui.extension.dataviewer.name": "PlayData",
+        "gui.extension.dataviewer.description": "Jugar con datos.",
+        "gui.extension.dataviewer.index": "índice",
+
+        "gui.stageHeader.dataviewerTable": "Visualización de datos",
+
+        "dataviewer.categoryName": "PlayData",
+
+        "dataviewer.showMoreBlocks": "Mostrar Más Bloques",
+        "dataviewer.showLessBlocks": "Mostrar Menos Bloques",
+
+        "dataviewer.setData": "definir [LIST_ID] como [DATA]",
+        "dataviewer.setSizeX": "fijar ancho a [SCALEX] %",
+        "dataviewer.setSizeY": "fijar alto a [SCALEY] %",
+        "dataviewer.readCSVDataFromURL": "leer datos CSV de la columna [COLUMN] en [URL] comenzando desde la línea [LINE]",
+        "dataviewer.readCSVDataFromURL.default": "link",
+        "dataviewer.createListsFromURL": "crear listas de [URL]",
+        "dataviewer.createListsFromURL.default": "link",
+        "dataviewer.deleteAllLists": "borrar todas las listas",
+        "dataviewer.readThingSpeakData": "leer canal de ThingSpeak: [CHANNEL] campo: [FIELD]",
+        "dataviewer.dataLoop": "para cada valor de [LIST_ID]",
+        "dataviewer.dataLoopAllLists": "para cada valor",
+        "dataviewer.getValue": "valor de [LIST_ID]",
+        "dataviewer.getIndex": "índice de [LIST_ID]",
+        "dataviewer.getValueIndex": "[DATA_TYPE] de [LIST_ID]",
+        "dataviewer.getStatistic": "[FNC] de [LIST_ID]",
+        "dataviewer.deleteOfList": "borrar [DATA_TYPE] [OP] [VALUE] de [LIST_ID] de [DATASET]",
+        "dataviewer.deleteOfListAllLists": "borrar valores [OP] [VALUE] de [LIST_ID]",
+        "dataviewer.selectListAllLists": "seleccionar valores [OP] [VALUE] de [LIST_ID]",
+        "dataviewer.orderList": "ordenar valores de [LIST_ID] [ORDER] de [DATASET]",
+        "dataviewer.orderListAllLists": "ordenar valores de [LIST_ID] [ORDER]",
+        "dataviewer.changeDataScale": "cambiar [LIST_ID] para escalar de [NEW_MIN] a [NEW_MAX]",
+        "dataviewer.mapData": "[DATA_TYPE] de [LIST_ID] para [NEW_MIN] ⇔ [NEW_MAX]",
+        "dataviewer.mapDataFromTo": "[DATA_TYPE] de [LIST_ID] de [OLD_MIN] ⇔ [OLD_MAX] para [NEW_MIN] ⇔ [NEW_MAX]",
+        "dataviewer.groupBy": "calcular [FNC] agrupando por [LIST_ID]",
+        "dataviewer.stampText": "estampar texto [TEXT] con color [COLOR]",
+        "dataviewer.clearText": "borrar todos los textos",
+
+        "dataviewer.menu.statisticFunctions.average": "promedio",
+        "dataviewer.menu.statisticFunctions.count": "contar",
+        "dataviewer.menu.statisticFunctions.sum": "suma",
+        "dataviewer.menu.statisticFunctions.min": "mínimo",
+        "dataviewer.menu.statisticFunctions.max": "máximo",
+        "dataviewer.menu.dataType.value": "valor",
+        "dataviewer.menu.dataType.index": "índice",
+        "dataviewer.menu.orderList.ascendant": "ascendente",
+        "dataviewer.menu.orderList.descendent": "descendente",
+
+        "dataviewer.list": "mi lista",
+        "dataviewer.allLists": "todas las listas"
     }
 }

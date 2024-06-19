@@ -1705,11 +1705,13 @@ class Scratch3DataViewerBlocks {
 
         this._renderText(util.target);
 
-        this._pen.stamp(args, util);
-
-        textState.visible = false;
-        const costume = util.target.getCostumes()[util.target.currentCostume];
-        this._runtime.renderer.updateDrawableSkinId(util.target.drawableID, costume.skinId);
+        //Waiting the text to be rendered before calling stamp.
+        setTimeout(() => {
+            this._pen.stamp(args, util);
+            textState.visible = false;
+            const costume = util.target.getCostumes()[util.target.currentCostume];
+            this._runtime.renderer.updateDrawableSkinId(util.target.drawableID, costume.skinId);
+          }, "1");
 
         return Promise.resolve();
     }

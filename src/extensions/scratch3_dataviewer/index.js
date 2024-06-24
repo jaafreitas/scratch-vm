@@ -1691,8 +1691,6 @@ class Scratch3DataViewerBlocks {
 
     clearText (args, util) {
         this._pen.clear(args, util);
-
-        return Promise.resolve();
     }
 
     stampText (args, util) {
@@ -1703,17 +1701,20 @@ class Scratch3DataViewerBlocks {
         textState.visible = true;
         textState.animating = true;
 
+        const targetVisible = util.target.visible;
+        util.target.setVisible(true);
+
         this._renderText(util.target);
 
-        //Waiting the text to be rendered before calling stamp.
-        setTimeout(() => {
+        //Text must be rendered before calling stamp.
+        const resolve = Promise.resolve();
+        resolve.then(() => {
             this._pen.stamp(args, util);
             textState.visible = false;
             const costume = util.target.getCostumes()[util.target.currentCostume];
             this._runtime.renderer.updateDrawableSkinId(util.target.drawableID, costume.skinId);
-          }, "1");
-
-        return Promise.resolve();
+            util.target.setVisible(targetVisible);
+        });
     }
 }
 

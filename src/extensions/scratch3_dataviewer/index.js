@@ -1701,12 +1701,13 @@ class Scratch3DataViewerBlocks {
         textState.visible = true;
         textState.animating = true;
 
+        // Target must be visible to render correctly.
         const targetVisible = util.target.visible;
         util.target.setVisible(true);
 
         this._renderText(util.target);
 
-        //Text must be rendered before calling stamp.
+        // Text must be rendered before calling stamp.
         const resolve = Promise.resolve();
         resolve.then(() => {
             this._pen.stamp(args, util);
@@ -1715,6 +1716,9 @@ class Scratch3DataViewerBlocks {
             this._runtime.renderer.updateDrawableSkinId(util.target.drawableID, costume.skinId);
             util.target.setVisible(targetVisible);
         });
+
+        // It's necessary to return a resolved promise to be sure that this block will work correctly.
+        return resolve;
     }
 }
 

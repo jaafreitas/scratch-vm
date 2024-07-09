@@ -665,15 +665,13 @@ class Scratch3DataViewerBlocks {
             }
         };
         const blocks = [
-            allBlocks.deleteAllLists,
             allBlocks.createListsFromURL,
+            allBlocks.deleteAllLists,
             '---',
-            allBlocks.setData,
-            allBlocks.groupBy,
             allBlocks.dataLoopAllLists,
+            '---',
             allBlocks.getValueIndex,
             allBlocks.mapData,
-            '---',
             allBlocks.getStatistic,
             '---',
             allBlocks.stampText,
@@ -691,10 +689,12 @@ class Scratch3DataViewerBlocks {
             blocks.push(
                 allBlocks.showLessBlocks,
                 '---',
+                allBlocks.groupBy,
                 allBlocks.selectListAllLists,
                 allBlocks.orderListAllLists,
                 '---',
-                allBlocks.mapDataFromTo
+                allBlocks.mapDataFromTo,
+                allBlocks.setData
             );
         }
         // if we try load a project with the extra blocks using the minimal-block version,

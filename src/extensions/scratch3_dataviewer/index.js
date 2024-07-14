@@ -849,11 +849,13 @@ class Scratch3DataViewerBlocks {
                     items.push(({text: currVar.name, value: currVar.id}));
                 }
             }
-            items.sort((a, b) => {
-                const _a = a.text.toUpperCase();
-                const _b = b.text.toUpperCase();
-                return _a > _b ? 1 : -1;
-            });
+            // Parece melhor não ordenar para que as variáves apareçam na mesma ordem
+            // das colunas no dropdown.
+            // items.sort((a, b) => {
+            //     const _a = a.text.toUpperCase();
+            //     const _b = b.text.toUpperCase();
+            //     return _a > _b ? 1 : -1;
+            // });
         }
         return items;
     }
@@ -874,8 +876,8 @@ class Scratch3DataViewerBlocks {
         const dataset = [];
 
         const maxDataLengthReadAll = this._getMaxDataLengthReadAll();
-        const items = this.getDataMenu();
-
+        const items = this.getDataMenu().filter(item => this._data(item.value).value.length);
+        
         for (let i = 0; i < maxDataLengthReadAll; i++) {
             const data = {};
             items.forEach(item => {
@@ -998,15 +1000,17 @@ class Scratch3DataViewerBlocks {
         return '';
     }
 
+    // Apesar de ser convertido para Number, é esperado que os dados sejam tratados antes
+    // de chamar a função para evitar um retorno NaN.
     _mapValue (value, oldMin, oldMax, newMin, newMax) {
-        return newMin + ((value - oldMin) * (newMax - newMin) / (oldMax - oldMin));
+        return Number(newMin) + Number((value - oldMin) * (newMax - newMin) / (oldMax - oldMin));
     }
 
     _getSum (args) {
         if (this.getDataLength(args) > 0) {
             let total = 0.0;
             for (let i = 0; i < this.getDataLength(args); i += 1) {
-                total = total + this._data(args.LIST_ID).value[i];
+                total = total + Number(this._data(args.LIST_ID).value[i]);
             }
             if (!isNaN(total)) {
                 return total;
@@ -1129,6 +1133,15 @@ class Scratch3DataViewerBlocks {
                 if (typeof colValue !== 'undefined' && colValue.effectiveValue) {
                     if (colValue.effectiveValue.hasOwnProperty('numberValue')) {
                         value = colValue.effectiveValue.numberValue;
+                        if (colValue.hasOwnProperty('userEnteredFormat') && 
+                            colValue.userEnteredFormat.hasOwnProperty('numberFormat')) {
+                            let numberFormat = colValue.userEnteredFormat.numberFormat.pattern;
+                            let dotPosition = numberFormat.search(/[.]/) + 1;
+                            if (dotPosition > 0) {
+                                let decimals = numberFormat.length - dotPosition;
+                                value = value.toFixed(decimals);
+                            } 
+                        }
                     } else {
                         value = colValue.effectiveValue.stringValue;
                     }
@@ -1139,7 +1152,7 @@ class Scratch3DataViewerBlocks {
                     // eslint-disable-next-line no-negated-condition
                     if (value !== '') {
 						// Adding a space if the key is numeric to keep the order of the keys
-                        lists[typeof value === 'number' ? ` ${value}` : value] = [];
+                        lists[!isNaN(value) ? ` ${value}` : value] = [];
                     // Ignore values starting from the first unamed column
                     } else {
                         maxColumns = col;
@@ -1303,9 +1316,9 @@ class Scratch3DataViewerBlocks {
         case '<=':
             return (value <= deleteValue);
         case '=':
-            return (value === deleteValue);
+            return (value == deleteValue);
         case '!=':
-            return (value !== deleteValue);
+            return (value != deleteValue);
         default:
             return false;
         }
@@ -1384,8 +1397,18 @@ class Scratch3DataViewerBlocks {
     orderList (args) {
         if (args.DATASET === this.READ_ALL_LISTS_ID) {
             const dataset = this._listsToDataset();
+            const collator = new Intl.Collator(undefined, {
+                numeric: true,
+                sensitivity: 'base'
+            });
             dataset.sort((a, b) => {
-                let x = a[args.LIST_ID] - b[args.LIST_ID];
+                let x;
+                // collator.compare does not work for decimals, so we compare numbers first.
+                if (!isNaN(a[args.LIST_ID]) && !isNaN(b[args.LIST_ID])) {
+                    x = a[args.LIST_ID] - b[args.LIST_ID];
+                } else {
+                    x = collator.compare(a[args.LIST_ID], b[args.LIST_ID]);
+                }
                 if (args.ORDER === 'DESC') {
                     x = x * -1;
                 }
@@ -1397,8 +1420,17 @@ class Scratch3DataViewerBlocks {
                 this._data(listID)._monitorUpToDate = false;
             });
         } else {
+            const collator = new Intl.Collator(undefined, {
+                numeric: true,
+                sensitivity: 'base'
+            });
             this._data(args.LIST_ID).value.sort((a, b) => {
-                let x = a - b;
+                let x;
+                if (!isNaN(a) && !isNaN(b)) {
+                    x = a - b;
+                } else {
+                    x = collator.compare(a, b);
+                }
                 if (args.ORDER === 'DESC') {
                     x = x * -1;
                 }
@@ -1472,7 +1504,7 @@ class Scratch3DataViewerBlocks {
 
     mapData (args, util) {
         const value = this._mapData(args, util);
-        if (typeof value !== 'undefined' && !isNaN(value)) {
+        if ((typeof value !== 'undefined') && (typeof value === 'number')) {
             return Cast.toNumber(value.toFixed(2));
         }
         return '';
@@ -1504,13 +1536,14 @@ class Scratch3DataViewerBlocks {
                             if (!data[key]) {
                                 data[key] = 0;
                             }
-                            data[key] += value;
+                            data[key] += Number(value);
                         }
                     }
                 });
                 for (const [key, value] of Object.entries(data)) {
-                    if ((!isNaN(value) && key !== args.LIST_ID)) {
-                        data[key] /= items.length;
+                    // is the if necessary here?
+                    if ((typeof value === 'number') && (key !== args.LIST_ID)) {
+                        data[key] = (data[key] / items.length).toFixed(6);
                     }
                 }
                 break;
@@ -1525,10 +1558,16 @@ class Scratch3DataViewerBlocks {
                             if (!data[`${key} ${args.FNC}`]) {
                                 data[`${key} ${args.FNC}`] = 0;
                             }
-                            data[`${key} ${args.FNC}`] += value;
+                            data[`${key} ${args.FNC}`] += Number(value);
                         }
                     }
                 });
+                for (const [key, value] of Object.entries(data)) {
+                    // is the if necessary here?
+                    if ((typeof value === 'number') && (key !== args.LIST_ID)) {
+                        data[key] = data[key].toFixed(6);
+                    }
+                }
                 break;
             case this.STATISTIC_MIN:
                 items.forEach(item => {
@@ -1659,6 +1698,9 @@ class Scratch3DataViewerBlocks {
         // Non-integers should be rounded to 2 decimal places (no more, no less), unless they're small enough that
         // rounding would display them as 0.00. This matches 2.0's behavior:
         // https://github.com/LLK/scratch-flash/blob/2e4a402ceb205a042887f54b26eebe1c2e6da6c0/src/scratch/ScratchSprite.as#L579-L585
+        if (!isNaN(text) && typeof text !== 'number') {
+            text = Number(text);
+        }
         if (typeof text === 'number' && Math.abs(text) >= 0.01 && text % 1 !== 0) {
             text = text.toFixed(2);
         }

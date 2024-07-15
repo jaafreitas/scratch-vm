@@ -1135,12 +1135,17 @@ class Scratch3DataViewerBlocks {
                         value = colValue.effectiveValue.numberValue;
                         if (colValue.hasOwnProperty('userEnteredFormat') && 
                             colValue.userEnteredFormat.hasOwnProperty('numberFormat')) {
-                            let numberFormat = colValue.userEnteredFormat.numberFormat.pattern;
-                            let dotPosition = numberFormat.search(/[.]/) + 1;
-                            if (dotPosition > 0) {
-                                let decimals = numberFormat.length - dotPosition;
-                                value = value.toFixed(decimals);
-                            } 
+                            if (colValue.userEnteredFormat.numberFormat.hasOwnProperty('type') && 
+                                colValue.userEnteredFormat.numberFormat.type === 'DATE_TIME') {
+                                    value = colValue.formattedValue;
+                            } else if (colValue.userEnteredFormat.numberFormat.hasOwnProperty('pattern')) {
+                                let numberFormat = colValue.userEnteredFormat.numberFormat.pattern;
+                                let dotPosition = numberFormat.search(/[.]/) + 1;
+                                if (dotPosition > 0) {
+                                    let decimals = numberFormat.length - dotPosition;
+                                    value = value.toFixed(decimals);
+                                }
+                            }
                         }
                     } else {
                         value = colValue.effectiveValue.stringValue;

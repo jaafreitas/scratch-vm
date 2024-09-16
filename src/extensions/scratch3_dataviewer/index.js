@@ -1147,6 +1147,8 @@ class Scratch3DataViewerBlocks {
                                 }
                             }
                         }
+                    } else if (colValue.effectiveValue.hasOwnProperty('errorValue')) {
+                        value = colValue.formattedValue;
                     } else {
                         value = colValue.effectiveValue.stringValue;
                     }

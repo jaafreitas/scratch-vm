@@ -97,7 +97,7 @@
         "dataviewer.menu.statisticFunctions.max": "máximo",
         "dataviewer.menu.dataType.value": "valor",
         "dataviewer.menu.dataType.index": "índice",
-        "dataviewer.menu.orderList.ascendant": "ascendente",
+        "dataviewer.menu.orderList.ascendant": "crescente",
         "dataviewer.menu.orderList.descendent": "descendente",
 
         "dataviewer.list": "minha lista",

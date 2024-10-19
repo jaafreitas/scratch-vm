@@ -123,12 +123,14 @@ class Scratch3DataViewerBlocks {
         // Create the initial list.
         const stage = this._runtime.getTargetForStage();
         if (stage) {
-            const varName = formatMessage({
-                id: 'dataviewer.list',
-                default: 'my list'});
-            const variable = stage.lookupOrCreateList(this.MY_LIST_ID, varName);
-            variable._monitorUpToDate = false;
-
+            const foundList = Object.values(stage.variables).some(variable => variable.type === Variable.LIST_TYPE);
+            if (!foundList) {
+                const varName = formatMessage({
+                    id: 'dataviewer.list',
+                    default: 'my list'});
+                const variable = stage.lookupOrCreateList(this.MY_LIST_ID, varName);
+                variable._monitorUpToDate = false;
+            }
             // Show the new variable on toolbox
             this._runtime.requestBlocksUpdate();
         }
@@ -1222,6 +1224,13 @@ class Scratch3DataViewerBlocks {
                         this._data(key).value = value;
                         this._data(key)._monitorUpToDate = false;
                     }
+                    
+                    const deleteMyList = Object.keys(lists).length > 0;
+                    if (this._data(this.MY_LIST_ID).value.length === 0 && deleteMyList) {
+                        this.dataBlocks.hideList({LIST: {id: this.MY_LIST_ID}});
+                        const stage = this._runtime.getTargetForStage();
+                        stage.deleteVariable(this.MY_LIST_ID);
+                    }
 
                     // Show new variables on toolbox.
                     this._runtime.requestToolboxExtensionsUpdate();
@@ -1335,13 +1344,12 @@ class Scratch3DataViewerBlocks {
         const lists = this.getDataMenu();
         const stage = this._runtime.getTargetForStage();
 
-        // BUG: We need to wait for the changeMonitorVisibility event to finish before delete variables
+        // BUG: We need to wait for the changeMonitorVisibility event to finish before deleting variables
         // that are monitored, otherwise the thread that list monitor content will recreate
         // the lists for the sprite.
         lists.forEach(item => {
             if (item.value === this.MY_LIST_ID) {
                 this._data(item.value).value = [];
-
             } else {
                 this.dataBlocks.hideList({LIST: {id: item.value}});
                 stage.deleteVariable(item.value);

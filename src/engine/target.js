@@ -380,6 +380,7 @@ class Target extends EventEmitter {
                 }
                 this.runtime.monitorBlocks.deleteBlock(id);
                 this.runtime.requestRemoveMonitor(id);
+                this.runtime.requestToolboxExtensionsUpdate();
             }
         }
     }

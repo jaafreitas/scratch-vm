@@ -1,4 +1,4 @@
-const Worker = require('tiny-worker');
+const Worker = require('web-worker');
 const path = require('path');
 const test = require('tap').test;
 const makeTestStorage = require('../fixtures/make-test-storage');
@@ -20,8 +20,8 @@ test('sound', t => {
     vm.on('playgroundData', e => {
         const threads = JSON.parse(e.threads);
         t.ok(threads.length > 0);
+        vm.quit();
         t.end();
-        process.nextTick(process.exit);
     });
 
     // Start VM, load project, and run

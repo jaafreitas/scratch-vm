@@ -1307,7 +1307,7 @@ class Scratch3DataViewerBlocks {
     createListsFromTemplates (args) {
         console.log(args);
         args.URL = args.TEMPLATE;
-        this.createListsFromURL(args);
+        return this.createListsFromURL(args);
     }
 
     readThingSpeakData (args) {

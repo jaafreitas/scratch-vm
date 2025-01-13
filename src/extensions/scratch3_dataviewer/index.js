@@ -91,6 +91,18 @@ class Scratch3DataViewerBlocks {
         return 'max';
     }
 
+    get TEMPLATE_EARTHQUAKE () {
+        return 'earthquakes > 6';
+    }
+
+    get TEMPLATE_TEMPERATURE () {
+        return 'temperature anomaly and CO2';
+    }
+
+    get TEMPLATE_WEATHER () {
+        return 'weather data - São Paulo';
+    }
+
     constructor (runtime) {
         this._runtime = runtime;
 
@@ -199,6 +211,24 @@ class Scratch3DataViewerBlocks {
                             id: 'dataviewer.createListsFromURL.default',
                             default: 'link'
                         })
+                    }
+                }
+            },
+            createListsFromTemplates: {
+                opcode: 'createListsFromTemplates',
+                text: formatMessage({
+                    id: 'dataviewer.createListsFromTemplates',
+                    default: 'create lists from [TEMPLATE]'
+                }),
+                blockType: BlockType.COMMAND,
+                arguments: {
+                    TEMPLATE: {
+                        type: ArgumentType.STRING,
+                        menu: 'menuTemplates',
+                        // defaultValue: formatMessage({
+                        //     id: 'dataviewer.menu.menuTemplates.earthquakeLink',
+                        //     default: 'https://docs.google.com/spreadsheets/d/14EOqQbfeSMmmu06tV0S5A6azaNYIRpjvpAcu7Cq6ugU/edit#gid=0'
+                        // })
                     }
                 }
             },
@@ -668,6 +698,7 @@ class Scratch3DataViewerBlocks {
         };
         const blocks = [
             allBlocks.createListsFromURL,
+            allBlocks.createListsFromTemplates,
             allBlocks.deleteAllLists,
             '---',
             allBlocks.dataLoopAllLists,
@@ -715,6 +746,38 @@ class Scratch3DataViewerBlocks {
 
     addMenus () {
         return {
+            menuTemplates: [
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.menuTemplates.earthquake',
+                        default: this.TEMPLATE_EARTHQUAKE
+                    }),
+                    value: formatMessage({
+                        id: 'dataviewer.menu.menuTemplates.earthquakeLink',
+                        default: 'https://docs.google.com/spreadsheets/d/1YqHhKIs2uNryv2IMfYBilXAagVAS1BqsiT95Cm-hBQM/edit?usp=drive_link'
+                    })
+                },
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.menuTemplates.temperature',
+                        default: this.TEMPLATE_TEMPERATURE
+                    }),
+                    value: formatMessage({
+                        id: 'dataviewer.menu.menuTemplates.temperatureLink',
+                        default: 'https://docs.google.com/spreadsheets/d/1vL6sFAHr7dzrtwyxJ0X6CWzj0Yk5A_6Hh66MYVtPgzg/edit?usp=drive_link'
+                    })
+                },
+                {
+                    text: formatMessage({
+                        id: 'dataviewer.menu.menuTemplates.weather',
+                        default: this.TEMPLATE_WEATHER
+                    }),
+                    value: formatMessage({
+                        id: 'dataviewer.menu.menuTemplates.weatherLink',
+                        default: 'https://docs.google.com/spreadsheets/d/1exvlOAldvEyY2CFPZSKUEgcEhfRmJRbFK3mEN-WI864/edit?usp=drive_link'
+                    })
+                }
+            ],
             statisticFunctions: [
                 {
                     text: formatMessage({
@@ -1241,6 +1304,12 @@ class Scratch3DataViewerBlocks {
         }
     }
 
+    createListsFromTemplates (args) {
+        console.log(args);
+        args.URL = args.TEMPLATE;
+        this.createListsFromURL(args);
+    }
+
     readThingSpeakData (args) {
         if (args.CHANNEL && args.FIELD) {
             const channel = args.CHANNEL;
@@ -1296,6 +1365,7 @@ class Scratch3DataViewerBlocks {
     }
 
     getStatistic (args) {
+        console.log(args);
         let value;
         switch (args.FNC) {
         case this.STATISTIC_AVERAGE:

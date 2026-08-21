@@ -1154,32 +1154,51 @@ class Scratch3DataViewerBlocks {
         return [urlBase, googleSheets && googleSheets.length > 0];
     }
 
-    readCSVDataFromURL (args) {
+    readCSVDataFromURL(args) {
         if (args.URL.trim() && args.COLUMN && args.LINE) {
             const [urlBase, isGoogleSpreadsheet] = this._resolveURLBase(args.URL.trim());
             const column = args.COLUMN - 1;
-            // const line = args.LINE;
+            
             return new Promise((resolve, reject) => {
-                nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    if (res.statusCode !== 200) {
+                // Cria AbortController para timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                    reject(new Error('Request timeout'));
+                }, serverTimeoutMs);
+                // ATENÇÂO: Trocar para const {fetchWithTimeout} = require('../../util/fetch-with-timeout');
+                // trocar também em render-gui.jsx -> fetch(projectFile)
+                fetch(urlBase, { 
+                    signal: controller.signal,
+                    method: 'GET'
+                })
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    
+                    if (response.status !== 200) {
                         return reject('statusCode != 200');
                     }
-
+                    
+                    return response.text();
+                })
+                .then(body => {
                     let lists;
                     if (isGoogleSpreadsheet) {
                         lists = this._convertGoogleSheetsToLists(body);
                     } else {
                         lists = this._convertCSVToLists(body);
                     }
+                    
                     const data = lists[Object.keys(lists)[column]];
                     if (typeof data === 'undefined' || data.length === 0) {
                         return resolve('');
                     }
-
+                    
                     return resolve(data);
+                })
+                .catch(err => {
+                    clearTimeout(timeoutId);
+                    reject(err);
                 });
             });
         }
@@ -1269,14 +1288,28 @@ class Scratch3DataViewerBlocks {
         if (args.URL.trim()) {
             const [urlBase, isGoogleSpreadsheet] = this._resolveURLBase(args.URL.trim());
             return new Promise((resolve, reject) => {
-                nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    if (res.statusCode !== 200) {
+                // Cria AbortController para timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                    reject(new Error('Request timeout'));
+                }, serverTimeoutMs);
+                // ATENÇÂO: Trocar para const {fetchWithTimeout} = require('../../util/fetch-with-timeout');
+                // trocar também em render-gui.jsx -> fetch(projectFile)
+                fetch(urlBase, { 
+                    signal: controller.signal,
+                    method: 'GET'
+                })
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    
+                    if (response.status !== 200) {
                         return reject('statusCode != 200');
                     }
-
+                    
+                    return response.text();
+                })
+                .then(body => {
                     let lists;
                     if (isGoogleSpreadsheet) {
                         lists = this._convertGoogleSheetsToLists(body);
@@ -1299,6 +1332,10 @@ class Scratch3DataViewerBlocks {
                     this._runtime.requestToolboxExtensionsUpdate();
 
                     return resolve();
+                })
+                .catch(err => {
+                    clearTimeout(timeoutId);
+                    reject(err);
                 });
             });
         }
@@ -1317,14 +1354,28 @@ class Scratch3DataViewerBlocks {
             const urlBase = `https://thingspeak.com/channels/${channel}/field/${field}.json`;
 
             return new Promise((resolve, reject) => {
-                nets({url: urlBase, timeout: serverTimeoutMs}, (err, res, body) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    if (res.statusCode !== 200) {
+                // Cria AbortController para timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                    reject(new Error('Request timeout'));
+                }, serverTimeoutMs);
+                // ATENÇÂO: Trocar para const {fetchWithTimeout} = require('../../util/fetch-with-timeout');
+                // trocar também em render-gui.jsx -> fetch(projectFile)
+                fetch(urlBase, { 
+                    signal: controller.signal,
+                    method: 'GET'
+                })
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    
+                    if (response.status !== 200) {
                         return reject('statusCode != 200');
                     }
-
+                    
+                    return response.text();
+                })
+                .then(body => {
                     const feeds = JSON.parse(body).feeds;
                     const data = [];
                     let dataIndex = 0;
@@ -1339,6 +1390,10 @@ class Scratch3DataViewerBlocks {
                     }
 
                     return resolve();
+                })
+                .catch(err => {
+                    clearTimeout(timeoutId);
+                    reject(err);
                 });
             });
         }
